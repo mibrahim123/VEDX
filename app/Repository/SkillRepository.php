@@ -51,4 +51,8 @@ class SkillRepository implements SkillRepositoryInterface
         ->make(true);
     }
 
+    public function list() {
+        return $this->_skill->get();
+    }
+
 }

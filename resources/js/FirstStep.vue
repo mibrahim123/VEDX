@@ -18,96 +18,127 @@
             <h5 class="text-600 text-center mb-20">Social media</h5>
             <div class="vx__social-icon d-flex justify-content-center mb-25">
                 <div class="icon facebook">
-                                            <a href="https://www.facebook.com/">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="42" height="43" viewBox="0 0 42 43" fill="none" class=" in-svg replaced-svg">
-                                                    <path d="M18.5528 31.6935V22.099H16V18.6445H18.5528V15.6939C18.5528 13.3753 20.0607 11.2461 23.5353 11.2461C24.9421 11.2461 25.9824 11.3801 25.9824 11.3801L25.9004 14.606C25.9004 14.606 24.8395 14.5958 23.6818 14.5958C22.4288 14.5958 22.228 15.1696 22.228 16.1221V18.6445H26L25.8359 22.099H22.228V31.6935H18.5528Z" fill="#FF9A08"></path>
-                                                </svg>
-                                            </a>
+                    <a href="https://www.facebook.com/">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="42" height="43" viewBox="0 0 42 43" fill="none" class=" in-svg replaced-svg">
+                            <path d="M18.5528 31.6935V22.099H16V18.6445H18.5528V15.6939C18.5528 13.3753 20.0607 11.2461 23.5353 11.2461C24.9421 11.2461 25.9824 11.3801 25.9824 11.3801L25.9004 14.606C25.9004 14.606 24.8395 14.5958 23.6818 14.5958C22.4288 14.5958 22.228 15.1696 22.228 16.1221V18.6445H26L25.8359 22.099H22.228V31.6935H18.5528Z" fill="#FF9A08"></path>
+                        </svg>
+                    </a>
                 </div>
                 <div class="icon linkedin">
-                                            <a href="https://www.linkedin.com/login">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="42" height="43" viewBox="0 0 42 43" fill="none" class=" in-svg replaced-svg">
-                                                    <g clip-path="url(#clip0_1135_5540)">
-                                                        <path d="M15.735 14.1853C15.735 15.2442 14.9025 16.1022 13.875 16.1022C12.8475 16.1022 12.015 15.2442 12.015 14.1853C12.015 13.1271 12.8475 12.2683 13.875 12.2683C14.9025 12.2683 15.735 13.1271 15.735 14.1853ZM15.75 17.6358H12V29.9044H15.75V17.6358ZM21.7365 17.6358H18.0105V29.9044H21.7372V23.4641C21.7372 19.8832 26.259 19.5903 26.259 23.4641V29.9044H30V22.1361C30 16.0938 23.3085 16.3139 21.7365 19.2882V17.6358Z" fill="#FF9A08"></path>
-                                                    </g>
-                                                    <defs>
-                                                        <clipPath id="clip0_1135_5540">
-                                                            <rect width="18" height="18.4028" fill="white" transform="translate(12 12.2683)"></rect>
-                                                        </clipPath>
-                                                    </defs>
-                                                </svg>
-                                            </a>
+                    <a href="https://www.linkedin.com/login">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="42" height="43" viewBox="0 0 42 43" fill="none" class=" in-svg replaced-svg">
+                            <g clip-path="url(#clip0_1135_5540)">
+                                <path d="M15.735 14.1853C15.735 15.2442 14.9025 16.1022 13.875 16.1022C12.8475 16.1022 12.015 15.2442 12.015 14.1853C12.015 13.1271 12.8475 12.2683 13.875 12.2683C14.9025 12.2683 15.735 13.1271 15.735 14.1853ZM15.75 17.6358H12V29.9044H15.75V17.6358ZM21.7365 17.6358H18.0105V29.9044H21.7372V23.4641C21.7372 19.8832 26.259 19.5903 26.259 23.4641V29.9044H30V22.1361C30 16.0938 23.3085 16.3139 21.7365 19.2882V17.6358Z" fill="#FF9A08"></path>
+                            </g>
+                            <defs>
+                                <clipPath id="clip0_1135_5540">
+                                    <rect width="18" height="18.4028" fill="white" transform="translate(12 12.2683)"></rect>
+                                </clipPath>
+                            </defs>
+                        </svg>
+                    </a>
                 </div>
                 <div class="icon google">
-                                            <a href="https://www.google.com/">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none" class=" in-svg replaced-svg">
-                                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M19.6083 25.92V23.3143H26.8088C26.8741 23.6943 26.9286 24.0743 26.9286 24.5738C26.9286 28.9166 24.0092 32 19.6083 32C15.3925 32 11.9829 28.6018 11.9829 24.4C11.9829 20.1983 15.3925 16.8 19.6083 16.8C21.6671 16.8 23.3882 17.5492 24.7172 18.7869L22.6475 20.7738C22.081 20.2309 21.0897 19.6012 19.6083 19.6012C17.0047 19.6012 14.8805 21.7509 14.8805 24.4C14.8805 27.0492 17.0047 29.1989 19.6083 29.1989C22.6257 29.1989 23.7586 27.0383 23.9329 25.92H19.6083ZM33.7696 23.3143H35.9483V25.4858H33.7696V27.6572H31.5909V25.4858H29.4123V23.3143H31.5909V21.1429H33.7696V23.3143Z" fill="#0450B4"></path>
-                                                </svg>
-                                            </a>
+                    <a href="https://www.google.com/">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none" class=" in-svg replaced-svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M19.6083 25.92V23.3143H26.8088C26.8741 23.6943 26.9286 24.0743 26.9286 24.5738C26.9286 28.9166 24.0092 32 19.6083 32C15.3925 32 11.9829 28.6018 11.9829 24.4C11.9829 20.1983 15.3925 16.8 19.6083 16.8C21.6671 16.8 23.3882 17.5492 24.7172 18.7869L22.6475 20.7738C22.081 20.2309 21.0897 19.6012 19.6083 19.6012C17.0047 19.6012 14.8805 21.7509 14.8805 24.4C14.8805 27.0492 17.0047 29.1989 19.6083 29.1989C22.6257 29.1989 23.7586 27.0383 23.9329 25.92H19.6083ZM33.7696 23.3143H35.9483V25.4858H33.7696V27.6572H31.5909V25.4858H29.4123V23.3143H31.5909V21.1429H33.7696V23.3143Z" fill="#0450B4"></path>
+                        </svg>
+                    </a>
                 </div>
             </div>
             <div class="line mb-30">
-                                        <hr>
-                                    </div>
+                <hr>
+            </div>
             <div class="row">
                 <div class="col--50">
                     <div class="form-group mb-25">
-                        <input class="p" type="text"
+                        <Field class="p" type="text"
                         v-model = "store.firstName"
-                        placeholder="First Name">
+                        name = "firstName"
+                        placeholder="First Name" />
+                        <ErrorMessage name="firstName" v-slot="{ message }" >
+                            <span class="error">{{ message }}</span>
+                        </ErrorMessage>
                     </div>
                 </div>
                 <div class="col--50">
                     <div class="form-group mb-25">
-                        <input class="p" type="text"
+                        <Field class="p" type="text"
                         v-model = "store.lastName"
-                        placeholder="Last Name">
+                        name = "lastName"
+                        placeholder="Last Name"/>
+                        <ErrorMessage name="lastName" v-slot="{ message }" >
+                            <span class="error">{{ message }}</span>
+                        </ErrorMessage>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col--50">
                     <div class="form-group mb-25">
-                        <input class="p" type="email"
+                        <Field class="p" type="email"
                         v-model = "store.email"
-                        placeholder="Email Address">
+                        name = "email"
+                        placeholder="Email Address"/>
+                        <ErrorMessage name="email" v-slot="{ message }" >
+                            <span class="error">{{ message }}</span>
+                        </ErrorMessage>
                     </div>
                 </div>
                 <div class="col--50">
                     <div class="form-group mb-25">
-                         <vue-tel-input v-model="phone" @input="onInput" :input-options = '{placeholder : "Phone Number", showDialCode : false}'></vue-tel-input>
+                        <Field v-model="store.phone" name="phone" as="vue-tel-input" @input="onInput" ></Field>
+                        <ErrorMessage name="phone" v-slot="{ message }" >
+                            <span class="error">{{ message }}</span>
+                        </ErrorMessage>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col--50">
                     <div class="form-group mb-25">
-                        <input class="p" type="number"
+                        <Field class="p" type="number"
                         v-model = "store.age"
-                        placeholder="Age">
+                        name = "age"
+                        placeholder="Age" />
+                        <ErrorMessage name="age" v-slot="{ message }" >
+                            <span class="error">{{ message }}</span>
+                        </ErrorMessage>
                     </div>
                 </div>
                 <div class="col--50">
                     <div class="form-group mb-25">
-                        <input class="p" type="text"
+                        <Field class="p" type="text"
                         v-model = "store.location"
-                        placeholder="Location">
+                        name = "location"
+                        placeholder="Location"/>
+                        <ErrorMessage name="location" v-slot="{ message }" >
+                            <span class="error">{{ message }}</span>
+                        </ErrorMessage>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col--50">
                     <div class="form-group mb-25">
-                        <input class="p" type="password"
+                        <Field class="p" type="password"
                         v-model = "store.password"
-                        placeholder="Password">
+                        name = "password"
+                        placeholder="Password"/>
+                        <ErrorMessage name="password" v-slot="{ message }" >
+                            <span class="error">{{ message }}</span>
+                        </ErrorMessage>
                     </div>
                 </div>
                 <div class="col--50">
                     <div class="form-group mb-25">
-                        <input class="p" type="password"
+                        <Field class="p" type="password"
                         v-model = "store.confirmPassword"
-                        placeholder="Confirm Password">
+                        name = "confirmPassword"
+                        placeholder="Confirm Password"/>
+                        <ErrorMessage name="confirmPassword" v-slot="{ message }" >
+                            <span class="error">{{ message }}</span>
+                        </ErrorMessage>
                     </div>
                 </div>
             </div>
@@ -116,25 +147,65 @@
 <script>
     // import { parsePhoneNumber, parsePhoneNumberFromString,isValidPhoneNumber} from 'libphonenumber-js';
     import { parsePhoneNumberFromString } from 'libphonenumber-js/max';
-    import { reactive, ref } from 'vue';
+    import { reactive, ref, defineExpose } from 'vue';
+    import * as Yup from "yup";
     import { useRegisterStore } from "./stores/register";
-    export default {
-        setup(_, context) {
-            const store = useRegisterStore();
-            const onInput = (phone, phoneObject, input) => {
-                // if(phoneObject) {
-                //     let valid = parsePhoneNumberFromString("'" + phoneObject?.nationalNumber+"'" ,phoneObject?.country?.iso2 );
+    import { useField, useForm, Field, ErrorMessage} from 'vee-validate';
 
-                //     store.countryCode = phoneObject.country.dialCode
-                //     store.phone = phone
-                //     store.validPhone = valid.isValid();
-                // }
+
+    export default {
+        components: {
+            Field,
+            ErrorMessage
+        },
+        setup() {
+
+            const schema = Yup.object({
+                firstName : Yup.string().min(5).required().label('First Name'),
+                lastName : Yup.string().min(5).required().label('Last Name'),
+                phone : Yup.string().required().label('Phone Number').test("valid-phone", "Invalid Phone Number", (value) =>  store.validPhone),
+                email : Yup.string().email().required().label('Email'),
+                age : Yup.string().required().test("valid-age", "Age Must Be Greate Than 10", (value) => value > 10 && value < 60),
+                location : Yup.string().required(),
+                password :  Yup.string().min(8).required(),
+                confirmPassword :Yup.string().min(8).required().test("confirm-password", "confirm password must match with password fields", (value) => value === store.password),
+            });
+
+            const store = useRegisterStore();
+
+            const { meta, handleSubmit, setErrors, validate  } = useForm({
+                validationSchema: schema
+            });
+
+
+            // const { value:confirmPassword} = useField('confirm-password');
+            const onSubmit = handleSubmit(() => console.log('hiii'));
+            const onInput = (phone, phoneObject, input) => {
+                if(phoneObject && phoneObject.nationalNumber) {
+                    let valid = parsePhoneNumberFromString("'" + phoneObject?.nationalNumber+"'" ,phoneObject?.country?.iso2 );
+
+                    store.countryCode = phoneObject.country.dialCode
+                    store.phone = phone
+
+                    store.validPhone = valid.isValid();
+                }
             }
             // expose the state to the template
             return {
                 store,
-                onInput
+                onInput,
+                onSubmit,
+                meta,
+                validate
             }
         }
     }
 </script>
+<style>
+    .error {
+        color:red !important;
+        font-size:14px !important;
+        text-transform:lowercase;
+        font-weight: 500;
+    }
+</style>

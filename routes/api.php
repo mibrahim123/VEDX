@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\SkillController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\SubCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +19,11 @@ use App\Http\Controllers\Api\UserController;
 */
 Route::get('login', [UserController::class, 'login']);
 Route::post('register', [UserController::class, 'register']);
+
+Route::get('categories', [CategoryController::class,'list']);
+Route::get('sub-categories', [SubCategoryController::class,'list']);
+Route::get('skills', [SkillController::class,'list']);
+
 
 Route::middleware('auth:sanctum')->group(function(){
     Route::get('/user', function (Request $request) {

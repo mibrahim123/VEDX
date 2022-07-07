@@ -1,0 +1,11 @@
+/*!
+  * pinia v2.0.14
+  * (c) 2022 Eduardo San Martin Morote
+  * @license MIT
+  */
+
+/**
+  * vee-validate v4.5.11
+  * (c) 2022 Abdelrahman Awad
+  * @license MIT
+  */

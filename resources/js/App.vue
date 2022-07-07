@@ -1,7 +1,7 @@
 <template>
     <div class="form--data" >
-        <FirstStep v-show='step == 1 ? true : false'/>
-        <SecondStep v-show='step == 2 ? true : false' @changeRole = 'changeRole' />
+        <FirstStep v-show='step == 1 ? true : false' ref="firstStep" />
+        <SecondStep v-show='step == 2 ? true : false' @changeRole = 'changeRole' ref="secondStep"/>
 
         <div class="vx__register--button mb-25">
             <button type="button" class="btn btn-blue" @click = 'nextStep()'>
@@ -21,13 +21,26 @@
             FirstStep,
             SecondStep
         },
-        setup() {
+        setup(_, context) {
             const store = useRegisterStore();
             const step = ref(1)
             const role = ref('student');
+            const firstStep = ref(null);
+            const secondStep = ref(null);
 
             const nextStep = () => {
-                step.value ++;
+                if (step.value == 1) {
+                    step.value = step.value + 1
+                    // firstStep.value.onSubmit()
+                    // if(firstStep.value.meta.valid){
+                    //     step.value = step.value + 1
+                    // }
+                } else {
+                    secondStep.value.onSubmit()
+                    if(secondStep.value.valid){
+                        alert("yes");
+                    }
+                }
             }
 
             // expose the state to the template
@@ -35,7 +48,9 @@
                 step,
                 role,
                 store,
-                nextStep
+                nextStep,
+                firstStep,
+                secondStep
             }
         }
     }

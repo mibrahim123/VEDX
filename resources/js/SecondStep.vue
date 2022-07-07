@@ -4,27 +4,53 @@
             <button class="tablinks btn btn-blue secondary-font" :class="{'active' : state.isStudent}" @click="changeTab(true, 'student')">Student </button>
             <button class="tablinks btn btn-blue secondary-font" :class="{'active' : !state.isStudent}" @click="changeTab(false, 'not-student')">Non - Student</button>
         </div>
-        <div id="student" class="tabcontent" :class="{'active' : state.isStudent}">
-            <div class="form-group mb-25">
-                <div class="row">
-                    <div class="col--50 vx__fist-name">
-                        <input class="p" type="text" id="exampleInputText" placeholder="School">
-                    </div>
-                    <div class="col--50 vx__fist-name">
-                        <input class="p" type="text" id="exampleInputText" placeholder="Grade">
+        <div id="student" class="tabcontent active" :class="{'active' : state.isStudent}">
+            <div v-show="state.isStudent">
+                <div class="form-group mb-25">
+                    <div class="row">
+                        <div class="col--50 vx__fist-name">
+                            <Field class="p" type="text"
+                                v-model = "store.school"
+                                name = "school"
+                                placeholder="School"
+                            />
+                            <ErrorMessage name="school" v-slot="{ message }" >
+                                <span class="error">{{ message }}</span>
+                            </ErrorMessage>
+                        </div>
+                        <div class="col--50 vx__fist-name">
+                            <Field class="p" type="text"
+                                v-model = "store.grade"
+                                name = "grade"
+                                placeholder="Grade"
+                            />
+                            <ErrorMessage name="grade" v-slot="{ message }" >
+                                <span class="error">{{ message }}</span>
+                            </ErrorMessage>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="form-group mb-25">
-                <input class="p" type="text" id="exampleInputText" placeholder="Curriculum / Major">
+                <div class="form-group mb-25">
+                    <Field class="p" type="text"
+                        v-model = "store.curriculum"
+                        name = "curriculum"
+                        placeholder="Curriculum / Major"
+                    />
+                    <ErrorMessage name="curriculum" v-slot="{ message }" >
+                        <span class="error">{{ message }}</span>
+                    </ErrorMessage>
+                </div>
             </div>
             <div class="form-group mb-25">
                 <div class="row">
                     <div class="col--50 vx__fist-name">
                         <Multiselect
-                            v-model="store.cateogry"
+                            v-model="store.category"
                             :searchable = 'true'
-                            :options="options"
+                            :label = '"title"'
+                            @select="fetchSubcategory"
+                            :value-prop = '"id"'
+                            :options="categories"
                             :placeholder="'Category'"
                         />
                     </div>
@@ -32,97 +58,102 @@
                         <Multiselect
                             v-model="store.subCategory"
                             :searchable = 'true'
-                            :options="options"
+                            :label = '"title"'
+                            :value-prop = '"id"'
+                            :options="subCategories"
                             :placeholder="'Sub categories'"
                         />
                     </div>
                 </div>
             </div>
             <div class="form-group mb-25">
-                <label class="p mb-5" for="exampleInputEmail1">Add skills to learn</label>
-                <Multiselect
-                    v-model="store.skills"
-                    :mode = "'tags'"
-                    :searchable = 'true'
-                    :create-option = 'true'
-                    @deselect = 'removeOption'
-                    @option = 'addNewOption'
-                    @clear = 'removeOption'
-                    :append-new-option = 'false'
-                    :append-new-tag = 'false'
-                    @keydown = 'kewDown'
-                    :options="options"
-                    :placeholder="'Skills'"
-                />
-            </div>
-        </div>
-        <div id="nonstudent" class="tabcontent" :class="{'active' : !state.isStudent}" >
-            <div class="form-group mb-25">
-                <div class="row">
-                    <div class="col--50 vx__fist-name">
-                        <Multiselect
-                                v-model="store.category"
-                                :searchable = 'true'
-                                :options="options"
-                                :placeholder="'Category'"
-                        />
-                    </div>
-                    <div class="col--50 vx__fist-name">
-
-                        <Multiselect
-                                v-model="store.subCategory"
-                                :searchable = 'true'
-                                :options="options"
-                                :placeholder="'Sub categories'"
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group mb-25">
-                <label class="p mb-5" for="exampleInputEmail1">Add skills to learn</label>
-                <Multiselect
-                    v-model="store.skills"
-                    :mode = "'tags'"
-                    :searchable = 'true'
-                    :create-option = 'true'
-                    @deselect = 'removeOption'
-                    @option = 'addNewOption'
-                    @clear = 'removeOption'
-                    :append-new-option = 'false'
-                    :append-new-tag = 'false'
-                    @keydown = 'kewDown'
-                    :options="options"
-                />
+                <label class="p mb-5" >Add skills to learn</label>
+                    <Multiselect
+                        v-model="skillsToValidate"
+                        :mode = "'tags'"
+                        :searchable = 'true'
+                        :create-option = 'true'
+                        @deselect = 'removeOption'
+                        @option = 'addNewOption'
+                        @clear = 'removeOption'
+                        :append-new-option = 'false'
+                        :append-new-tag = 'false'
+                        :label = '"title"'
+                        :value-prop = '"id"'
+                        @keydown = 'kewDown'
+                        :options="skills"
+                        :placeholder="'Skills'"
+                    />
+                    <span class="error">{{ skillErrorMessage }}</span>
             </div>
         </div>
     </div>
 </template>
 <script>
-import { reactive, onMounted, inject, ref  } from 'vue';
+import { reactive, onMounted, inject, ref, computed  } from 'vue';
 import Multiselect from '@vueform/multiselect'
 import { useRegisterStore } from "./stores/register";
+import * as Yup from "yup";
+import { useField, useForm, Field, ErrorMessage} from 'vee-validate';
+
 export default {
     components: {
-      Multiselect,
+        Multiselect,
+        Field,
+        ErrorMessage
     },
     setup(_, context) {
         const axios = inject('axios')
         const store = useRegisterStore();
+
         const categories = ref([]);
+        const subCategories = ref([]);
+        const skills = ref([]);
         const state = reactive({
             isStudent : true
         })
 
+        const schema = Yup.object({
+            school : Yup.string().required().label('School'),
+            grade : Yup.string().required().label('Grade'),
+            curriculum : Yup.string().required().label('Curriculum'),
+            skills :  Yup.string().required()
+        });
+
+        const {value : skillsToValidate, errorMessage : skillErrorMessage , validate } = useField('skills', Yup.string().required());
+
+        const { handleSubmit, meta} = useForm({
+            validationSchema: schema
+        });
+
+        const onSubmit = handleSubmit(() => console.log('hiii'));
+
         onMounted(() => {
-            axios.get(
-                "https://jsonplaceholder.typicode.com/users"
+            axios.get('api/categories'
             ).then((res) => {
-                categories.value = res.data
+                categories.value = res.data.data
+            })
+
+            axios.get('api/skills'
+            ).then((res) => {
+                skills.value = res.data.data
             })
         })
 
-        const options = categories;
+        const fetchSubcategory = async () => {
+            if(store.category) {
+                axios.get('api/sub-categories',
+                {
+                    params : {
+                        parent_id : store.category
+                    }
+                }
+                ).then((res) => {
+                    subCategories.value = res.data.data
+                })
+            }
+        }
+
         const changeTab = (status, role) => {
             state.isStudent = status;
             store.role = role;
@@ -152,11 +183,21 @@ export default {
         return {
             state,
             store,
-            options,
+            categories,
+            subCategories,
+            skills,
             changeTab,
             addNewOption,
             removeOption,
-            kewDown
+            kewDown,
+            fetchSubcategory,
+            handleSubmit,
+            skillsToValidate,
+            skillErrorMessage,
+            onSubmit,
+            meta,
+            validate
+
         }
     }
 }

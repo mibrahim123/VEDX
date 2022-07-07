@@ -24507,13 +24507,26 @@ __webpack_require__.r(__webpack_exports__);
     FirstStep: _FirstStep_vue__WEBPACK_IMPORTED_MODULE_2__["default"],
     SecondStep: _SecondStep_vue__WEBPACK_IMPORTED_MODULE_3__["default"]
   },
-  setup: function setup() {
+  setup: function setup(_, context) {
     var store = (0,_stores_register__WEBPACK_IMPORTED_MODULE_1__.useRegisterStore)();
     var step = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(1);
     var role = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)('student');
+    var firstStep = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(null);
+    var secondStep = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(null);
 
     var nextStep = function nextStep() {
-      step.value++;
+      if (step.value == 1) {
+        step.value = step.value + 1; // firstStep.value.onSubmit()
+        // if(firstStep.value.meta.valid){
+        //     step.value = step.value + 1
+        // }
+      } else {
+        secondStep.value.onSubmit();
+
+        if (secondStep.value.valid) {
+          alert("yes");
+        }
+      }
     }; // expose the state to the template
 
 
@@ -24521,7 +24534,9 @@ __webpack_require__.r(__webpack_exports__);
       step: step,
       role: role,
       store: store,
-      nextStep: nextStep
+      nextStep: nextStep,
+      firstStep: firstStep,
+      secondStep: secondStep
     };
   }
 });
@@ -24539,28 +24554,72 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var libphonenumber_js_max__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! libphonenumber-js/max */ "./node_modules/libphonenumber-js/max/exports/parsePhoneNumberFromString.js");
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
-/* harmony import */ var _stores_register__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./stores/register */ "./resources/js/stores/register.js");
+/* harmony import */ var yup__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! yup */ "./node_modules/yup/es/index.js");
+/* harmony import */ var _stores_register__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./stores/register */ "./resources/js/stores/register.js");
+/* harmony import */ var vee_validate__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vee-validate */ "./node_modules/vee-validate/dist/vee-validate.esm.js");
 // import { parsePhoneNumber, parsePhoneNumberFromString,isValidPhoneNumber} from 'libphonenumber-js';
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  setup: function setup(_, context) {
-    var store = (0,_stores_register__WEBPACK_IMPORTED_MODULE_1__.useRegisterStore)();
 
-    var onInput = function onInput(phone, phoneObject, input) {// if(phoneObject) {
-      //     let valid = parsePhoneNumberFromString("'" + phoneObject?.nationalNumber+"'" ,phoneObject?.country?.iso2 );
-      //     store.countryCode = phoneObject.country.dialCode
-      //     store.phone = phone
-      //     store.validPhone = valid.isValid();
-      // }
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  components: {
+    Field: vee_validate__WEBPACK_IMPORTED_MODULE_3__.Field,
+    ErrorMessage: vee_validate__WEBPACK_IMPORTED_MODULE_3__.ErrorMessage
+  },
+  setup: function setup() {
+    var schema = yup__WEBPACK_IMPORTED_MODULE_1__.object({
+      firstName: yup__WEBPACK_IMPORTED_MODULE_1__.string().min(5).required().label('First Name'),
+      lastName: yup__WEBPACK_IMPORTED_MODULE_1__.string().min(5).required().label('Last Name'),
+      phone: yup__WEBPACK_IMPORTED_MODULE_1__.string().required().label('Phone Number').test("valid-phone", "Invalid Phone Number", function (value) {
+        return store.validPhone;
+      }),
+      email: yup__WEBPACK_IMPORTED_MODULE_1__.string().email().required().label('Email'),
+      age: yup__WEBPACK_IMPORTED_MODULE_1__.string().required().test("valid-age", "Age Must Be Greate Than 10", function (value) {
+        return value > 10 && value < 60;
+      }),
+      location: yup__WEBPACK_IMPORTED_MODULE_1__.string().required(),
+      password: yup__WEBPACK_IMPORTED_MODULE_1__.string().min(8).required(),
+      confirmPassword: yup__WEBPACK_IMPORTED_MODULE_1__.string().min(8).required().test("confirm-password", "confirm password must match with password fields", function (value) {
+        return value === store.password;
+      })
+    });
+    var store = (0,_stores_register__WEBPACK_IMPORTED_MODULE_2__.useRegisterStore)();
+
+    var _useForm = (0,vee_validate__WEBPACK_IMPORTED_MODULE_3__.useForm)({
+      validationSchema: schema
+    }),
+        meta = _useForm.meta,
+        handleSubmit = _useForm.handleSubmit,
+        setErrors = _useForm.setErrors,
+        validate = _useForm.validate; // const { value:confirmPassword} = useField('confirm-password');
+
+
+    var onSubmit = handleSubmit(function () {
+      return console.log('hiii');
+    });
+
+    var onInput = function onInput(phone, phoneObject, input) {
+      if (phoneObject && phoneObject.nationalNumber) {
+        var _phoneObject$country;
+
+        var valid = (0,libphonenumber_js_max__WEBPACK_IMPORTED_MODULE_4__.parsePhoneNumberFromString)("'" + (phoneObject === null || phoneObject === void 0 ? void 0 : phoneObject.nationalNumber) + "'", phoneObject === null || phoneObject === void 0 ? void 0 : (_phoneObject$country = phoneObject.country) === null || _phoneObject$country === void 0 ? void 0 : _phoneObject$country.iso2);
+        store.countryCode = phoneObject.country.dialCode;
+        store.phone = phone;
+        store.validPhone = valid.isValid();
+      }
     }; // expose the state to the template
 
 
     return {
       store: store,
-      onInput: onInput
+      onInput: onInput,
+      onSubmit: onSubmit,
+      meta: meta,
+      validate: validate
     };
   }
 });
@@ -24581,26 +24640,94 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
 /* harmony import */ var _vueform_multiselect__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @vueform/multiselect */ "./node_modules/@vueform/multiselect/dist/multiselect.js");
 /* harmony import */ var _stores_register__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./stores/register */ "./resources/js/stores/register.js");
+/* harmony import */ var yup__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! yup */ "./node_modules/yup/es/index.js");
+/* harmony import */ var vee_validate__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! vee-validate */ "./node_modules/vee-validate/dist/vee-validate.esm.js");
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return exports; }; var exports = {}, Op = Object.prototype, hasOwn = Op.hasOwnProperty, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag"; function define(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: !0, configurable: !0, writable: !0 }), obj[key]; } try { define({}, ""); } catch (err) { define = function define(obj, key, value) { return obj[key] = value; }; } function wrap(innerFn, outerFn, self, tryLocsList) { var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []); return generator._invoke = function (innerFn, self, context) { var state = "suspendedStart"; return function (method, arg) { if ("executing" === state) throw new Error("Generator is already running"); if ("completed" === state) { if ("throw" === method) throw arg; return doneResult(); } for (context.method = method, context.arg = arg;;) { var delegate = context.delegate; if (delegate) { var delegateResult = maybeInvokeDelegate(delegate, context); if (delegateResult) { if (delegateResult === ContinueSentinel) continue; return delegateResult; } } if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) { if ("suspendedStart" === state) throw state = "completed", context.arg; context.dispatchException(context.arg); } else "return" === context.method && context.abrupt("return", context.arg); state = "executing"; var record = tryCatch(innerFn, self, context); if ("normal" === record.type) { if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue; return { value: record.arg, done: context.done }; } "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg); } }; }(innerFn, self, context), generator; } function tryCatch(fn, obj, arg) { try { return { type: "normal", arg: fn.call(obj, arg) }; } catch (err) { return { type: "throw", arg: err }; } } exports.wrap = wrap; var ContinueSentinel = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var IteratorPrototype = {}; define(IteratorPrototype, iteratorSymbol, function () { return this; }); var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values([]))); NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype); var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype); function defineIteratorMethods(prototype) { ["next", "throw", "return"].forEach(function (method) { define(prototype, method, function (arg) { return this._invoke(method, arg); }); }); } function AsyncIterator(generator, PromiseImpl) { function invoke(method, arg, resolve, reject) { var record = tryCatch(generator[method], generator, arg); if ("throw" !== record.type) { var result = record.arg, value = result.value; return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) { invoke("next", value, resolve, reject); }, function (err) { invoke("throw", err, resolve, reject); }) : PromiseImpl.resolve(value).then(function (unwrapped) { result.value = unwrapped, resolve(result); }, function (error) { return invoke("throw", error, resolve, reject); }); } reject(record.arg); } var previousPromise; this._invoke = function (method, arg) { function callInvokeWithMethodAndArg() { return new PromiseImpl(function (resolve, reject) { invoke(method, arg, resolve, reject); }); } return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); }; } function maybeInvokeDelegate(delegate, context) { var method = delegate.iterator[context.method]; if (undefined === method) { if (context.delegate = null, "throw" === context.method) { if (delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel; context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method"); } return ContinueSentinel; } var record = tryCatch(method, delegate.iterator, context.arg); if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel; var info = record.arg; return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel); } function pushTryEntry(locs) { var entry = { tryLoc: locs[0] }; 1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry); } function resetTryEntry(entry) { var record = entry.completion || {}; record.type = "normal", delete record.arg, entry.completion = record; } function Context(tryLocsList) { this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0); } function values(iterable) { if (iterable) { var iteratorMethod = iterable[iteratorSymbol]; if (iteratorMethod) return iteratorMethod.call(iterable); if ("function" == typeof iterable.next) return iterable; if (!isNaN(iterable.length)) { var i = -1, next = function next() { for (; ++i < iterable.length;) { if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next; } return next.value = undefined, next.done = !0, next; }; return next.next = next; } } return { next: doneResult }; } function doneResult() { return { value: undefined, done: !0 }; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) { var ctor = "function" == typeof genFun && genFun.constructor; return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name)); }, exports.mark = function (genFun) { return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun; }, exports.awrap = function (arg) { return { __await: arg }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () { return this; }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) { void 0 === PromiseImpl && (PromiseImpl = Promise); var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl); return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) { return result.done ? result.value : iter.next(); }); }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () { return this; }), define(Gp, "toString", function () { return "[object Generator]"; }), exports.keys = function (object) { var keys = []; for (var key in object) { keys.push(key); } return keys.reverse(), function next() { for (; keys.length;) { var key = keys.pop(); if (key in object) return next.value = key, next.done = !1, next; } return next.done = !0, next; }; }, exports.values = values, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) { if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) { "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined); } }, stop: function stop() { this.done = !0; var rootRecord = this.tryEntries[0].completion; if ("throw" === rootRecord.type) throw rootRecord.arg; return this.rval; }, dispatchException: function dispatchException(exception) { if (this.done) throw exception; var context = this; function handle(loc, caught) { return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught; } for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i], record = entry.completion; if ("root" === entry.tryLoc) return handle("end"); if (entry.tryLoc <= this.prev) { var hasCatch = hasOwn.call(entry, "catchLoc"), hasFinally = hasOwn.call(entry, "finallyLoc"); if (hasCatch && hasFinally) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } else if (hasCatch) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); } else { if (!hasFinally) throw new Error("try statement without catch or finally"); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } } } }, abrupt: function abrupt(type, arg) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) { var finallyEntry = entry; break; } } finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null); var record = finallyEntry ? finallyEntry.completion : {}; return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record); }, complete: function complete(record, afterLoc) { if ("throw" === record.type) throw record.arg; return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel; }, finish: function finish(finallyLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel; } }, "catch": function _catch(tryLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc === tryLoc) { var record = entry.completion; if ("throw" === record.type) { var thrown = record.arg; resetTryEntry(entry); } return thrown; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(iterable, resultName, nextLoc) { return this.delegate = { iterator: values(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = undefined), ContinueSentinel; } }, exports; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
-    Multiselect: _vueform_multiselect__WEBPACK_IMPORTED_MODULE_1__["default"]
+    Multiselect: _vueform_multiselect__WEBPACK_IMPORTED_MODULE_1__["default"],
+    Field: vee_validate__WEBPACK_IMPORTED_MODULE_4__.Field,
+    ErrorMessage: vee_validate__WEBPACK_IMPORTED_MODULE_4__.ErrorMessage
   },
   setup: function setup(_, context) {
     var axios = (0,vue__WEBPACK_IMPORTED_MODULE_0__.inject)('axios');
     var store = (0,_stores_register__WEBPACK_IMPORTED_MODULE_2__.useRegisterStore)();
     var categories = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)([]);
+    var subCategories = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)([]);
+    var skills = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)([]);
     var state = (0,vue__WEBPACK_IMPORTED_MODULE_0__.reactive)({
       isStudent: true
     });
+    var schema = yup__WEBPACK_IMPORTED_MODULE_3__.object({
+      school: yup__WEBPACK_IMPORTED_MODULE_3__.string().required().label('School'),
+      grade: yup__WEBPACK_IMPORTED_MODULE_3__.string().required().label('Grade'),
+      curriculum: yup__WEBPACK_IMPORTED_MODULE_3__.string().required().label('Curriculum'),
+      skills: yup__WEBPACK_IMPORTED_MODULE_3__.string().required()
+    });
+
+    var _useField = (0,vee_validate__WEBPACK_IMPORTED_MODULE_4__.useField)('skills', yup__WEBPACK_IMPORTED_MODULE_3__.string().required()),
+        skillsToValidate = _useField.value,
+        skillErrorMessage = _useField.errorMessage,
+        validate = _useField.validate;
+
+    var _useForm = (0,vee_validate__WEBPACK_IMPORTED_MODULE_4__.useForm)({
+      validationSchema: schema
+    }),
+        handleSubmit = _useForm.handleSubmit,
+        meta = _useForm.meta;
+
+    var onSubmit = handleSubmit(function () {
+      return console.log('hiii');
+    });
     (0,vue__WEBPACK_IMPORTED_MODULE_0__.onMounted)(function () {
-      axios.get("https://jsonplaceholder.typicode.com/users").then(function (res) {
-        categories.value = res.data;
+      axios.get('api/categories').then(function (res) {
+        categories.value = res.data.data;
+      });
+      axios.get('api/skills').then(function (res) {
+        skills.value = res.data.data;
       });
     });
-    var options = categories;
+
+    var fetchSubcategory = /*#__PURE__*/function () {
+      var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+        return _regeneratorRuntime().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                if (store.category) {
+                  axios.get('api/sub-categories', {
+                    params: {
+                      parent_id: store.category
+                    }
+                  }).then(function (res) {
+                    subCategories.value = res.data.data;
+                  });
+                }
+
+              case 1:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }));
+
+      return function fetchSubcategory() {
+        return _ref.apply(this, arguments);
+      };
+    }();
 
     var changeTab = function changeTab(status, role) {
       state.isStudent = status;
@@ -24634,11 +24761,20 @@ __webpack_require__.r(__webpack_exports__);
     return {
       state: state,
       store: store,
-      options: options,
+      categories: categories,
+      subCategories: subCategories,
+      skills: skills,
       changeTab: changeTab,
       addNewOption: addNewOption,
       removeOption: removeOption,
-      kewDown: kewDown
+      kewDown: kewDown,
+      fetchSubcategory: fetchSubcategory,
+      handleSubmit: handleSubmit,
+      skillsToValidate: skillsToValidate,
+      skillErrorMessage: skillErrorMessage,
+      onSubmit: onSubmit,
+      meta: meta,
+      validate: validate
     };
   }
 });
@@ -24669,10 +24805,13 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
 
   var _component_SecondStep = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("SecondStep");
 
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_FirstStep, null, null, 512
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_FirstStep, {
+    ref: "firstStep"
+  }, null, 512
   /* NEED_PATCH */
   ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.step == 1 ? true : false]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_SecondStep, {
-    onChangeRole: _ctx.changeRole
+    onChangeRole: _ctx.changeRole,
+    ref: "secondStep"
   }, null, 8
   /* PROPS */
   , ["onChangeRole"]), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.step == 2 ? true : false]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
@@ -24719,19 +24858,19 @@ var _hoisted_10 = {
   "class": "form-group mb-25"
 };
 var _hoisted_11 = {
-  "class": "col--50"
+  "class": "error"
 };
 var _hoisted_12 = {
-  "class": "form-group mb-25"
-};
-var _hoisted_13 = {
-  "class": "row"
-};
-var _hoisted_14 = {
   "class": "col--50"
 };
-var _hoisted_15 = {
+var _hoisted_13 = {
   "class": "form-group mb-25"
+};
+var _hoisted_14 = {
+  "class": "error"
+};
+var _hoisted_15 = {
+  "class": "row"
 };
 var _hoisted_16 = {
   "class": "col--50"
@@ -24740,7 +24879,7 @@ var _hoisted_17 = {
   "class": "form-group mb-25"
 };
 var _hoisted_18 = {
-  "class": "row"
+  "class": "error"
 };
 var _hoisted_19 = {
   "class": "col--50"
@@ -24749,19 +24888,19 @@ var _hoisted_20 = {
   "class": "form-group mb-25"
 };
 var _hoisted_21 = {
-  "class": "col--50"
+  "class": "error"
 };
 var _hoisted_22 = {
-  "class": "form-group mb-25"
-};
-var _hoisted_23 = {
   "class": "row"
 };
-var _hoisted_24 = {
+var _hoisted_23 = {
   "class": "col--50"
 };
-var _hoisted_25 = {
+var _hoisted_24 = {
   "class": "form-group mb-25"
+};
+var _hoisted_25 = {
+  "class": "error"
 };
 var _hoisted_26 = {
   "class": "col--50"
@@ -24769,85 +24908,219 @@ var _hoisted_26 = {
 var _hoisted_27 = {
   "class": "form-group mb-25"
 };
+var _hoisted_28 = {
+  "class": "error"
+};
+var _hoisted_29 = {
+  "class": "row"
+};
+var _hoisted_30 = {
+  "class": "col--50"
+};
+var _hoisted_31 = {
+  "class": "form-group mb-25"
+};
+var _hoisted_32 = {
+  "class": "error"
+};
+var _hoisted_33 = {
+  "class": "col--50"
+};
+var _hoisted_34 = {
+  "class": "form-group mb-25"
+};
+var _hoisted_35 = {
+  "class": "error"
+};
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  var _component_vue_tel_input = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("vue-tel-input");
+  var _component_Field = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Field");
 
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  var _component_ErrorMessage = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("ErrorMessage");
+
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_1, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_9, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Field, {
     "class": "p",
     type: "text",
+    modelValue: $setup.store.firstName,
     "onUpdate:modelValue": _cache[0] || (_cache[0] = function ($event) {
       return $setup.store.firstName = $event;
     }),
+    name: "firstName",
     placeholder: "First Name"
-  }, null, 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.store.firstName]])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, null, 8
+  /* PROPS */
+  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ErrorMessage, {
+    name: "firstName"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref) {
+      var message = _ref.message;
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message), 1
+      /* TEXT */
+      )];
+    }),
+    _: 1
+    /* STABLE */
+
+  })])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Field, {
     "class": "p",
     type: "text",
+    modelValue: $setup.store.lastName,
     "onUpdate:modelValue": _cache[1] || (_cache[1] = function ($event) {
       return $setup.store.lastName = $event;
     }),
+    name: "lastName",
     placeholder: "Last Name"
-  }, null, 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.store.lastName]])])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_15, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, null, 8
+  /* PROPS */
+  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ErrorMessage, {
+    name: "lastName"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref2) {
+      var message = _ref2.message;
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_14, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message), 1
+      /* TEXT */
+      )];
+    }),
+    _: 1
+    /* STABLE */
+
+  })])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_15, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Field, {
     "class": "p",
     type: "email",
+    modelValue: $setup.store.email,
     "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
       return $setup.store.email = $event;
     }),
+    name: "email",
     placeholder: "Email Address"
-  }, null, 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.store.email]])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_17, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_vue_tel_input, {
-    modelValue: _ctx.phone,
-    "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
-      return _ctx.phone = $event;
-    }),
-    onInput: $setup.onInput,
-    "input-options": {
-      placeholder: "Phone Number",
-      showDialCode: false
-    }
   }, null, 8
   /* PROPS */
-  , ["modelValue", "onInput"])])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_18, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_20, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ErrorMessage, {
+    name: "email"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref3) {
+      var message = _ref3.message;
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_18, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message), 1
+      /* TEXT */
+      )];
+    }),
+    _: 1
+    /* STABLE */
+
+  })])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_19, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_20, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Field, {
+    modelValue: $setup.store.phone,
+    "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
+      return $setup.store.phone = $event;
+    }),
+    name: "phone",
+    as: "vue-tel-input",
+    onInput: $setup.onInput
+  }, null, 8
+  /* PROPS */
+  , ["modelValue", "onInput"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ErrorMessage, {
+    name: "phone"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref4) {
+      var message = _ref4.message;
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message), 1
+      /* TEXT */
+      )];
+    }),
+    _: 1
+    /* STABLE */
+
+  })])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Field, {
     "class": "p",
     type: "number",
+    modelValue: $setup.store.age,
     "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
       return $setup.store.age = $event;
     }),
+    name: "age",
     placeholder: "Age"
-  }, null, 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.store.age]])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_21, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_22, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, null, 8
+  /* PROPS */
+  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ErrorMessage, {
+    name: "age"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref5) {
+      var message = _ref5.message;
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_25, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message), 1
+      /* TEXT */
+      )];
+    }),
+    _: 1
+    /* STABLE */
+
+  })])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Field, {
     "class": "p",
     type: "text",
+    modelValue: $setup.store.location,
     "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
       return $setup.store.location = $event;
     }),
+    name: "location",
     placeholder: "Location"
-  }, null, 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.store.location]])])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_23, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_24, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, null, 8
+  /* PROPS */
+  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ErrorMessage, {
+    name: "location"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref6) {
+      var message = _ref6.message;
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_28, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message), 1
+      /* TEXT */
+      )];
+    }),
+    _: 1
+    /* STABLE */
+
+  })])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_29, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_30, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_31, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Field, {
     "class": "p",
     type: "password",
+    modelValue: $setup.store.password,
     "onUpdate:modelValue": _cache[6] || (_cache[6] = function ($event) {
       return $setup.store.password = $event;
     }),
+    name: "password",
     placeholder: "Password"
-  }, null, 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.store.password]])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_26, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_27, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+  }, null, 8
+  /* PROPS */
+  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ErrorMessage, {
+    name: "password"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref7) {
+      var message = _ref7.message;
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_32, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message), 1
+      /* TEXT */
+      )];
+    }),
+    _: 1
+    /* STABLE */
+
+  })])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_33, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_34, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Field, {
     "class": "p",
     type: "password",
+    modelValue: $setup.store.confirmPassword,
     "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
       return $setup.store.confirmPassword = $event;
     }),
+    name: "confirmPassword",
     placeholder: "Confirm Password"
-  }, null, 512
-  /* NEED_PATCH */
-  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vModelText, $setup.store.confirmPassword]])])])])]);
+  }, null, 8
+  /* PROPS */
+  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ErrorMessage, {
+    name: "confirmPassword"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref8) {
+      var message = _ref8.message;
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_35, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message), 1
+      /* TEXT */
+      )];
+    }),
+    _: 1
+    /* STABLE */
+
+  })])])])]);
 }
 
 /***/ }),
@@ -24868,32 +25141,30 @@ __webpack_require__.r(__webpack_exports__);
 var _hoisted_1 = {
   "class": "tab d-flex justify-content-around mb-60"
 };
-
-var _hoisted_2 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createStaticVNode)("<div class=\"form-group mb-25\"><div class=\"row\"><div class=\"col--50 vx__fist-name\"><input class=\"p\" type=\"text\" id=\"exampleInputText\" placeholder=\"School\"></div><div class=\"col--50 vx__fist-name\"><input class=\"p\" type=\"text\" id=\"exampleInputText\" placeholder=\"Grade\"></div></div></div><div class=\"form-group mb-25\"><input class=\"p\" type=\"text\" id=\"exampleInputText\" placeholder=\"Curriculum / Major\"></div>", 2);
-
-var _hoisted_4 = {
+var _hoisted_2 = {
   "class": "form-group mb-25"
 };
-var _hoisted_5 = {
+var _hoisted_3 = {
   "class": "row"
+};
+var _hoisted_4 = {
+  "class": "col--50 vx__fist-name"
+};
+var _hoisted_5 = {
+  "class": "error"
 };
 var _hoisted_6 = {
   "class": "col--50 vx__fist-name"
 };
 var _hoisted_7 = {
-  "class": "col--50 vx__fist-name"
+  "class": "error"
 };
 var _hoisted_8 = {
   "class": "form-group mb-25"
 };
-
-var _hoisted_9 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
-  "class": "p mb-5",
-  "for": "exampleInputEmail1"
-}, "Add skills to learn", -1
-/* HOISTED */
-);
-
+var _hoisted_9 = {
+  "class": "error"
+};
 var _hoisted_10 = {
   "class": "form-group mb-25"
 };
@@ -24911,13 +25182,19 @@ var _hoisted_14 = {
 };
 
 var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
-  "class": "p mb-5",
-  "for": "exampleInputEmail1"
+  "class": "p mb-5"
 }, "Add skills to learn", -1
 /* HOISTED */
 );
 
+var _hoisted_16 = {
+  "class": "error"
+};
 function render(_ctx, _cache, $props, $setup, $data, $options) {
+  var _component_Field = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Field");
+
+  var _component_ErrorMessage = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("ErrorMessage");
+
   var _component_Multiselect = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("Multiselect");
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_1, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("button", {
@@ -24940,78 +25217,109 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   /* CLASS */
   )]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
     id: "student",
-    "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["tabcontent", {
+    "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["tabcontent active", {
       'active': $setup.state.isStudent
     }])
-  }, [_hoisted_2, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_5, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Multiselect, {
-    modelValue: $setup.store.cateogry,
+  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_2, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_3, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_4, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Field, {
+    "class": "p",
+    type: "text",
+    modelValue: $setup.store.school,
     "onUpdate:modelValue": _cache[2] || (_cache[2] = function ($event) {
-      return $setup.store.cateogry = $event;
+      return $setup.store.school = $event;
     }),
-    searchable: true,
-    options: $setup.options,
-    placeholder: 'Category'
+    name: "school",
+    placeholder: "School"
   }, null, 8
   /* PROPS */
-  , ["modelValue", "options"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_7, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Multiselect, {
-    modelValue: $setup.store.subCategory,
+  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ErrorMessage, {
+    name: "school"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref) {
+      var message = _ref.message;
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_5, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message), 1
+      /* TEXT */
+      )];
+    }),
+    _: 1
+    /* STABLE */
+
+  })]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_6, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Field, {
+    "class": "p",
+    type: "text",
+    modelValue: $setup.store.grade,
     "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
-      return $setup.store.subCategory = $event;
+      return $setup.store.grade = $event;
     }),
-    searchable: true,
-    options: $setup.options,
-    placeholder: 'Sub categories'
+    name: "grade",
+    placeholder: "Grade"
   }, null, 8
   /* PROPS */
-  , ["modelValue", "options"])])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [_hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Multiselect, {
-    modelValue: $setup.store.skills,
+  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ErrorMessage, {
+    name: "grade"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref2) {
+      var message = _ref2.message;
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_7, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message), 1
+      /* TEXT */
+      )];
+    }),
+    _: 1
+    /* STABLE */
+
+  })])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_8, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Field, {
+    "class": "p",
+    type: "text",
+    modelValue: $setup.store.curriculum,
     "onUpdate:modelValue": _cache[4] || (_cache[4] = function ($event) {
-      return $setup.store.skills = $event;
+      return $setup.store.curriculum = $event;
     }),
-    mode: 'tags',
-    searchable: true,
-    "create-option": true,
-    onDeselect: $setup.removeOption,
-    onOption: $setup.addNewOption,
-    onClear: $setup.removeOption,
-    "append-new-option": false,
-    "append-new-tag": false,
-    onKeydown: $setup.kewDown,
-    options: $setup.options,
-    placeholder: 'Skills'
+    name: "curriculum",
+    placeholder: "Curriculum / Major"
   }, null, 8
   /* PROPS */
-  , ["modelValue", "onDeselect", "onOption", "onClear", "onKeydown", "options"])])], 2
-  /* CLASS */
-  ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", {
-    id: "nonstudent",
-    "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["tabcontent", {
-      'active': !$setup.state.isStudent
-    }])
-  }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Multiselect, {
+  , ["modelValue"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_ErrorMessage, {
+    name: "curriculum"
+  }, {
+    "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function (_ref3) {
+      var message = _ref3.message;
+      return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_9, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(message), 1
+      /* TEXT */
+      )];
+    }),
+    _: 1
+    /* STABLE */
+
+  })])], 512
+  /* NEED_PATCH */
+  ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, $setup.state.isStudent]]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Multiselect, {
     modelValue: $setup.store.category,
     "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
       return $setup.store.category = $event;
     }),
     searchable: true,
-    options: $setup.options,
+    label: "title",
+    onSelect: $setup.fetchSubcategory,
+    "value-prop": "id",
+    options: $setup.categories,
     placeholder: 'Category'
   }, null, 8
   /* PROPS */
-  , ["modelValue", "options"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Multiselect, {
+  , ["modelValue", "onSelect", "options"])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_13, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Multiselect, {
     modelValue: $setup.store.subCategory,
     "onUpdate:modelValue": _cache[6] || (_cache[6] = function ($event) {
       return $setup.store.subCategory = $event;
     }),
     searchable: true,
-    options: $setup.options,
+    label: "title",
+    "value-prop": "id",
+    options: $setup.subCategories,
     placeholder: 'Sub categories'
   }, null, 8
   /* PROPS */
   , ["modelValue", "options"])])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [_hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_Multiselect, {
-    modelValue: $setup.store.skills,
+    modelValue: $setup.skillsToValidate,
     "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
-      return $setup.store.skills = $event;
+      return $setup.skillsToValidate = $event;
     }),
     mode: 'tags',
     searchable: true,
@@ -25021,11 +25329,16 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     onClear: $setup.removeOption,
     "append-new-option": false,
     "append-new-tag": false,
+    label: "title",
+    "value-prop": "id",
     onKeydown: $setup.kewDown,
-    options: $setup.options
+    options: $setup.skills,
+    placeholder: 'Skills'
   }, null, 8
   /* PROPS */
-  , ["modelValue", "onDeselect", "onOption", "onClear", "onKeydown", "options"])])], 2
+  , ["modelValue", "onDeselect", "onOption", "onClear", "onKeydown", "options"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", _hoisted_16, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)($setup.skillErrorMessage), 1
+  /* TEXT */
+  )])], 2
   /* CLASS */
   )]);
 }
@@ -25061,14 +25374,17 @@ var useRegisterStore = (0,pinia__WEBPACK_IMPORTED_MODULE_0__.defineStore)("regis
       confirmPassword: '',
       validPhone: true,
       skills: [],
-      newSkills: []
+      newSkills: [],
+      category: '',
+      subCategory: ''
     };
-  } // actions: {
-  //     increment(value = 1) {
-  //         this.count += value;
-  //     },
-  // },
-  // getters: {
+  },
+  actions: {
+    increment: function increment() {
+      var value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+      alert("yes");
+    }
+  } // getters: {
   //     doubleCount: (state) => {
   //         return state.count * 2;
   //     },
@@ -25125,6 +25441,30 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, ".multiselect{align-items:center;background:var(--ms-bg,#fff);border:var(--ms-border-width,1px) solid var(--ms-border-color,#d1d5db);border-radius:var(--ms-radius,4px);box-sizing:border-box;cursor:pointer;display:flex;font-size:var(--ms-font-size,1rem);justify-content:flex-end;margin:0 auto;min-height:calc(var(--ms-border-width, 1px)*2 + var(--ms-font-size, 1rem)*var(--ms-line-height, 1.375) + var(--ms-py, .5rem)*2);outline:none;position:relative;width:100%}.multiselect.is-open{border-radius:var(--ms-radius,4px) var(--ms-radius,4px) 0 0}.multiselect.is-open-top{border-radius:0 0 var(--ms-radius,4px) var(--ms-radius,4px)}.multiselect.is-disabled{background:var(--ms-bg-disabled,#f3f4f6);cursor:default}.multiselect.is-active{box-shadow:0 0 0 var(--ms-ring-width,3px) var(--ms-ring-color,rgba(16,185,129,.188))}.multiselect-multiple-label,.multiselect-placeholder,.multiselect-single-label{align-items:center;background:transparent;box-sizing:border-box;display:flex;height:100%;left:0;line-height:var(--ms-line-height,1.375);max-width:100%;padding-left:var(--ms-px,.875rem);padding-right:calc(1.25rem + var(--ms-px, .875rem)*3);pointer-events:none;position:absolute;top:0}.multiselect-placeholder{color:var(--ms-placeholder-color,#9ca3af)}.multiselect-single-label-text{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.multiselect-search{-webkit-appearance:none;-moz-appearance:none;appearance:none;background:var(--ms-bg,#fff);border:0;border-radius:var(--ms-radius,4px);bottom:0;box-sizing:border-box;font-family:inherit;font-size:inherit;height:100%;left:0;outline:none;padding-left:var(--ms-px,.875rem);position:absolute;right:0;top:0;width:100%}.multiselect-search::-webkit-search-cancel-button,.multiselect-search::-webkit-search-decoration,.multiselect-search::-webkit-search-results-button,.multiselect-search::-webkit-search-results-decoration{-webkit-appearance:none}.multiselect-tags{align-items:center;display:flex;flex-grow:1;flex-shrink:1;flex-wrap:wrap;margin:var(--ms-tag-my,.25rem) 0 0;padding-left:var(--ms-py,.5rem)}.multiselect-tag{align-items:center;background:var(--ms-tag-bg,#10b981);border-radius:var(--ms-tag-radius,4px);color:var(--ms-tag-color,#fff);display:flex;font-size:var(--ms-tag-font-size,.875rem);font-weight:var(--ms-tag-font-weight,600);line-height:var(--ms-tag-line-height,1.25rem);margin-bottom:var(--ms-tag-my,.25rem);margin-right:var(--ms-tag-mx,.25rem);padding:var(--ms-tag-py,.125rem) 0 var(--ms-tag-py,.125rem) var(--ms-tag-px,.5rem);white-space:nowrap}.multiselect-tag.is-disabled{background:var(--ms-tag-bg-disabled,#9ca3af);color:var(--ms-tag-color-disabled,#fff);padding-right:var(--ms-tag-px,.5rem)}.multiselect-tag-remove{align-items:center;border-radius:var(--ms-tag-remove-radius,4px);display:flex;justify-content:center;margin:var(--ms-tag-remove-my,0) var(--ms-tag-remove-mx,.125rem);padding:var(--ms-tag-remove-py,.25rem) var(--ms-tag-remove-px,.25rem)}.multiselect-tag-remove:hover{background:rgba(0,0,0,.063)}.multiselect-tag-remove-icon{background-color:currentColor;display:inline-block;height:.75rem;-webkit-mask-image:url(\"data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 320 512' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m207.6 256 107.72-107.72c6.23-6.23 6.23-16.34 0-22.58l-25.03-25.03c-6.23-6.23-16.34-6.23-22.58 0L160 208.4 52.28 100.68c-6.23-6.23-16.34-6.23-22.58 0L4.68 125.7c-6.23 6.23-6.23 16.34 0 22.58L112.4 256 4.68 363.72c-6.23 6.23-6.23 16.34 0 22.58l25.03 25.03c6.23 6.23 16.34 6.23 22.58 0L160 303.6l107.72 107.72c6.23 6.23 16.34 6.23 22.58 0l25.03-25.03c6.23-6.23 6.23-16.34 0-22.58L207.6 256z'/%3E%3C/svg%3E\");mask-image:url(\"data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 320 512' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m207.6 256 107.72-107.72c6.23-6.23 6.23-16.34 0-22.58l-25.03-25.03c-6.23-6.23-16.34-6.23-22.58 0L160 208.4 52.28 100.68c-6.23-6.23-16.34-6.23-22.58 0L4.68 125.7c-6.23 6.23-6.23 16.34 0 22.58L112.4 256 4.68 363.72c-6.23 6.23-6.23 16.34 0 22.58l25.03 25.03c6.23 6.23 16.34 6.23 22.58 0L160 303.6l107.72 107.72c6.23 6.23 16.34 6.23 22.58 0l25.03-25.03c6.23-6.23 6.23-16.34 0-22.58L207.6 256z'/%3E%3C/svg%3E\");-webkit-mask-position:center;mask-position:center;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain;opacity:.8;width:.75rem}.multiselect-tags-search-wrapper{display:inline-block;flex-grow:1;flex-shrink:1;height:100%;margin:0 var(--ms-tag-mx,4px) var(--ms-tag-my,4px);position:relative}.multiselect-tags-search-copy{display:inline-block;height:1px;visibility:hidden;white-space:pre-wrap;width:100%}.multiselect-tags-search{-webkit-appearance:none;-moz-appearance:none;appearance:none;border:0;bottom:0;box-sizing:border-box;font-family:inherit;font-size:inherit;left:0;outline:none;padding:0;position:absolute;right:0;top:0;width:100%}.multiselect-tags-search::-webkit-search-cancel-button,.multiselect-tags-search::-webkit-search-decoration,.multiselect-tags-search::-webkit-search-results-button,.multiselect-tags-search::-webkit-search-results-decoration{-webkit-appearance:none}.multiselect-inifite{align-items:center;display:flex;justify-content:center;min-height:calc(var(--ms-border-width, 1px)*2 + var(--ms-font-size, 1rem)*var(--ms-line-height, 1.375) + var(--ms-py, .5rem)*2);width:100%}.multiselect-inifite-spinner,.multiselect-spinner{-webkit-animation:multiselect-spin 1s linear infinite;animation:multiselect-spin 1s linear infinite;background-color:var(--ms-spinner-color,#10b981);flex-grow:0;flex-shrink:0;height:1rem;-webkit-mask-image:url(\"data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 512 512' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m456.433 371.72-27.79-16.045c-7.192-4.152-10.052-13.136-6.487-20.636 25.82-54.328 23.566-118.602-6.768-171.03-30.265-52.529-84.802-86.621-144.76-91.424C262.35 71.922 256 64.953 256 56.649V24.56c0-9.31 7.916-16.609 17.204-15.96 81.795 5.717 156.412 51.902 197.611 123.408 41.301 71.385 43.99 159.096 8.042 232.792-4.082 8.369-14.361 11.575-22.424 6.92z'/%3E%3C/svg%3E\");mask-image:url(\"data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 512 512' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m456.433 371.72-27.79-16.045c-7.192-4.152-10.052-13.136-6.487-20.636 25.82-54.328 23.566-118.602-6.768-171.03-30.265-52.529-84.802-86.621-144.76-91.424C262.35 71.922 256 64.953 256 56.649V24.56c0-9.31 7.916-16.609 17.204-15.96 81.795 5.717 156.412 51.902 197.611 123.408 41.301 71.385 43.99 159.096 8.042 232.792-4.082 8.369-14.361 11.575-22.424 6.92z'/%3E%3C/svg%3E\");-webkit-mask-position:center;mask-position:center;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain;width:1rem;z-index:10}.multiselect-spinner{margin:0 var(--ms-px,.875rem) 0 0}.multiselect-clear{display:flex;flex-grow:0;flex-shrink:0;opacity:1;padding:0 var(--ms-px,.875rem) 0 0;position:relative;transition:.3s;z-index:10}.multiselect-clear:hover .multiselect-clear-icon{background-color:var(--ms-clear-color-hover,#000)}.multiselect-clear-icon{background-color:var(--ms-clear-color,#999);display:inline-block;-webkit-mask-image:url(\"data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 320 512' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m207.6 256 107.72-107.72c6.23-6.23 6.23-16.34 0-22.58l-25.03-25.03c-6.23-6.23-16.34-6.23-22.58 0L160 208.4 52.28 100.68c-6.23-6.23-16.34-6.23-22.58 0L4.68 125.7c-6.23 6.23-6.23 16.34 0 22.58L112.4 256 4.68 363.72c-6.23 6.23-6.23 16.34 0 22.58l25.03 25.03c6.23 6.23 16.34 6.23 22.58 0L160 303.6l107.72 107.72c6.23 6.23 16.34 6.23 22.58 0l25.03-25.03c6.23-6.23 6.23-16.34 0-22.58L207.6 256z'/%3E%3C/svg%3E\");mask-image:url(\"data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 320 512' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m207.6 256 107.72-107.72c6.23-6.23 6.23-16.34 0-22.58l-25.03-25.03c-6.23-6.23-16.34-6.23-22.58 0L160 208.4 52.28 100.68c-6.23-6.23-16.34-6.23-22.58 0L4.68 125.7c-6.23 6.23-6.23 16.34 0 22.58L112.4 256 4.68 363.72c-6.23 6.23-6.23 16.34 0 22.58l25.03 25.03c6.23 6.23 16.34 6.23 22.58 0L160 303.6l107.72 107.72c6.23 6.23 16.34 6.23 22.58 0l25.03-25.03c6.23-6.23 6.23-16.34 0-22.58L207.6 256z'/%3E%3C/svg%3E\");transition:.3s}.multiselect-caret,.multiselect-clear-icon{height:1.125rem;-webkit-mask-position:center;mask-position:center;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:contain;mask-size:contain;width:.625rem}.multiselect-caret{background-color:var(--ms-caret-color,#999);flex-grow:0;flex-shrink:0;margin:0 var(--ms-px,.875rem) 0 0;-webkit-mask-image:url(\"data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 320 512' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z'/%3E%3C/svg%3E\");mask-image:url(\"data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 320 512' fill='currentColor' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z'/%3E%3C/svg%3E\");pointer-events:none;position:relative;transform:rotate(0deg);transition:transform .3s;z-index:10}.multiselect-caret.is-open{pointer-events:auto;transform:rotate(180deg)}.multiselect-dropdown{-webkit-overflow-scrolling:touch;background:var(--ms-dropdown-bg,#fff);border:var(--ms-dropdown-border-width,1px) solid var(--ms-dropdown-border-color,#d1d5db);border-radius:0 0 var(--ms-dropdown-radius,4px) var(--ms-dropdown-radius,4px);bottom:0;display:flex;flex-direction:column;left:calc(var(--ms-border-width, 1px)*-1);margin-top:calc(var(--ms-border-width, 1px)*-1);max-height:15rem;max-height:var(--ms-max-height,10rem);outline:none;overflow-y:scroll;position:absolute;right:calc(var(--ms-border-width, 1px)*-1);transform:translateY(100%);z-index:100}.multiselect-dropdown.is-top{border-radius:var(--ms-dropdown-radius,4px) var(--ms-dropdown-radius,4px) 0 0;bottom:auto;top:var(--ms-border-width,1px);transform:translateY(-100%)}.multiselect-dropdown.is-hidden{display:none}.multiselect-options{display:flex;flex-direction:column;list-style:none;margin:0;padding:0}.multiselect-group{margin:0;padding:0}.multiselect-group-label{align-items:center;background:var(--ms-group-label-bg,#e5e7eb);box-sizing:border-box;color:var(--ms-group-label-color,#374151);cursor:default;display:flex;font-size:.875rem;font-weight:600;justify-content:flex-start;line-height:var(--ms-group-label-line-height,1.375);padding:var(--ms-group-label-py,.3rem) var(--ms-group-label-px,.75rem);text-align:left;text-decoration:none}.multiselect-group-label.is-pointable{cursor:pointer}.multiselect-group-label.is-pointed{background:var(--ms-group-label-bg-pointed,#d1d5db);color:var(--ms-group-label-color-pointed,#374151)}.multiselect-group-label.is-selected{background:var(--ms-group-label-bg-selected,#059669);color:var(--ms-group-label-color-selected,#fff)}.multiselect-group-label.is-disabled{background:var(--ms-group-label-bg-disabled,#f3f4f6);color:var(--ms-group-label-color-disabled,#d1d5db);cursor:not-allowed}.multiselect-group-label.is-selected.is-pointed{background:var(--ms-group-label-bg-selected-pointed,#0c9e70);color:var(--ms-group-label-color-selected-pointed,#fff)}.multiselect-group-label.is-selected.is-disabled{background:var(--ms-group-label-bg-selected-disabled,#75cfb1);color:var(--ms-group-label-color-selected-disabled,#d1fae5)}.multiselect-group-options{margin:0;padding:0}.multiselect-option{align-items:center;box-sizing:border-box;cursor:pointer;display:flex;font-size:var(--ms-option-font-size,1rem);justify-content:flex-start;line-height:var(--ms-option-line-height,1.375);padding:var(--ms-option-py,.5rem) var(--ms-option-px,.75rem);text-align:left;text-decoration:none}.multiselect-option.is-pointed{background:var(--ms-option-bg-pointed,#f3f4f6);color:var(--ms-option-color-pointed,#1f2937)}.multiselect-option.is-selected{background:var(--ms-option-bg-selected,#10b981);color:var(--ms-option-color-selected,#fff)}.multiselect-option.is-disabled{background:var(--ms-option-bg-disabled,#fff);color:var(--ms-option-color-disabled,#d1d5db);cursor:not-allowed}.multiselect-option.is-selected.is-pointed{background:var(--ms-option-bg-selected-pointed,#26c08e);color:var(--ms-option-color-selected-pointed,#fff)}.multiselect-option.is-selected.is-disabled{background:var(--ms-option-bg-selected-disabled,#87dcc0);color:var(--ms-option-color-selected-disabled,#d1fae5)}.multiselect-no-options,.multiselect-no-results{color:var(--ms-empty-color,#4b5563);padding:var(--ms-option-py,.5rem) var(--ms-option-px,.75rem)}.multiselect-fake-input{background:transparent;border:0;bottom:-1px;font-size:0;height:1px;left:0;outline:none;padding:0;position:absolute;right:0;width:100%}.multiselect-fake-input:active,.multiselect-fake-input:focus{outline:none}.multiselect-spacer{display:none}[dir=rtl] .multiselect-multiple-label,[dir=rtl] .multiselect-placeholder,[dir=rtl] .multiselect-single-label{left:auto;padding-left:calc(1.25rem + var(--ms-px, .875rem)*3);padding-right:var(--ms-px,.875rem);right:0}[dir=rtl] .multiselect-search{padding-left:0;padding-right:var(--ms-px,.875rem)}[dir=rtl] .multiselect-tags{padding-left:0;padding-right:var(--ms-py,.5rem)}[dir=rtl] .multiselect-tag{margin-left:var(--ms-tag-mx,.25rem);margin-right:0;padding:var(--ms-tag-py,.125rem) var(--ms-tag-px,.5rem) var(--ms-tag-py,.125rem) 0}[dir=rtl] .multiselect-tag.is-disabled{padding-left:var(--ms-tag-px,.5rem)}[dir=rtl] .multiselect-caret,[dir=rtl] .multiselect-spinner{margin:0 0 0 var(--ms-px,.875rem)}[dir=rtl] .multiselect-clear{padding:0 0 0 var(--ms-px,.875rem)}@-webkit-keyframes multiselect-spin{0%{transform:rotate(0)}to{transform:rotate(1turn)}}@keyframes multiselect-spin{0%{transform:rotate(0)}to{transform:rotate(1turn)}}", ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/FirstStep.vue?vue&type=style&index=0&id=64171eee&lang=css":
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/FirstStep.vue?vue&type=style&index=0&id=64171eee&lang=css ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__);
+// Imports
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, "\n.error {\n        color:red !important;\n        font-size:14px !important;\n        text-transform:lowercase;\n        font-weight: 500;\n}\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -25228,6 +25568,5350 @@ module.exports = function (cssWithMappingToString) {
 
   return list;
 };
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_DataView.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_DataView.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getNative = __webpack_require__(/*! ./_getNative */ "./node_modules/lodash/_getNative.js"),
+    root = __webpack_require__(/*! ./_root */ "./node_modules/lodash/_root.js");
+
+/* Built-in method references that are verified to be native. */
+var DataView = getNative(root, 'DataView');
+
+module.exports = DataView;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_Hash.js":
+/*!**************************************!*\
+  !*** ./node_modules/lodash/_Hash.js ***!
+  \**************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var hashClear = __webpack_require__(/*! ./_hashClear */ "./node_modules/lodash/_hashClear.js"),
+    hashDelete = __webpack_require__(/*! ./_hashDelete */ "./node_modules/lodash/_hashDelete.js"),
+    hashGet = __webpack_require__(/*! ./_hashGet */ "./node_modules/lodash/_hashGet.js"),
+    hashHas = __webpack_require__(/*! ./_hashHas */ "./node_modules/lodash/_hashHas.js"),
+    hashSet = __webpack_require__(/*! ./_hashSet */ "./node_modules/lodash/_hashSet.js");
+
+/**
+ * Creates a hash object.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function Hash(entries) {
+  var index = -1,
+      length = entries == null ? 0 : entries.length;
+
+  this.clear();
+  while (++index < length) {
+    var entry = entries[index];
+    this.set(entry[0], entry[1]);
+  }
+}
+
+// Add methods to `Hash`.
+Hash.prototype.clear = hashClear;
+Hash.prototype['delete'] = hashDelete;
+Hash.prototype.get = hashGet;
+Hash.prototype.has = hashHas;
+Hash.prototype.set = hashSet;
+
+module.exports = Hash;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_ListCache.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_ListCache.js ***!
+  \*******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var listCacheClear = __webpack_require__(/*! ./_listCacheClear */ "./node_modules/lodash/_listCacheClear.js"),
+    listCacheDelete = __webpack_require__(/*! ./_listCacheDelete */ "./node_modules/lodash/_listCacheDelete.js"),
+    listCacheGet = __webpack_require__(/*! ./_listCacheGet */ "./node_modules/lodash/_listCacheGet.js"),
+    listCacheHas = __webpack_require__(/*! ./_listCacheHas */ "./node_modules/lodash/_listCacheHas.js"),
+    listCacheSet = __webpack_require__(/*! ./_listCacheSet */ "./node_modules/lodash/_listCacheSet.js");
+
+/**
+ * Creates an list cache object.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function ListCache(entries) {
+  var index = -1,
+      length = entries == null ? 0 : entries.length;
+
+  this.clear();
+  while (++index < length) {
+    var entry = entries[index];
+    this.set(entry[0], entry[1]);
+  }
+}
+
+// Add methods to `ListCache`.
+ListCache.prototype.clear = listCacheClear;
+ListCache.prototype['delete'] = listCacheDelete;
+ListCache.prototype.get = listCacheGet;
+ListCache.prototype.has = listCacheHas;
+ListCache.prototype.set = listCacheSet;
+
+module.exports = ListCache;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_Map.js":
+/*!*************************************!*\
+  !*** ./node_modules/lodash/_Map.js ***!
+  \*************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getNative = __webpack_require__(/*! ./_getNative */ "./node_modules/lodash/_getNative.js"),
+    root = __webpack_require__(/*! ./_root */ "./node_modules/lodash/_root.js");
+
+/* Built-in method references that are verified to be native. */
+var Map = getNative(root, 'Map');
+
+module.exports = Map;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_MapCache.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_MapCache.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var mapCacheClear = __webpack_require__(/*! ./_mapCacheClear */ "./node_modules/lodash/_mapCacheClear.js"),
+    mapCacheDelete = __webpack_require__(/*! ./_mapCacheDelete */ "./node_modules/lodash/_mapCacheDelete.js"),
+    mapCacheGet = __webpack_require__(/*! ./_mapCacheGet */ "./node_modules/lodash/_mapCacheGet.js"),
+    mapCacheHas = __webpack_require__(/*! ./_mapCacheHas */ "./node_modules/lodash/_mapCacheHas.js"),
+    mapCacheSet = __webpack_require__(/*! ./_mapCacheSet */ "./node_modules/lodash/_mapCacheSet.js");
+
+/**
+ * Creates a map cache object to store key-value pairs.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function MapCache(entries) {
+  var index = -1,
+      length = entries == null ? 0 : entries.length;
+
+  this.clear();
+  while (++index < length) {
+    var entry = entries[index];
+    this.set(entry[0], entry[1]);
+  }
+}
+
+// Add methods to `MapCache`.
+MapCache.prototype.clear = mapCacheClear;
+MapCache.prototype['delete'] = mapCacheDelete;
+MapCache.prototype.get = mapCacheGet;
+MapCache.prototype.has = mapCacheHas;
+MapCache.prototype.set = mapCacheSet;
+
+module.exports = MapCache;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_Promise.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_Promise.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getNative = __webpack_require__(/*! ./_getNative */ "./node_modules/lodash/_getNative.js"),
+    root = __webpack_require__(/*! ./_root */ "./node_modules/lodash/_root.js");
+
+/* Built-in method references that are verified to be native. */
+var Promise = getNative(root, 'Promise');
+
+module.exports = Promise;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_Set.js":
+/*!*************************************!*\
+  !*** ./node_modules/lodash/_Set.js ***!
+  \*************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getNative = __webpack_require__(/*! ./_getNative */ "./node_modules/lodash/_getNative.js"),
+    root = __webpack_require__(/*! ./_root */ "./node_modules/lodash/_root.js");
+
+/* Built-in method references that are verified to be native. */
+var Set = getNative(root, 'Set');
+
+module.exports = Set;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_SetCache.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_SetCache.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var MapCache = __webpack_require__(/*! ./_MapCache */ "./node_modules/lodash/_MapCache.js"),
+    setCacheAdd = __webpack_require__(/*! ./_setCacheAdd */ "./node_modules/lodash/_setCacheAdd.js"),
+    setCacheHas = __webpack_require__(/*! ./_setCacheHas */ "./node_modules/lodash/_setCacheHas.js");
+
+/**
+ *
+ * Creates an array cache object to store unique values.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [values] The values to cache.
+ */
+function SetCache(values) {
+  var index = -1,
+      length = values == null ? 0 : values.length;
+
+  this.__data__ = new MapCache;
+  while (++index < length) {
+    this.add(values[index]);
+  }
+}
+
+// Add methods to `SetCache`.
+SetCache.prototype.add = SetCache.prototype.push = setCacheAdd;
+SetCache.prototype.has = setCacheHas;
+
+module.exports = SetCache;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_Stack.js":
+/*!***************************************!*\
+  !*** ./node_modules/lodash/_Stack.js ***!
+  \***************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var ListCache = __webpack_require__(/*! ./_ListCache */ "./node_modules/lodash/_ListCache.js"),
+    stackClear = __webpack_require__(/*! ./_stackClear */ "./node_modules/lodash/_stackClear.js"),
+    stackDelete = __webpack_require__(/*! ./_stackDelete */ "./node_modules/lodash/_stackDelete.js"),
+    stackGet = __webpack_require__(/*! ./_stackGet */ "./node_modules/lodash/_stackGet.js"),
+    stackHas = __webpack_require__(/*! ./_stackHas */ "./node_modules/lodash/_stackHas.js"),
+    stackSet = __webpack_require__(/*! ./_stackSet */ "./node_modules/lodash/_stackSet.js");
+
+/**
+ * Creates a stack cache object to store key-value pairs.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function Stack(entries) {
+  var data = this.__data__ = new ListCache(entries);
+  this.size = data.size;
+}
+
+// Add methods to `Stack`.
+Stack.prototype.clear = stackClear;
+Stack.prototype['delete'] = stackDelete;
+Stack.prototype.get = stackGet;
+Stack.prototype.has = stackHas;
+Stack.prototype.set = stackSet;
+
+module.exports = Stack;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_Symbol.js":
+/*!****************************************!*\
+  !*** ./node_modules/lodash/_Symbol.js ***!
+  \****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var root = __webpack_require__(/*! ./_root */ "./node_modules/lodash/_root.js");
+
+/** Built-in value references. */
+var Symbol = root.Symbol;
+
+module.exports = Symbol;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_Uint8Array.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_Uint8Array.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var root = __webpack_require__(/*! ./_root */ "./node_modules/lodash/_root.js");
+
+/** Built-in value references. */
+var Uint8Array = root.Uint8Array;
+
+module.exports = Uint8Array;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_WeakMap.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_WeakMap.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getNative = __webpack_require__(/*! ./_getNative */ "./node_modules/lodash/_getNative.js"),
+    root = __webpack_require__(/*! ./_root */ "./node_modules/lodash/_root.js");
+
+/* Built-in method references that are verified to be native. */
+var WeakMap = getNative(root, 'WeakMap');
+
+module.exports = WeakMap;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_arrayFilter.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_arrayFilter.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+/**
+ * A specialized version of `_.filter` for arrays without support for
+ * iteratee shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} predicate The function invoked per iteration.
+ * @returns {Array} Returns the new filtered array.
+ */
+function arrayFilter(array, predicate) {
+  var index = -1,
+      length = array == null ? 0 : array.length,
+      resIndex = 0,
+      result = [];
+
+  while (++index < length) {
+    var value = array[index];
+    if (predicate(value, index, array)) {
+      result[resIndex++] = value;
+    }
+  }
+  return result;
+}
+
+module.exports = arrayFilter;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_arrayLikeKeys.js":
+/*!***********************************************!*\
+  !*** ./node_modules/lodash/_arrayLikeKeys.js ***!
+  \***********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseTimes = __webpack_require__(/*! ./_baseTimes */ "./node_modules/lodash/_baseTimes.js"),
+    isArguments = __webpack_require__(/*! ./isArguments */ "./node_modules/lodash/isArguments.js"),
+    isArray = __webpack_require__(/*! ./isArray */ "./node_modules/lodash/isArray.js"),
+    isBuffer = __webpack_require__(/*! ./isBuffer */ "./node_modules/lodash/isBuffer.js"),
+    isIndex = __webpack_require__(/*! ./_isIndex */ "./node_modules/lodash/_isIndex.js"),
+    isTypedArray = __webpack_require__(/*! ./isTypedArray */ "./node_modules/lodash/isTypedArray.js");
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Creates an array of the enumerable property names of the array-like `value`.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @param {boolean} inherited Specify returning inherited property names.
+ * @returns {Array} Returns the array of property names.
+ */
+function arrayLikeKeys(value, inherited) {
+  var isArr = isArray(value),
+      isArg = !isArr && isArguments(value),
+      isBuff = !isArr && !isArg && isBuffer(value),
+      isType = !isArr && !isArg && !isBuff && isTypedArray(value),
+      skipIndexes = isArr || isArg || isBuff || isType,
+      result = skipIndexes ? baseTimes(value.length, String) : [],
+      length = result.length;
+
+  for (var key in value) {
+    if ((inherited || hasOwnProperty.call(value, key)) &&
+        !(skipIndexes && (
+           // Safari 9 has enumerable `arguments.length` in strict mode.
+           key == 'length' ||
+           // Node.js 0.10 has enumerable non-index properties on buffers.
+           (isBuff && (key == 'offset' || key == 'parent')) ||
+           // PhantomJS 2 has enumerable non-index properties on typed arrays.
+           (isType && (key == 'buffer' || key == 'byteLength' || key == 'byteOffset')) ||
+           // Skip index properties.
+           isIndex(key, length)
+        ))) {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+module.exports = arrayLikeKeys;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_arrayMap.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_arrayMap.js ***!
+  \******************************************/
+/***/ ((module) => {
+
+/**
+ * A specialized version of `_.map` for arrays without support for iteratee
+ * shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the new mapped array.
+ */
+function arrayMap(array, iteratee) {
+  var index = -1,
+      length = array == null ? 0 : array.length,
+      result = Array(length);
+
+  while (++index < length) {
+    result[index] = iteratee(array[index], index, array);
+  }
+  return result;
+}
+
+module.exports = arrayMap;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_arrayPush.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_arrayPush.js ***!
+  \*******************************************/
+/***/ ((module) => {
+
+/**
+ * Appends the elements of `values` to `array`.
+ *
+ * @private
+ * @param {Array} array The array to modify.
+ * @param {Array} values The values to append.
+ * @returns {Array} Returns `array`.
+ */
+function arrayPush(array, values) {
+  var index = -1,
+      length = values.length,
+      offset = array.length;
+
+  while (++index < length) {
+    array[offset + index] = values[index];
+  }
+  return array;
+}
+
+module.exports = arrayPush;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_arrayReduce.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_arrayReduce.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+/**
+ * A specialized version of `_.reduce` for arrays without support for
+ * iteratee shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @param {*} [accumulator] The initial value.
+ * @param {boolean} [initAccum] Specify using the first element of `array` as
+ *  the initial value.
+ * @returns {*} Returns the accumulated value.
+ */
+function arrayReduce(array, iteratee, accumulator, initAccum) {
+  var index = -1,
+      length = array == null ? 0 : array.length;
+
+  if (initAccum && length) {
+    accumulator = array[++index];
+  }
+  while (++index < length) {
+    accumulator = iteratee(accumulator, array[index], index, array);
+  }
+  return accumulator;
+}
+
+module.exports = arrayReduce;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_arraySome.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_arraySome.js ***!
+  \*******************************************/
+/***/ ((module) => {
+
+/**
+ * A specialized version of `_.some` for arrays without support for iteratee
+ * shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} predicate The function invoked per iteration.
+ * @returns {boolean} Returns `true` if any element passes the predicate check,
+ *  else `false`.
+ */
+function arraySome(array, predicate) {
+  var index = -1,
+      length = array == null ? 0 : array.length;
+
+  while (++index < length) {
+    if (predicate(array[index], index, array)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+module.exports = arraySome;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_asciiToArray.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_asciiToArray.js ***!
+  \**********************************************/
+/***/ ((module) => {
+
+/**
+ * Converts an ASCII `string` to an array.
+ *
+ * @private
+ * @param {string} string The string to convert.
+ * @returns {Array} Returns the converted array.
+ */
+function asciiToArray(string) {
+  return string.split('');
+}
+
+module.exports = asciiToArray;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_asciiWords.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_asciiWords.js ***!
+  \********************************************/
+/***/ ((module) => {
+
+/** Used to match words composed of alphanumeric characters. */
+var reAsciiWord = /[^\x00-\x2f\x3a-\x40\x5b-\x60\x7b-\x7f]+/g;
+
+/**
+ * Splits an ASCII `string` into an array of its words.
+ *
+ * @private
+ * @param {string} The string to inspect.
+ * @returns {Array} Returns the words of `string`.
+ */
+function asciiWords(string) {
+  return string.match(reAsciiWord) || [];
+}
+
+module.exports = asciiWords;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_assocIndexOf.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_assocIndexOf.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var eq = __webpack_require__(/*! ./eq */ "./node_modules/lodash/eq.js");
+
+/**
+ * Gets the index at which the `key` is found in `array` of key-value pairs.
+ *
+ * @private
+ * @param {Array} array The array to inspect.
+ * @param {*} key The key to search for.
+ * @returns {number} Returns the index of the matched value, else `-1`.
+ */
+function assocIndexOf(array, key) {
+  var length = array.length;
+  while (length--) {
+    if (eq(array[length][0], key)) {
+      return length;
+    }
+  }
+  return -1;
+}
+
+module.exports = assocIndexOf;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseAssignValue.js":
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_baseAssignValue.js ***!
+  \*************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var defineProperty = __webpack_require__(/*! ./_defineProperty */ "./node_modules/lodash/_defineProperty.js");
+
+/**
+ * The base implementation of `assignValue` and `assignMergeValue` without
+ * value checks.
+ *
+ * @private
+ * @param {Object} object The object to modify.
+ * @param {string} key The key of the property to assign.
+ * @param {*} value The value to assign.
+ */
+function baseAssignValue(object, key, value) {
+  if (key == '__proto__' && defineProperty) {
+    defineProperty(object, key, {
+      'configurable': true,
+      'enumerable': true,
+      'value': value,
+      'writable': true
+    });
+  } else {
+    object[key] = value;
+  }
+}
+
+module.exports = baseAssignValue;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseFor.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_baseFor.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var createBaseFor = __webpack_require__(/*! ./_createBaseFor */ "./node_modules/lodash/_createBaseFor.js");
+
+/**
+ * The base implementation of `baseForOwn` which iterates over `object`
+ * properties returned by `keysFunc` and invokes `iteratee` for each property.
+ * Iteratee functions may exit iteration early by explicitly returning `false`.
+ *
+ * @private
+ * @param {Object} object The object to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @param {Function} keysFunc The function to get the keys of `object`.
+ * @returns {Object} Returns `object`.
+ */
+var baseFor = createBaseFor();
+
+module.exports = baseFor;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseForOwn.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_baseForOwn.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseFor = __webpack_require__(/*! ./_baseFor */ "./node_modules/lodash/_baseFor.js"),
+    keys = __webpack_require__(/*! ./keys */ "./node_modules/lodash/keys.js");
+
+/**
+ * The base implementation of `_.forOwn` without support for iteratee shorthands.
+ *
+ * @private
+ * @param {Object} object The object to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Object} Returns `object`.
+ */
+function baseForOwn(object, iteratee) {
+  return object && baseFor(object, iteratee, keys);
+}
+
+module.exports = baseForOwn;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseGet.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_baseGet.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var castPath = __webpack_require__(/*! ./_castPath */ "./node_modules/lodash/_castPath.js"),
+    toKey = __webpack_require__(/*! ./_toKey */ "./node_modules/lodash/_toKey.js");
+
+/**
+ * The base implementation of `_.get` without support for default values.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path of the property to get.
+ * @returns {*} Returns the resolved value.
+ */
+function baseGet(object, path) {
+  path = castPath(path, object);
+
+  var index = 0,
+      length = path.length;
+
+  while (object != null && index < length) {
+    object = object[toKey(path[index++])];
+  }
+  return (index && index == length) ? object : undefined;
+}
+
+module.exports = baseGet;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseGetAllKeys.js":
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_baseGetAllKeys.js ***!
+  \************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var arrayPush = __webpack_require__(/*! ./_arrayPush */ "./node_modules/lodash/_arrayPush.js"),
+    isArray = __webpack_require__(/*! ./isArray */ "./node_modules/lodash/isArray.js");
+
+/**
+ * The base implementation of `getAllKeys` and `getAllKeysIn` which uses
+ * `keysFunc` and `symbolsFunc` to get the enumerable property names and
+ * symbols of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {Function} keysFunc The function to get the keys of `object`.
+ * @param {Function} symbolsFunc The function to get the symbols of `object`.
+ * @returns {Array} Returns the array of property names and symbols.
+ */
+function baseGetAllKeys(object, keysFunc, symbolsFunc) {
+  var result = keysFunc(object);
+  return isArray(object) ? result : arrayPush(result, symbolsFunc(object));
+}
+
+module.exports = baseGetAllKeys;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseGetTag.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_baseGetTag.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Symbol = __webpack_require__(/*! ./_Symbol */ "./node_modules/lodash/_Symbol.js"),
+    getRawTag = __webpack_require__(/*! ./_getRawTag */ "./node_modules/lodash/_getRawTag.js"),
+    objectToString = __webpack_require__(/*! ./_objectToString */ "./node_modules/lodash/_objectToString.js");
+
+/** `Object#toString` result references. */
+var nullTag = '[object Null]',
+    undefinedTag = '[object Undefined]';
+
+/** Built-in value references. */
+var symToStringTag = Symbol ? Symbol.toStringTag : undefined;
+
+/**
+ * The base implementation of `getTag` without fallbacks for buggy environments.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @returns {string} Returns the `toStringTag`.
+ */
+function baseGetTag(value) {
+  if (value == null) {
+    return value === undefined ? undefinedTag : nullTag;
+  }
+  return (symToStringTag && symToStringTag in Object(value))
+    ? getRawTag(value)
+    : objectToString(value);
+}
+
+module.exports = baseGetTag;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseHas.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_baseHas.js ***!
+  \*****************************************/
+/***/ ((module) => {
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * The base implementation of `_.has` without support for deep paths.
+ *
+ * @private
+ * @param {Object} [object] The object to query.
+ * @param {Array|string} key The key to check.
+ * @returns {boolean} Returns `true` if `key` exists, else `false`.
+ */
+function baseHas(object, key) {
+  return object != null && hasOwnProperty.call(object, key);
+}
+
+module.exports = baseHas;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseHasIn.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseHasIn.js ***!
+  \*******************************************/
+/***/ ((module) => {
+
+/**
+ * The base implementation of `_.hasIn` without support for deep paths.
+ *
+ * @private
+ * @param {Object} [object] The object to query.
+ * @param {Array|string} key The key to check.
+ * @returns {boolean} Returns `true` if `key` exists, else `false`.
+ */
+function baseHasIn(object, key) {
+  return object != null && key in Object(object);
+}
+
+module.exports = baseHasIn;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseIsArguments.js":
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_baseIsArguments.js ***!
+  \*************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseGetTag = __webpack_require__(/*! ./_baseGetTag */ "./node_modules/lodash/_baseGetTag.js"),
+    isObjectLike = __webpack_require__(/*! ./isObjectLike */ "./node_modules/lodash/isObjectLike.js");
+
+/** `Object#toString` result references. */
+var argsTag = '[object Arguments]';
+
+/**
+ * The base implementation of `_.isArguments`.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+ */
+function baseIsArguments(value) {
+  return isObjectLike(value) && baseGetTag(value) == argsTag;
+}
+
+module.exports = baseIsArguments;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseIsEqual.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_baseIsEqual.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseIsEqualDeep = __webpack_require__(/*! ./_baseIsEqualDeep */ "./node_modules/lodash/_baseIsEqualDeep.js"),
+    isObjectLike = __webpack_require__(/*! ./isObjectLike */ "./node_modules/lodash/isObjectLike.js");
+
+/**
+ * The base implementation of `_.isEqual` which supports partial comparisons
+ * and tracks traversed objects.
+ *
+ * @private
+ * @param {*} value The value to compare.
+ * @param {*} other The other value to compare.
+ * @param {boolean} bitmask The bitmask flags.
+ *  1 - Unordered comparison
+ *  2 - Partial comparison
+ * @param {Function} [customizer] The function to customize comparisons.
+ * @param {Object} [stack] Tracks traversed `value` and `other` objects.
+ * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+ */
+function baseIsEqual(value, other, bitmask, customizer, stack) {
+  if (value === other) {
+    return true;
+  }
+  if (value == null || other == null || (!isObjectLike(value) && !isObjectLike(other))) {
+    return value !== value && other !== other;
+  }
+  return baseIsEqualDeep(value, other, bitmask, customizer, baseIsEqual, stack);
+}
+
+module.exports = baseIsEqual;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseIsEqualDeep.js":
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_baseIsEqualDeep.js ***!
+  \*************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Stack = __webpack_require__(/*! ./_Stack */ "./node_modules/lodash/_Stack.js"),
+    equalArrays = __webpack_require__(/*! ./_equalArrays */ "./node_modules/lodash/_equalArrays.js"),
+    equalByTag = __webpack_require__(/*! ./_equalByTag */ "./node_modules/lodash/_equalByTag.js"),
+    equalObjects = __webpack_require__(/*! ./_equalObjects */ "./node_modules/lodash/_equalObjects.js"),
+    getTag = __webpack_require__(/*! ./_getTag */ "./node_modules/lodash/_getTag.js"),
+    isArray = __webpack_require__(/*! ./isArray */ "./node_modules/lodash/isArray.js"),
+    isBuffer = __webpack_require__(/*! ./isBuffer */ "./node_modules/lodash/isBuffer.js"),
+    isTypedArray = __webpack_require__(/*! ./isTypedArray */ "./node_modules/lodash/isTypedArray.js");
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1;
+
+/** `Object#toString` result references. */
+var argsTag = '[object Arguments]',
+    arrayTag = '[object Array]',
+    objectTag = '[object Object]';
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * A specialized version of `baseIsEqual` for arrays and objects which performs
+ * deep comparisons and tracks traversed objects enabling objects with circular
+ * references to be compared.
+ *
+ * @private
+ * @param {Object} object The object to compare.
+ * @param {Object} other The other object to compare.
+ * @param {number} bitmask The bitmask flags. See `baseIsEqual` for more details.
+ * @param {Function} customizer The function to customize comparisons.
+ * @param {Function} equalFunc The function to determine equivalents of values.
+ * @param {Object} [stack] Tracks traversed `object` and `other` objects.
+ * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
+ */
+function baseIsEqualDeep(object, other, bitmask, customizer, equalFunc, stack) {
+  var objIsArr = isArray(object),
+      othIsArr = isArray(other),
+      objTag = objIsArr ? arrayTag : getTag(object),
+      othTag = othIsArr ? arrayTag : getTag(other);
+
+  objTag = objTag == argsTag ? objectTag : objTag;
+  othTag = othTag == argsTag ? objectTag : othTag;
+
+  var objIsObj = objTag == objectTag,
+      othIsObj = othTag == objectTag,
+      isSameTag = objTag == othTag;
+
+  if (isSameTag && isBuffer(object)) {
+    if (!isBuffer(other)) {
+      return false;
+    }
+    objIsArr = true;
+    objIsObj = false;
+  }
+  if (isSameTag && !objIsObj) {
+    stack || (stack = new Stack);
+    return (objIsArr || isTypedArray(object))
+      ? equalArrays(object, other, bitmask, customizer, equalFunc, stack)
+      : equalByTag(object, other, objTag, bitmask, customizer, equalFunc, stack);
+  }
+  if (!(bitmask & COMPARE_PARTIAL_FLAG)) {
+    var objIsWrapped = objIsObj && hasOwnProperty.call(object, '__wrapped__'),
+        othIsWrapped = othIsObj && hasOwnProperty.call(other, '__wrapped__');
+
+    if (objIsWrapped || othIsWrapped) {
+      var objUnwrapped = objIsWrapped ? object.value() : object,
+          othUnwrapped = othIsWrapped ? other.value() : other;
+
+      stack || (stack = new Stack);
+      return equalFunc(objUnwrapped, othUnwrapped, bitmask, customizer, stack);
+    }
+  }
+  if (!isSameTag) {
+    return false;
+  }
+  stack || (stack = new Stack);
+  return equalObjects(object, other, bitmask, customizer, equalFunc, stack);
+}
+
+module.exports = baseIsEqualDeep;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseIsMatch.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_baseIsMatch.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Stack = __webpack_require__(/*! ./_Stack */ "./node_modules/lodash/_Stack.js"),
+    baseIsEqual = __webpack_require__(/*! ./_baseIsEqual */ "./node_modules/lodash/_baseIsEqual.js");
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1,
+    COMPARE_UNORDERED_FLAG = 2;
+
+/**
+ * The base implementation of `_.isMatch` without support for iteratee shorthands.
+ *
+ * @private
+ * @param {Object} object The object to inspect.
+ * @param {Object} source The object of property values to match.
+ * @param {Array} matchData The property names, values, and compare flags to match.
+ * @param {Function} [customizer] The function to customize comparisons.
+ * @returns {boolean} Returns `true` if `object` is a match, else `false`.
+ */
+function baseIsMatch(object, source, matchData, customizer) {
+  var index = matchData.length,
+      length = index,
+      noCustomizer = !customizer;
+
+  if (object == null) {
+    return !length;
+  }
+  object = Object(object);
+  while (index--) {
+    var data = matchData[index];
+    if ((noCustomizer && data[2])
+          ? data[1] !== object[data[0]]
+          : !(data[0] in object)
+        ) {
+      return false;
+    }
+  }
+  while (++index < length) {
+    data = matchData[index];
+    var key = data[0],
+        objValue = object[key],
+        srcValue = data[1];
+
+    if (noCustomizer && data[2]) {
+      if (objValue === undefined && !(key in object)) {
+        return false;
+      }
+    } else {
+      var stack = new Stack;
+      if (customizer) {
+        var result = customizer(objValue, srcValue, key, object, source, stack);
+      }
+      if (!(result === undefined
+            ? baseIsEqual(srcValue, objValue, COMPARE_PARTIAL_FLAG | COMPARE_UNORDERED_FLAG, customizer, stack)
+            : result
+          )) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+module.exports = baseIsMatch;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseIsNative.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_baseIsNative.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var isFunction = __webpack_require__(/*! ./isFunction */ "./node_modules/lodash/isFunction.js"),
+    isMasked = __webpack_require__(/*! ./_isMasked */ "./node_modules/lodash/_isMasked.js"),
+    isObject = __webpack_require__(/*! ./isObject */ "./node_modules/lodash/isObject.js"),
+    toSource = __webpack_require__(/*! ./_toSource */ "./node_modules/lodash/_toSource.js");
+
+/**
+ * Used to match `RegExp`
+ * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+ */
+var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+
+/** Used to detect host constructors (Safari). */
+var reIsHostCtor = /^\[object .+?Constructor\]$/;
+
+/** Used for built-in method references. */
+var funcProto = Function.prototype,
+    objectProto = Object.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var funcToString = funcProto.toString;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Used to detect if a method is native. */
+var reIsNative = RegExp('^' +
+  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
+  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+);
+
+/**
+ * The base implementation of `_.isNative` without bad shim checks.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a native function,
+ *  else `false`.
+ */
+function baseIsNative(value) {
+  if (!isObject(value) || isMasked(value)) {
+    return false;
+  }
+  var pattern = isFunction(value) ? reIsNative : reIsHostCtor;
+  return pattern.test(toSource(value));
+}
+
+module.exports = baseIsNative;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseIsTypedArray.js":
+/*!**************************************************!*\
+  !*** ./node_modules/lodash/_baseIsTypedArray.js ***!
+  \**************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseGetTag = __webpack_require__(/*! ./_baseGetTag */ "./node_modules/lodash/_baseGetTag.js"),
+    isLength = __webpack_require__(/*! ./isLength */ "./node_modules/lodash/isLength.js"),
+    isObjectLike = __webpack_require__(/*! ./isObjectLike */ "./node_modules/lodash/isObjectLike.js");
+
+/** `Object#toString` result references. */
+var argsTag = '[object Arguments]',
+    arrayTag = '[object Array]',
+    boolTag = '[object Boolean]',
+    dateTag = '[object Date]',
+    errorTag = '[object Error]',
+    funcTag = '[object Function]',
+    mapTag = '[object Map]',
+    numberTag = '[object Number]',
+    objectTag = '[object Object]',
+    regexpTag = '[object RegExp]',
+    setTag = '[object Set]',
+    stringTag = '[object String]',
+    weakMapTag = '[object WeakMap]';
+
+var arrayBufferTag = '[object ArrayBuffer]',
+    dataViewTag = '[object DataView]',
+    float32Tag = '[object Float32Array]',
+    float64Tag = '[object Float64Array]',
+    int8Tag = '[object Int8Array]',
+    int16Tag = '[object Int16Array]',
+    int32Tag = '[object Int32Array]',
+    uint8Tag = '[object Uint8Array]',
+    uint8ClampedTag = '[object Uint8ClampedArray]',
+    uint16Tag = '[object Uint16Array]',
+    uint32Tag = '[object Uint32Array]';
+
+/** Used to identify `toStringTag` values of typed arrays. */
+var typedArrayTags = {};
+typedArrayTags[float32Tag] = typedArrayTags[float64Tag] =
+typedArrayTags[int8Tag] = typedArrayTags[int16Tag] =
+typedArrayTags[int32Tag] = typedArrayTags[uint8Tag] =
+typedArrayTags[uint8ClampedTag] = typedArrayTags[uint16Tag] =
+typedArrayTags[uint32Tag] = true;
+typedArrayTags[argsTag] = typedArrayTags[arrayTag] =
+typedArrayTags[arrayBufferTag] = typedArrayTags[boolTag] =
+typedArrayTags[dataViewTag] = typedArrayTags[dateTag] =
+typedArrayTags[errorTag] = typedArrayTags[funcTag] =
+typedArrayTags[mapTag] = typedArrayTags[numberTag] =
+typedArrayTags[objectTag] = typedArrayTags[regexpTag] =
+typedArrayTags[setTag] = typedArrayTags[stringTag] =
+typedArrayTags[weakMapTag] = false;
+
+/**
+ * The base implementation of `_.isTypedArray` without Node.js optimizations.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a typed array, else `false`.
+ */
+function baseIsTypedArray(value) {
+  return isObjectLike(value) &&
+    isLength(value.length) && !!typedArrayTags[baseGetTag(value)];
+}
+
+module.exports = baseIsTypedArray;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseIteratee.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_baseIteratee.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseMatches = __webpack_require__(/*! ./_baseMatches */ "./node_modules/lodash/_baseMatches.js"),
+    baseMatchesProperty = __webpack_require__(/*! ./_baseMatchesProperty */ "./node_modules/lodash/_baseMatchesProperty.js"),
+    identity = __webpack_require__(/*! ./identity */ "./node_modules/lodash/identity.js"),
+    isArray = __webpack_require__(/*! ./isArray */ "./node_modules/lodash/isArray.js"),
+    property = __webpack_require__(/*! ./property */ "./node_modules/lodash/property.js");
+
+/**
+ * The base implementation of `_.iteratee`.
+ *
+ * @private
+ * @param {*} [value=_.identity] The value to convert to an iteratee.
+ * @returns {Function} Returns the iteratee.
+ */
+function baseIteratee(value) {
+  // Don't store the `typeof` result in a variable to avoid a JIT bug in Safari 9.
+  // See https://bugs.webkit.org/show_bug.cgi?id=156034 for more details.
+  if (typeof value == 'function') {
+    return value;
+  }
+  if (value == null) {
+    return identity;
+  }
+  if (typeof value == 'object') {
+    return isArray(value)
+      ? baseMatchesProperty(value[0], value[1])
+      : baseMatches(value);
+  }
+  return property(value);
+}
+
+module.exports = baseIteratee;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseKeys.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_baseKeys.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var isPrototype = __webpack_require__(/*! ./_isPrototype */ "./node_modules/lodash/_isPrototype.js"),
+    nativeKeys = __webpack_require__(/*! ./_nativeKeys */ "./node_modules/lodash/_nativeKeys.js");
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ */
+function baseKeys(object) {
+  if (!isPrototype(object)) {
+    return nativeKeys(object);
+  }
+  var result = [];
+  for (var key in Object(object)) {
+    if (hasOwnProperty.call(object, key) && key != 'constructor') {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+module.exports = baseKeys;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseMatches.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_baseMatches.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseIsMatch = __webpack_require__(/*! ./_baseIsMatch */ "./node_modules/lodash/_baseIsMatch.js"),
+    getMatchData = __webpack_require__(/*! ./_getMatchData */ "./node_modules/lodash/_getMatchData.js"),
+    matchesStrictComparable = __webpack_require__(/*! ./_matchesStrictComparable */ "./node_modules/lodash/_matchesStrictComparable.js");
+
+/**
+ * The base implementation of `_.matches` which doesn't clone `source`.
+ *
+ * @private
+ * @param {Object} source The object of property values to match.
+ * @returns {Function} Returns the new spec function.
+ */
+function baseMatches(source) {
+  var matchData = getMatchData(source);
+  if (matchData.length == 1 && matchData[0][2]) {
+    return matchesStrictComparable(matchData[0][0], matchData[0][1]);
+  }
+  return function(object) {
+    return object === source || baseIsMatch(object, source, matchData);
+  };
+}
+
+module.exports = baseMatches;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseMatchesProperty.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/lodash/_baseMatchesProperty.js ***!
+  \*****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseIsEqual = __webpack_require__(/*! ./_baseIsEqual */ "./node_modules/lodash/_baseIsEqual.js"),
+    get = __webpack_require__(/*! ./get */ "./node_modules/lodash/get.js"),
+    hasIn = __webpack_require__(/*! ./hasIn */ "./node_modules/lodash/hasIn.js"),
+    isKey = __webpack_require__(/*! ./_isKey */ "./node_modules/lodash/_isKey.js"),
+    isStrictComparable = __webpack_require__(/*! ./_isStrictComparable */ "./node_modules/lodash/_isStrictComparable.js"),
+    matchesStrictComparable = __webpack_require__(/*! ./_matchesStrictComparable */ "./node_modules/lodash/_matchesStrictComparable.js"),
+    toKey = __webpack_require__(/*! ./_toKey */ "./node_modules/lodash/_toKey.js");
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1,
+    COMPARE_UNORDERED_FLAG = 2;
+
+/**
+ * The base implementation of `_.matchesProperty` which doesn't clone `srcValue`.
+ *
+ * @private
+ * @param {string} path The path of the property to get.
+ * @param {*} srcValue The value to match.
+ * @returns {Function} Returns the new spec function.
+ */
+function baseMatchesProperty(path, srcValue) {
+  if (isKey(path) && isStrictComparable(srcValue)) {
+    return matchesStrictComparable(toKey(path), srcValue);
+  }
+  return function(object) {
+    var objValue = get(object, path);
+    return (objValue === undefined && objValue === srcValue)
+      ? hasIn(object, path)
+      : baseIsEqual(srcValue, objValue, COMPARE_PARTIAL_FLAG | COMPARE_UNORDERED_FLAG);
+  };
+}
+
+module.exports = baseMatchesProperty;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseProperty.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_baseProperty.js ***!
+  \**********************************************/
+/***/ ((module) => {
+
+/**
+ * The base implementation of `_.property` without support for deep paths.
+ *
+ * @private
+ * @param {string} key The key of the property to get.
+ * @returns {Function} Returns the new accessor function.
+ */
+function baseProperty(key) {
+  return function(object) {
+    return object == null ? undefined : object[key];
+  };
+}
+
+module.exports = baseProperty;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_basePropertyDeep.js":
+/*!**************************************************!*\
+  !*** ./node_modules/lodash/_basePropertyDeep.js ***!
+  \**************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseGet = __webpack_require__(/*! ./_baseGet */ "./node_modules/lodash/_baseGet.js");
+
+/**
+ * A specialized version of `baseProperty` which supports deep paths.
+ *
+ * @private
+ * @param {Array|string} path The path of the property to get.
+ * @returns {Function} Returns the new accessor function.
+ */
+function basePropertyDeep(path) {
+  return function(object) {
+    return baseGet(object, path);
+  };
+}
+
+module.exports = basePropertyDeep;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_basePropertyOf.js":
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_basePropertyOf.js ***!
+  \************************************************/
+/***/ ((module) => {
+
+/**
+ * The base implementation of `_.propertyOf` without support for deep paths.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Function} Returns the new accessor function.
+ */
+function basePropertyOf(object) {
+  return function(key) {
+    return object == null ? undefined : object[key];
+  };
+}
+
+module.exports = basePropertyOf;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseSlice.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseSlice.js ***!
+  \*******************************************/
+/***/ ((module) => {
+
+/**
+ * The base implementation of `_.slice` without an iteratee call guard.
+ *
+ * @private
+ * @param {Array} array The array to slice.
+ * @param {number} [start=0] The start position.
+ * @param {number} [end=array.length] The end position.
+ * @returns {Array} Returns the slice of `array`.
+ */
+function baseSlice(array, start, end) {
+  var index = -1,
+      length = array.length;
+
+  if (start < 0) {
+    start = -start > length ? 0 : (length + start);
+  }
+  end = end > length ? length : end;
+  if (end < 0) {
+    end += length;
+  }
+  length = start > end ? 0 : ((end - start) >>> 0);
+  start >>>= 0;
+
+  var result = Array(length);
+  while (++index < length) {
+    result[index] = array[index + start];
+  }
+  return result;
+}
+
+module.exports = baseSlice;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseTimes.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseTimes.js ***!
+  \*******************************************/
+/***/ ((module) => {
+
+/**
+ * The base implementation of `_.times` without support for iteratee shorthands
+ * or max array length checks.
+ *
+ * @private
+ * @param {number} n The number of times to invoke `iteratee`.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the array of results.
+ */
+function baseTimes(n, iteratee) {
+  var index = -1,
+      result = Array(n);
+
+  while (++index < n) {
+    result[index] = iteratee(index);
+  }
+  return result;
+}
+
+module.exports = baseTimes;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseToString.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_baseToString.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Symbol = __webpack_require__(/*! ./_Symbol */ "./node_modules/lodash/_Symbol.js"),
+    arrayMap = __webpack_require__(/*! ./_arrayMap */ "./node_modules/lodash/_arrayMap.js"),
+    isArray = __webpack_require__(/*! ./isArray */ "./node_modules/lodash/isArray.js"),
+    isSymbol = __webpack_require__(/*! ./isSymbol */ "./node_modules/lodash/isSymbol.js");
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0;
+
+/** Used to convert symbols to primitives and strings. */
+var symbolProto = Symbol ? Symbol.prototype : undefined,
+    symbolToString = symbolProto ? symbolProto.toString : undefined;
+
+/**
+ * The base implementation of `_.toString` which doesn't convert nullish
+ * values to empty strings.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {string} Returns the string.
+ */
+function baseToString(value) {
+  // Exit early for strings to avoid a performance hit in some environments.
+  if (typeof value == 'string') {
+    return value;
+  }
+  if (isArray(value)) {
+    // Recursively convert values (susceptible to call stack limits).
+    return arrayMap(value, baseToString) + '';
+  }
+  if (isSymbol(value)) {
+    return symbolToString ? symbolToString.call(value) : '';
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+}
+
+module.exports = baseToString;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_baseUnary.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_baseUnary.js ***!
+  \*******************************************/
+/***/ ((module) => {
+
+/**
+ * The base implementation of `_.unary` without support for storing metadata.
+ *
+ * @private
+ * @param {Function} func The function to cap arguments for.
+ * @returns {Function} Returns the new capped function.
+ */
+function baseUnary(func) {
+  return function(value) {
+    return func(value);
+  };
+}
+
+module.exports = baseUnary;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_cacheHas.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_cacheHas.js ***!
+  \******************************************/
+/***/ ((module) => {
+
+/**
+ * Checks if a `cache` value for `key` exists.
+ *
+ * @private
+ * @param {Object} cache The cache to query.
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function cacheHas(cache, key) {
+  return cache.has(key);
+}
+
+module.exports = cacheHas;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_castPath.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_castPath.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var isArray = __webpack_require__(/*! ./isArray */ "./node_modules/lodash/isArray.js"),
+    isKey = __webpack_require__(/*! ./_isKey */ "./node_modules/lodash/_isKey.js"),
+    stringToPath = __webpack_require__(/*! ./_stringToPath */ "./node_modules/lodash/_stringToPath.js"),
+    toString = __webpack_require__(/*! ./toString */ "./node_modules/lodash/toString.js");
+
+/**
+ * Casts `value` to a path array if it's not one.
+ *
+ * @private
+ * @param {*} value The value to inspect.
+ * @param {Object} [object] The object to query keys on.
+ * @returns {Array} Returns the cast property path array.
+ */
+function castPath(value, object) {
+  if (isArray(value)) {
+    return value;
+  }
+  return isKey(value, object) ? [value] : stringToPath(toString(value));
+}
+
+module.exports = castPath;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_castSlice.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_castSlice.js ***!
+  \*******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseSlice = __webpack_require__(/*! ./_baseSlice */ "./node_modules/lodash/_baseSlice.js");
+
+/**
+ * Casts `array` to a slice if it's needed.
+ *
+ * @private
+ * @param {Array} array The array to inspect.
+ * @param {number} start The start position.
+ * @param {number} [end=array.length] The end position.
+ * @returns {Array} Returns the cast slice.
+ */
+function castSlice(array, start, end) {
+  var length = array.length;
+  end = end === undefined ? length : end;
+  return (!start && end >= length) ? array : baseSlice(array, start, end);
+}
+
+module.exports = castSlice;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_coreJsData.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_coreJsData.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var root = __webpack_require__(/*! ./_root */ "./node_modules/lodash/_root.js");
+
+/** Used to detect overreaching core-js shims. */
+var coreJsData = root['__core-js_shared__'];
+
+module.exports = coreJsData;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_createBaseFor.js":
+/*!***********************************************!*\
+  !*** ./node_modules/lodash/_createBaseFor.js ***!
+  \***********************************************/
+/***/ ((module) => {
+
+/**
+ * Creates a base function for methods like `_.forIn` and `_.forOwn`.
+ *
+ * @private
+ * @param {boolean} [fromRight] Specify iterating from right to left.
+ * @returns {Function} Returns the new base function.
+ */
+function createBaseFor(fromRight) {
+  return function(object, iteratee, keysFunc) {
+    var index = -1,
+        iterable = Object(object),
+        props = keysFunc(object),
+        length = props.length;
+
+    while (length--) {
+      var key = props[fromRight ? length : ++index];
+      if (iteratee(iterable[key], key, iterable) === false) {
+        break;
+      }
+    }
+    return object;
+  };
+}
+
+module.exports = createBaseFor;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_createCaseFirst.js":
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_createCaseFirst.js ***!
+  \*************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var castSlice = __webpack_require__(/*! ./_castSlice */ "./node_modules/lodash/_castSlice.js"),
+    hasUnicode = __webpack_require__(/*! ./_hasUnicode */ "./node_modules/lodash/_hasUnicode.js"),
+    stringToArray = __webpack_require__(/*! ./_stringToArray */ "./node_modules/lodash/_stringToArray.js"),
+    toString = __webpack_require__(/*! ./toString */ "./node_modules/lodash/toString.js");
+
+/**
+ * Creates a function like `_.lowerFirst`.
+ *
+ * @private
+ * @param {string} methodName The name of the `String` case method to use.
+ * @returns {Function} Returns the new case function.
+ */
+function createCaseFirst(methodName) {
+  return function(string) {
+    string = toString(string);
+
+    var strSymbols = hasUnicode(string)
+      ? stringToArray(string)
+      : undefined;
+
+    var chr = strSymbols
+      ? strSymbols[0]
+      : string.charAt(0);
+
+    var trailing = strSymbols
+      ? castSlice(strSymbols, 1).join('')
+      : string.slice(1);
+
+    return chr[methodName]() + trailing;
+  };
+}
+
+module.exports = createCaseFirst;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_createCompounder.js":
+/*!**************************************************!*\
+  !*** ./node_modules/lodash/_createCompounder.js ***!
+  \**************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var arrayReduce = __webpack_require__(/*! ./_arrayReduce */ "./node_modules/lodash/_arrayReduce.js"),
+    deburr = __webpack_require__(/*! ./deburr */ "./node_modules/lodash/deburr.js"),
+    words = __webpack_require__(/*! ./words */ "./node_modules/lodash/words.js");
+
+/** Used to compose unicode capture groups. */
+var rsApos = "['\u2019]";
+
+/** Used to match apostrophes. */
+var reApos = RegExp(rsApos, 'g');
+
+/**
+ * Creates a function like `_.camelCase`.
+ *
+ * @private
+ * @param {Function} callback The function to combine each word.
+ * @returns {Function} Returns the new compounder function.
+ */
+function createCompounder(callback) {
+  return function(string) {
+    return arrayReduce(words(deburr(string).replace(reApos, '')), callback, '');
+  };
+}
+
+module.exports = createCompounder;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_deburrLetter.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_deburrLetter.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var basePropertyOf = __webpack_require__(/*! ./_basePropertyOf */ "./node_modules/lodash/_basePropertyOf.js");
+
+/** Used to map Latin Unicode letters to basic Latin letters. */
+var deburredLetters = {
+  // Latin-1 Supplement block.
+  '\xc0': 'A',  '\xc1': 'A', '\xc2': 'A', '\xc3': 'A', '\xc4': 'A', '\xc5': 'A',
+  '\xe0': 'a',  '\xe1': 'a', '\xe2': 'a', '\xe3': 'a', '\xe4': 'a', '\xe5': 'a',
+  '\xc7': 'C',  '\xe7': 'c',
+  '\xd0': 'D',  '\xf0': 'd',
+  '\xc8': 'E',  '\xc9': 'E', '\xca': 'E', '\xcb': 'E',
+  '\xe8': 'e',  '\xe9': 'e', '\xea': 'e', '\xeb': 'e',
+  '\xcc': 'I',  '\xcd': 'I', '\xce': 'I', '\xcf': 'I',
+  '\xec': 'i',  '\xed': 'i', '\xee': 'i', '\xef': 'i',
+  '\xd1': 'N',  '\xf1': 'n',
+  '\xd2': 'O',  '\xd3': 'O', '\xd4': 'O', '\xd5': 'O', '\xd6': 'O', '\xd8': 'O',
+  '\xf2': 'o',  '\xf3': 'o', '\xf4': 'o', '\xf5': 'o', '\xf6': 'o', '\xf8': 'o',
+  '\xd9': 'U',  '\xda': 'U', '\xdb': 'U', '\xdc': 'U',
+  '\xf9': 'u',  '\xfa': 'u', '\xfb': 'u', '\xfc': 'u',
+  '\xdd': 'Y',  '\xfd': 'y', '\xff': 'y',
+  '\xc6': 'Ae', '\xe6': 'ae',
+  '\xde': 'Th', '\xfe': 'th',
+  '\xdf': 'ss',
+  // Latin Extended-A block.
+  '\u0100': 'A',  '\u0102': 'A', '\u0104': 'A',
+  '\u0101': 'a',  '\u0103': 'a', '\u0105': 'a',
+  '\u0106': 'C',  '\u0108': 'C', '\u010a': 'C', '\u010c': 'C',
+  '\u0107': 'c',  '\u0109': 'c', '\u010b': 'c', '\u010d': 'c',
+  '\u010e': 'D',  '\u0110': 'D', '\u010f': 'd', '\u0111': 'd',
+  '\u0112': 'E',  '\u0114': 'E', '\u0116': 'E', '\u0118': 'E', '\u011a': 'E',
+  '\u0113': 'e',  '\u0115': 'e', '\u0117': 'e', '\u0119': 'e', '\u011b': 'e',
+  '\u011c': 'G',  '\u011e': 'G', '\u0120': 'G', '\u0122': 'G',
+  '\u011d': 'g',  '\u011f': 'g', '\u0121': 'g', '\u0123': 'g',
+  '\u0124': 'H',  '\u0126': 'H', '\u0125': 'h', '\u0127': 'h',
+  '\u0128': 'I',  '\u012a': 'I', '\u012c': 'I', '\u012e': 'I', '\u0130': 'I',
+  '\u0129': 'i',  '\u012b': 'i', '\u012d': 'i', '\u012f': 'i', '\u0131': 'i',
+  '\u0134': 'J',  '\u0135': 'j',
+  '\u0136': 'K',  '\u0137': 'k', '\u0138': 'k',
+  '\u0139': 'L',  '\u013b': 'L', '\u013d': 'L', '\u013f': 'L', '\u0141': 'L',
+  '\u013a': 'l',  '\u013c': 'l', '\u013e': 'l', '\u0140': 'l', '\u0142': 'l',
+  '\u0143': 'N',  '\u0145': 'N', '\u0147': 'N', '\u014a': 'N',
+  '\u0144': 'n',  '\u0146': 'n', '\u0148': 'n', '\u014b': 'n',
+  '\u014c': 'O',  '\u014e': 'O', '\u0150': 'O',
+  '\u014d': 'o',  '\u014f': 'o', '\u0151': 'o',
+  '\u0154': 'R',  '\u0156': 'R', '\u0158': 'R',
+  '\u0155': 'r',  '\u0157': 'r', '\u0159': 'r',
+  '\u015a': 'S',  '\u015c': 'S', '\u015e': 'S', '\u0160': 'S',
+  '\u015b': 's',  '\u015d': 's', '\u015f': 's', '\u0161': 's',
+  '\u0162': 'T',  '\u0164': 'T', '\u0166': 'T',
+  '\u0163': 't',  '\u0165': 't', '\u0167': 't',
+  '\u0168': 'U',  '\u016a': 'U', '\u016c': 'U', '\u016e': 'U', '\u0170': 'U', '\u0172': 'U',
+  '\u0169': 'u',  '\u016b': 'u', '\u016d': 'u', '\u016f': 'u', '\u0171': 'u', '\u0173': 'u',
+  '\u0174': 'W',  '\u0175': 'w',
+  '\u0176': 'Y',  '\u0177': 'y', '\u0178': 'Y',
+  '\u0179': 'Z',  '\u017b': 'Z', '\u017d': 'Z',
+  '\u017a': 'z',  '\u017c': 'z', '\u017e': 'z',
+  '\u0132': 'IJ', '\u0133': 'ij',
+  '\u0152': 'Oe', '\u0153': 'oe',
+  '\u0149': "'n", '\u017f': 's'
+};
+
+/**
+ * Used by `_.deburr` to convert Latin-1 Supplement and Latin Extended-A
+ * letters to basic Latin letters.
+ *
+ * @private
+ * @param {string} letter The matched letter to deburr.
+ * @returns {string} Returns the deburred letter.
+ */
+var deburrLetter = basePropertyOf(deburredLetters);
+
+module.exports = deburrLetter;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_defineProperty.js":
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_defineProperty.js ***!
+  \************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getNative = __webpack_require__(/*! ./_getNative */ "./node_modules/lodash/_getNative.js");
+
+var defineProperty = (function() {
+  try {
+    var func = getNative(Object, 'defineProperty');
+    func({}, '', {});
+    return func;
+  } catch (e) {}
+}());
+
+module.exports = defineProperty;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_equalArrays.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_equalArrays.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var SetCache = __webpack_require__(/*! ./_SetCache */ "./node_modules/lodash/_SetCache.js"),
+    arraySome = __webpack_require__(/*! ./_arraySome */ "./node_modules/lodash/_arraySome.js"),
+    cacheHas = __webpack_require__(/*! ./_cacheHas */ "./node_modules/lodash/_cacheHas.js");
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1,
+    COMPARE_UNORDERED_FLAG = 2;
+
+/**
+ * A specialized version of `baseIsEqualDeep` for arrays with support for
+ * partial deep comparisons.
+ *
+ * @private
+ * @param {Array} array The array to compare.
+ * @param {Array} other The other array to compare.
+ * @param {number} bitmask The bitmask flags. See `baseIsEqual` for more details.
+ * @param {Function} customizer The function to customize comparisons.
+ * @param {Function} equalFunc The function to determine equivalents of values.
+ * @param {Object} stack Tracks traversed `array` and `other` objects.
+ * @returns {boolean} Returns `true` if the arrays are equivalent, else `false`.
+ */
+function equalArrays(array, other, bitmask, customizer, equalFunc, stack) {
+  var isPartial = bitmask & COMPARE_PARTIAL_FLAG,
+      arrLength = array.length,
+      othLength = other.length;
+
+  if (arrLength != othLength && !(isPartial && othLength > arrLength)) {
+    return false;
+  }
+  // Check that cyclic values are equal.
+  var arrStacked = stack.get(array);
+  var othStacked = stack.get(other);
+  if (arrStacked && othStacked) {
+    return arrStacked == other && othStacked == array;
+  }
+  var index = -1,
+      result = true,
+      seen = (bitmask & COMPARE_UNORDERED_FLAG) ? new SetCache : undefined;
+
+  stack.set(array, other);
+  stack.set(other, array);
+
+  // Ignore non-index properties.
+  while (++index < arrLength) {
+    var arrValue = array[index],
+        othValue = other[index];
+
+    if (customizer) {
+      var compared = isPartial
+        ? customizer(othValue, arrValue, index, other, array, stack)
+        : customizer(arrValue, othValue, index, array, other, stack);
+    }
+    if (compared !== undefined) {
+      if (compared) {
+        continue;
+      }
+      result = false;
+      break;
+    }
+    // Recursively compare arrays (susceptible to call stack limits).
+    if (seen) {
+      if (!arraySome(other, function(othValue, othIndex) {
+            if (!cacheHas(seen, othIndex) &&
+                (arrValue === othValue || equalFunc(arrValue, othValue, bitmask, customizer, stack))) {
+              return seen.push(othIndex);
+            }
+          })) {
+        result = false;
+        break;
+      }
+    } else if (!(
+          arrValue === othValue ||
+            equalFunc(arrValue, othValue, bitmask, customizer, stack)
+        )) {
+      result = false;
+      break;
+    }
+  }
+  stack['delete'](array);
+  stack['delete'](other);
+  return result;
+}
+
+module.exports = equalArrays;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_equalByTag.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_equalByTag.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Symbol = __webpack_require__(/*! ./_Symbol */ "./node_modules/lodash/_Symbol.js"),
+    Uint8Array = __webpack_require__(/*! ./_Uint8Array */ "./node_modules/lodash/_Uint8Array.js"),
+    eq = __webpack_require__(/*! ./eq */ "./node_modules/lodash/eq.js"),
+    equalArrays = __webpack_require__(/*! ./_equalArrays */ "./node_modules/lodash/_equalArrays.js"),
+    mapToArray = __webpack_require__(/*! ./_mapToArray */ "./node_modules/lodash/_mapToArray.js"),
+    setToArray = __webpack_require__(/*! ./_setToArray */ "./node_modules/lodash/_setToArray.js");
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1,
+    COMPARE_UNORDERED_FLAG = 2;
+
+/** `Object#toString` result references. */
+var boolTag = '[object Boolean]',
+    dateTag = '[object Date]',
+    errorTag = '[object Error]',
+    mapTag = '[object Map]',
+    numberTag = '[object Number]',
+    regexpTag = '[object RegExp]',
+    setTag = '[object Set]',
+    stringTag = '[object String]',
+    symbolTag = '[object Symbol]';
+
+var arrayBufferTag = '[object ArrayBuffer]',
+    dataViewTag = '[object DataView]';
+
+/** Used to convert symbols to primitives and strings. */
+var symbolProto = Symbol ? Symbol.prototype : undefined,
+    symbolValueOf = symbolProto ? symbolProto.valueOf : undefined;
+
+/**
+ * A specialized version of `baseIsEqualDeep` for comparing objects of
+ * the same `toStringTag`.
+ *
+ * **Note:** This function only supports comparing values with tags of
+ * `Boolean`, `Date`, `Error`, `Number`, `RegExp`, or `String`.
+ *
+ * @private
+ * @param {Object} object The object to compare.
+ * @param {Object} other The other object to compare.
+ * @param {string} tag The `toStringTag` of the objects to compare.
+ * @param {number} bitmask The bitmask flags. See `baseIsEqual` for more details.
+ * @param {Function} customizer The function to customize comparisons.
+ * @param {Function} equalFunc The function to determine equivalents of values.
+ * @param {Object} stack Tracks traversed `object` and `other` objects.
+ * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
+ */
+function equalByTag(object, other, tag, bitmask, customizer, equalFunc, stack) {
+  switch (tag) {
+    case dataViewTag:
+      if ((object.byteLength != other.byteLength) ||
+          (object.byteOffset != other.byteOffset)) {
+        return false;
+      }
+      object = object.buffer;
+      other = other.buffer;
+
+    case arrayBufferTag:
+      if ((object.byteLength != other.byteLength) ||
+          !equalFunc(new Uint8Array(object), new Uint8Array(other))) {
+        return false;
+      }
+      return true;
+
+    case boolTag:
+    case dateTag:
+    case numberTag:
+      // Coerce booleans to `1` or `0` and dates to milliseconds.
+      // Invalid dates are coerced to `NaN`.
+      return eq(+object, +other);
+
+    case errorTag:
+      return object.name == other.name && object.message == other.message;
+
+    case regexpTag:
+    case stringTag:
+      // Coerce regexes to strings and treat strings, primitives and objects,
+      // as equal. See http://www.ecma-international.org/ecma-262/7.0/#sec-regexp.prototype.tostring
+      // for more details.
+      return object == (other + '');
+
+    case mapTag:
+      var convert = mapToArray;
+
+    case setTag:
+      var isPartial = bitmask & COMPARE_PARTIAL_FLAG;
+      convert || (convert = setToArray);
+
+      if (object.size != other.size && !isPartial) {
+        return false;
+      }
+      // Assume cyclic values are equal.
+      var stacked = stack.get(object);
+      if (stacked) {
+        return stacked == other;
+      }
+      bitmask |= COMPARE_UNORDERED_FLAG;
+
+      // Recursively compare objects (susceptible to call stack limits).
+      stack.set(object, other);
+      var result = equalArrays(convert(object), convert(other), bitmask, customizer, equalFunc, stack);
+      stack['delete'](object);
+      return result;
+
+    case symbolTag:
+      if (symbolValueOf) {
+        return symbolValueOf.call(object) == symbolValueOf.call(other);
+      }
+  }
+  return false;
+}
+
+module.exports = equalByTag;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_equalObjects.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_equalObjects.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getAllKeys = __webpack_require__(/*! ./_getAllKeys */ "./node_modules/lodash/_getAllKeys.js");
+
+/** Used to compose bitmasks for value comparisons. */
+var COMPARE_PARTIAL_FLAG = 1;
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * A specialized version of `baseIsEqualDeep` for objects with support for
+ * partial deep comparisons.
+ *
+ * @private
+ * @param {Object} object The object to compare.
+ * @param {Object} other The other object to compare.
+ * @param {number} bitmask The bitmask flags. See `baseIsEqual` for more details.
+ * @param {Function} customizer The function to customize comparisons.
+ * @param {Function} equalFunc The function to determine equivalents of values.
+ * @param {Object} stack Tracks traversed `object` and `other` objects.
+ * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
+ */
+function equalObjects(object, other, bitmask, customizer, equalFunc, stack) {
+  var isPartial = bitmask & COMPARE_PARTIAL_FLAG,
+      objProps = getAllKeys(object),
+      objLength = objProps.length,
+      othProps = getAllKeys(other),
+      othLength = othProps.length;
+
+  if (objLength != othLength && !isPartial) {
+    return false;
+  }
+  var index = objLength;
+  while (index--) {
+    var key = objProps[index];
+    if (!(isPartial ? key in other : hasOwnProperty.call(other, key))) {
+      return false;
+    }
+  }
+  // Check that cyclic values are equal.
+  var objStacked = stack.get(object);
+  var othStacked = stack.get(other);
+  if (objStacked && othStacked) {
+    return objStacked == other && othStacked == object;
+  }
+  var result = true;
+  stack.set(object, other);
+  stack.set(other, object);
+
+  var skipCtor = isPartial;
+  while (++index < objLength) {
+    key = objProps[index];
+    var objValue = object[key],
+        othValue = other[key];
+
+    if (customizer) {
+      var compared = isPartial
+        ? customizer(othValue, objValue, key, other, object, stack)
+        : customizer(objValue, othValue, key, object, other, stack);
+    }
+    // Recursively compare objects (susceptible to call stack limits).
+    if (!(compared === undefined
+          ? (objValue === othValue || equalFunc(objValue, othValue, bitmask, customizer, stack))
+          : compared
+        )) {
+      result = false;
+      break;
+    }
+    skipCtor || (skipCtor = key == 'constructor');
+  }
+  if (result && !skipCtor) {
+    var objCtor = object.constructor,
+        othCtor = other.constructor;
+
+    // Non `Object` object instances with different constructors are not equal.
+    if (objCtor != othCtor &&
+        ('constructor' in object && 'constructor' in other) &&
+        !(typeof objCtor == 'function' && objCtor instanceof objCtor &&
+          typeof othCtor == 'function' && othCtor instanceof othCtor)) {
+      result = false;
+    }
+  }
+  stack['delete'](object);
+  stack['delete'](other);
+  return result;
+}
+
+module.exports = equalObjects;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_freeGlobal.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_freeGlobal.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+/** Detect free variable `global` from Node.js. */
+var freeGlobal = typeof __webpack_require__.g == 'object' && __webpack_require__.g && __webpack_require__.g.Object === Object && __webpack_require__.g;
+
+module.exports = freeGlobal;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_getAllKeys.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_getAllKeys.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseGetAllKeys = __webpack_require__(/*! ./_baseGetAllKeys */ "./node_modules/lodash/_baseGetAllKeys.js"),
+    getSymbols = __webpack_require__(/*! ./_getSymbols */ "./node_modules/lodash/_getSymbols.js"),
+    keys = __webpack_require__(/*! ./keys */ "./node_modules/lodash/keys.js");
+
+/**
+ * Creates an array of own enumerable property names and symbols of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names and symbols.
+ */
+function getAllKeys(object) {
+  return baseGetAllKeys(object, keys, getSymbols);
+}
+
+module.exports = getAllKeys;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_getMapData.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_getMapData.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var isKeyable = __webpack_require__(/*! ./_isKeyable */ "./node_modules/lodash/_isKeyable.js");
+
+/**
+ * Gets the data for `map`.
+ *
+ * @private
+ * @param {Object} map The map to query.
+ * @param {string} key The reference key.
+ * @returns {*} Returns the map data.
+ */
+function getMapData(map, key) {
+  var data = map.__data__;
+  return isKeyable(key)
+    ? data[typeof key == 'string' ? 'string' : 'hash']
+    : data.map;
+}
+
+module.exports = getMapData;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_getMatchData.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_getMatchData.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var isStrictComparable = __webpack_require__(/*! ./_isStrictComparable */ "./node_modules/lodash/_isStrictComparable.js"),
+    keys = __webpack_require__(/*! ./keys */ "./node_modules/lodash/keys.js");
+
+/**
+ * Gets the property names, values, and compare flags of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the match data of `object`.
+ */
+function getMatchData(object) {
+  var result = keys(object),
+      length = result.length;
+
+  while (length--) {
+    var key = result[length],
+        value = object[key];
+
+    result[length] = [key, value, isStrictComparable(value)];
+  }
+  return result;
+}
+
+module.exports = getMatchData;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_getNative.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_getNative.js ***!
+  \*******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseIsNative = __webpack_require__(/*! ./_baseIsNative */ "./node_modules/lodash/_baseIsNative.js"),
+    getValue = __webpack_require__(/*! ./_getValue */ "./node_modules/lodash/_getValue.js");
+
+/**
+ * Gets the native function at `key` of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {string} key The key of the method to get.
+ * @returns {*} Returns the function if it's native, else `undefined`.
+ */
+function getNative(object, key) {
+  var value = getValue(object, key);
+  return baseIsNative(value) ? value : undefined;
+}
+
+module.exports = getNative;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_getRawTag.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_getRawTag.js ***!
+  \*******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Symbol = __webpack_require__(/*! ./_Symbol */ "./node_modules/lodash/_Symbol.js");
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var nativeObjectToString = objectProto.toString;
+
+/** Built-in value references. */
+var symToStringTag = Symbol ? Symbol.toStringTag : undefined;
+
+/**
+ * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @returns {string} Returns the raw `toStringTag`.
+ */
+function getRawTag(value) {
+  var isOwn = hasOwnProperty.call(value, symToStringTag),
+      tag = value[symToStringTag];
+
+  try {
+    value[symToStringTag] = undefined;
+    var unmasked = true;
+  } catch (e) {}
+
+  var result = nativeObjectToString.call(value);
+  if (unmasked) {
+    if (isOwn) {
+      value[symToStringTag] = tag;
+    } else {
+      delete value[symToStringTag];
+    }
+  }
+  return result;
+}
+
+module.exports = getRawTag;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_getSymbols.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_getSymbols.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var arrayFilter = __webpack_require__(/*! ./_arrayFilter */ "./node_modules/lodash/_arrayFilter.js"),
+    stubArray = __webpack_require__(/*! ./stubArray */ "./node_modules/lodash/stubArray.js");
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Built-in value references. */
+var propertyIsEnumerable = objectProto.propertyIsEnumerable;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeGetSymbols = Object.getOwnPropertySymbols;
+
+/**
+ * Creates an array of the own enumerable symbols of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of symbols.
+ */
+var getSymbols = !nativeGetSymbols ? stubArray : function(object) {
+  if (object == null) {
+    return [];
+  }
+  object = Object(object);
+  return arrayFilter(nativeGetSymbols(object), function(symbol) {
+    return propertyIsEnumerable.call(object, symbol);
+  });
+};
+
+module.exports = getSymbols;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_getTag.js":
+/*!****************************************!*\
+  !*** ./node_modules/lodash/_getTag.js ***!
+  \****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var DataView = __webpack_require__(/*! ./_DataView */ "./node_modules/lodash/_DataView.js"),
+    Map = __webpack_require__(/*! ./_Map */ "./node_modules/lodash/_Map.js"),
+    Promise = __webpack_require__(/*! ./_Promise */ "./node_modules/lodash/_Promise.js"),
+    Set = __webpack_require__(/*! ./_Set */ "./node_modules/lodash/_Set.js"),
+    WeakMap = __webpack_require__(/*! ./_WeakMap */ "./node_modules/lodash/_WeakMap.js"),
+    baseGetTag = __webpack_require__(/*! ./_baseGetTag */ "./node_modules/lodash/_baseGetTag.js"),
+    toSource = __webpack_require__(/*! ./_toSource */ "./node_modules/lodash/_toSource.js");
+
+/** `Object#toString` result references. */
+var mapTag = '[object Map]',
+    objectTag = '[object Object]',
+    promiseTag = '[object Promise]',
+    setTag = '[object Set]',
+    weakMapTag = '[object WeakMap]';
+
+var dataViewTag = '[object DataView]';
+
+/** Used to detect maps, sets, and weakmaps. */
+var dataViewCtorString = toSource(DataView),
+    mapCtorString = toSource(Map),
+    promiseCtorString = toSource(Promise),
+    setCtorString = toSource(Set),
+    weakMapCtorString = toSource(WeakMap);
+
+/**
+ * Gets the `toStringTag` of `value`.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @returns {string} Returns the `toStringTag`.
+ */
+var getTag = baseGetTag;
+
+// Fallback for data views, maps, sets, and weak maps in IE 11 and promises in Node.js < 6.
+if ((DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag) ||
+    (Map && getTag(new Map) != mapTag) ||
+    (Promise && getTag(Promise.resolve()) != promiseTag) ||
+    (Set && getTag(new Set) != setTag) ||
+    (WeakMap && getTag(new WeakMap) != weakMapTag)) {
+  getTag = function(value) {
+    var result = baseGetTag(value),
+        Ctor = result == objectTag ? value.constructor : undefined,
+        ctorString = Ctor ? toSource(Ctor) : '';
+
+    if (ctorString) {
+      switch (ctorString) {
+        case dataViewCtorString: return dataViewTag;
+        case mapCtorString: return mapTag;
+        case promiseCtorString: return promiseTag;
+        case setCtorString: return setTag;
+        case weakMapCtorString: return weakMapTag;
+      }
+    }
+    return result;
+  };
+}
+
+module.exports = getTag;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_getValue.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_getValue.js ***!
+  \******************************************/
+/***/ ((module) => {
+
+/**
+ * Gets the value at `key` of `object`.
+ *
+ * @private
+ * @param {Object} [object] The object to query.
+ * @param {string} key The key of the property to get.
+ * @returns {*} Returns the property value.
+ */
+function getValue(object, key) {
+  return object == null ? undefined : object[key];
+}
+
+module.exports = getValue;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_hasPath.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_hasPath.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var castPath = __webpack_require__(/*! ./_castPath */ "./node_modules/lodash/_castPath.js"),
+    isArguments = __webpack_require__(/*! ./isArguments */ "./node_modules/lodash/isArguments.js"),
+    isArray = __webpack_require__(/*! ./isArray */ "./node_modules/lodash/isArray.js"),
+    isIndex = __webpack_require__(/*! ./_isIndex */ "./node_modules/lodash/_isIndex.js"),
+    isLength = __webpack_require__(/*! ./isLength */ "./node_modules/lodash/isLength.js"),
+    toKey = __webpack_require__(/*! ./_toKey */ "./node_modules/lodash/_toKey.js");
+
+/**
+ * Checks if `path` exists on `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path to check.
+ * @param {Function} hasFunc The function to check properties.
+ * @returns {boolean} Returns `true` if `path` exists, else `false`.
+ */
+function hasPath(object, path, hasFunc) {
+  path = castPath(path, object);
+
+  var index = -1,
+      length = path.length,
+      result = false;
+
+  while (++index < length) {
+    var key = toKey(path[index]);
+    if (!(result = object != null && hasFunc(object, key))) {
+      break;
+    }
+    object = object[key];
+  }
+  if (result || ++index != length) {
+    return result;
+  }
+  length = object == null ? 0 : object.length;
+  return !!length && isLength(length) && isIndex(key, length) &&
+    (isArray(object) || isArguments(object));
+}
+
+module.exports = hasPath;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_hasUnicode.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_hasUnicode.js ***!
+  \********************************************/
+/***/ ((module) => {
+
+/** Used to compose unicode character classes. */
+var rsAstralRange = '\\ud800-\\udfff',
+    rsComboMarksRange = '\\u0300-\\u036f',
+    reComboHalfMarksRange = '\\ufe20-\\ufe2f',
+    rsComboSymbolsRange = '\\u20d0-\\u20ff',
+    rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange,
+    rsVarRange = '\\ufe0e\\ufe0f';
+
+/** Used to compose unicode capture groups. */
+var rsZWJ = '\\u200d';
+
+/** Used to detect strings with [zero-width joiners or code points from the astral planes](http://eev.ee/blog/2015/09/12/dark-corners-of-unicode/). */
+var reHasUnicode = RegExp('[' + rsZWJ + rsAstralRange  + rsComboRange + rsVarRange + ']');
+
+/**
+ * Checks if `string` contains Unicode symbols.
+ *
+ * @private
+ * @param {string} string The string to inspect.
+ * @returns {boolean} Returns `true` if a symbol is found, else `false`.
+ */
+function hasUnicode(string) {
+  return reHasUnicode.test(string);
+}
+
+module.exports = hasUnicode;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_hasUnicodeWord.js":
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_hasUnicodeWord.js ***!
+  \************************************************/
+/***/ ((module) => {
+
+/** Used to detect strings that need a more robust regexp to match words. */
+var reHasUnicodeWord = /[a-z][A-Z]|[A-Z]{2}[a-z]|[0-9][a-zA-Z]|[a-zA-Z][0-9]|[^a-zA-Z0-9 ]/;
+
+/**
+ * Checks if `string` contains a word composed of Unicode symbols.
+ *
+ * @private
+ * @param {string} string The string to inspect.
+ * @returns {boolean} Returns `true` if a word is found, else `false`.
+ */
+function hasUnicodeWord(string) {
+  return reHasUnicodeWord.test(string);
+}
+
+module.exports = hasUnicodeWord;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_hashClear.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_hashClear.js ***!
+  \*******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var nativeCreate = __webpack_require__(/*! ./_nativeCreate */ "./node_modules/lodash/_nativeCreate.js");
+
+/**
+ * Removes all key-value entries from the hash.
+ *
+ * @private
+ * @name clear
+ * @memberOf Hash
+ */
+function hashClear() {
+  this.__data__ = nativeCreate ? nativeCreate(null) : {};
+  this.size = 0;
+}
+
+module.exports = hashClear;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_hashDelete.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_hashDelete.js ***!
+  \********************************************/
+/***/ ((module) => {
+
+/**
+ * Removes `key` and its value from the hash.
+ *
+ * @private
+ * @name delete
+ * @memberOf Hash
+ * @param {Object} hash The hash to modify.
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ */
+function hashDelete(key) {
+  var result = this.has(key) && delete this.__data__[key];
+  this.size -= result ? 1 : 0;
+  return result;
+}
+
+module.exports = hashDelete;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_hashGet.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_hashGet.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var nativeCreate = __webpack_require__(/*! ./_nativeCreate */ "./node_modules/lodash/_nativeCreate.js");
+
+/** Used to stand-in for `undefined` hash values. */
+var HASH_UNDEFINED = '__lodash_hash_undefined__';
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Gets the hash value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf Hash
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
+ */
+function hashGet(key) {
+  var data = this.__data__;
+  if (nativeCreate) {
+    var result = data[key];
+    return result === HASH_UNDEFINED ? undefined : result;
+  }
+  return hasOwnProperty.call(data, key) ? data[key] : undefined;
+}
+
+module.exports = hashGet;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_hashHas.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_hashHas.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var nativeCreate = __webpack_require__(/*! ./_nativeCreate */ "./node_modules/lodash/_nativeCreate.js");
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Checks if a hash value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf Hash
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function hashHas(key) {
+  var data = this.__data__;
+  return nativeCreate ? (data[key] !== undefined) : hasOwnProperty.call(data, key);
+}
+
+module.exports = hashHas;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_hashSet.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_hashSet.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var nativeCreate = __webpack_require__(/*! ./_nativeCreate */ "./node_modules/lodash/_nativeCreate.js");
+
+/** Used to stand-in for `undefined` hash values. */
+var HASH_UNDEFINED = '__lodash_hash_undefined__';
+
+/**
+ * Sets the hash `key` to `value`.
+ *
+ * @private
+ * @name set
+ * @memberOf Hash
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the hash instance.
+ */
+function hashSet(key, value) {
+  var data = this.__data__;
+  this.size += this.has(key) ? 0 : 1;
+  data[key] = (nativeCreate && value === undefined) ? HASH_UNDEFINED : value;
+  return this;
+}
+
+module.exports = hashSet;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_isIndex.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_isIndex.js ***!
+  \*****************************************/
+/***/ ((module) => {
+
+/** Used as references for various `Number` constants. */
+var MAX_SAFE_INTEGER = 9007199254740991;
+
+/** Used to detect unsigned integer values. */
+var reIsUint = /^(?:0|[1-9]\d*)$/;
+
+/**
+ * Checks if `value` is a valid array-like index.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+ * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+ */
+function isIndex(value, length) {
+  var type = typeof value;
+  length = length == null ? MAX_SAFE_INTEGER : length;
+
+  return !!length &&
+    (type == 'number' ||
+      (type != 'symbol' && reIsUint.test(value))) &&
+        (value > -1 && value % 1 == 0 && value < length);
+}
+
+module.exports = isIndex;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_isKey.js":
+/*!***************************************!*\
+  !*** ./node_modules/lodash/_isKey.js ***!
+  \***************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var isArray = __webpack_require__(/*! ./isArray */ "./node_modules/lodash/isArray.js"),
+    isSymbol = __webpack_require__(/*! ./isSymbol */ "./node_modules/lodash/isSymbol.js");
+
+/** Used to match property names within property paths. */
+var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/,
+    reIsPlainProp = /^\w*$/;
+
+/**
+ * Checks if `value` is a property name and not a property path.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @param {Object} [object] The object to query keys on.
+ * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
+ */
+function isKey(value, object) {
+  if (isArray(value)) {
+    return false;
+  }
+  var type = typeof value;
+  if (type == 'number' || type == 'symbol' || type == 'boolean' ||
+      value == null || isSymbol(value)) {
+    return true;
+  }
+  return reIsPlainProp.test(value) || !reIsDeepProp.test(value) ||
+    (object != null && value in Object(object));
+}
+
+module.exports = isKey;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_isKeyable.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/_isKeyable.js ***!
+  \*******************************************/
+/***/ ((module) => {
+
+/**
+ * Checks if `value` is suitable for use as unique object key.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is suitable, else `false`.
+ */
+function isKeyable(value) {
+  var type = typeof value;
+  return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
+    ? (value !== '__proto__')
+    : (value === null);
+}
+
+module.exports = isKeyable;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_isMasked.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_isMasked.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var coreJsData = __webpack_require__(/*! ./_coreJsData */ "./node_modules/lodash/_coreJsData.js");
+
+/** Used to detect methods masquerading as native. */
+var maskSrcKey = (function() {
+  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+  return uid ? ('Symbol(src)_1.' + uid) : '';
+}());
+
+/**
+ * Checks if `func` has its source masked.
+ *
+ * @private
+ * @param {Function} func The function to check.
+ * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+ */
+function isMasked(func) {
+  return !!maskSrcKey && (maskSrcKey in func);
+}
+
+module.exports = isMasked;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_isPrototype.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_isPrototype.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Checks if `value` is likely a prototype object.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
+ */
+function isPrototype(value) {
+  var Ctor = value && value.constructor,
+      proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto;
+
+  return value === proto;
+}
+
+module.exports = isPrototype;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_isStrictComparable.js":
+/*!****************************************************!*\
+  !*** ./node_modules/lodash/_isStrictComparable.js ***!
+  \****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var isObject = __webpack_require__(/*! ./isObject */ "./node_modules/lodash/isObject.js");
+
+/**
+ * Checks if `value` is suitable for strict equality comparisons, i.e. `===`.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` if suitable for strict
+ *  equality comparisons, else `false`.
+ */
+function isStrictComparable(value) {
+  return value === value && !isObject(value);
+}
+
+module.exports = isStrictComparable;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_listCacheClear.js":
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_listCacheClear.js ***!
+  \************************************************/
+/***/ ((module) => {
+
+/**
+ * Removes all key-value entries from the list cache.
+ *
+ * @private
+ * @name clear
+ * @memberOf ListCache
+ */
+function listCacheClear() {
+  this.__data__ = [];
+  this.size = 0;
+}
+
+module.exports = listCacheClear;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_listCacheDelete.js":
+/*!*************************************************!*\
+  !*** ./node_modules/lodash/_listCacheDelete.js ***!
+  \*************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var assocIndexOf = __webpack_require__(/*! ./_assocIndexOf */ "./node_modules/lodash/_assocIndexOf.js");
+
+/** Used for built-in method references. */
+var arrayProto = Array.prototype;
+
+/** Built-in value references. */
+var splice = arrayProto.splice;
+
+/**
+ * Removes `key` and its value from the list cache.
+ *
+ * @private
+ * @name delete
+ * @memberOf ListCache
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ */
+function listCacheDelete(key) {
+  var data = this.__data__,
+      index = assocIndexOf(data, key);
+
+  if (index < 0) {
+    return false;
+  }
+  var lastIndex = data.length - 1;
+  if (index == lastIndex) {
+    data.pop();
+  } else {
+    splice.call(data, index, 1);
+  }
+  --this.size;
+  return true;
+}
+
+module.exports = listCacheDelete;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_listCacheGet.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_listCacheGet.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var assocIndexOf = __webpack_require__(/*! ./_assocIndexOf */ "./node_modules/lodash/_assocIndexOf.js");
+
+/**
+ * Gets the list cache value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf ListCache
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
+ */
+function listCacheGet(key) {
+  var data = this.__data__,
+      index = assocIndexOf(data, key);
+
+  return index < 0 ? undefined : data[index][1];
+}
+
+module.exports = listCacheGet;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_listCacheHas.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_listCacheHas.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var assocIndexOf = __webpack_require__(/*! ./_assocIndexOf */ "./node_modules/lodash/_assocIndexOf.js");
+
+/**
+ * Checks if a list cache value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf ListCache
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function listCacheHas(key) {
+  return assocIndexOf(this.__data__, key) > -1;
+}
+
+module.exports = listCacheHas;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_listCacheSet.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_listCacheSet.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var assocIndexOf = __webpack_require__(/*! ./_assocIndexOf */ "./node_modules/lodash/_assocIndexOf.js");
+
+/**
+ * Sets the list cache `key` to `value`.
+ *
+ * @private
+ * @name set
+ * @memberOf ListCache
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the list cache instance.
+ */
+function listCacheSet(key, value) {
+  var data = this.__data__,
+      index = assocIndexOf(data, key);
+
+  if (index < 0) {
+    ++this.size;
+    data.push([key, value]);
+  } else {
+    data[index][1] = value;
+  }
+  return this;
+}
+
+module.exports = listCacheSet;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_mapCacheClear.js":
+/*!***********************************************!*\
+  !*** ./node_modules/lodash/_mapCacheClear.js ***!
+  \***********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Hash = __webpack_require__(/*! ./_Hash */ "./node_modules/lodash/_Hash.js"),
+    ListCache = __webpack_require__(/*! ./_ListCache */ "./node_modules/lodash/_ListCache.js"),
+    Map = __webpack_require__(/*! ./_Map */ "./node_modules/lodash/_Map.js");
+
+/**
+ * Removes all key-value entries from the map.
+ *
+ * @private
+ * @name clear
+ * @memberOf MapCache
+ */
+function mapCacheClear() {
+  this.size = 0;
+  this.__data__ = {
+    'hash': new Hash,
+    'map': new (Map || ListCache),
+    'string': new Hash
+  };
+}
+
+module.exports = mapCacheClear;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_mapCacheDelete.js":
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_mapCacheDelete.js ***!
+  \************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getMapData = __webpack_require__(/*! ./_getMapData */ "./node_modules/lodash/_getMapData.js");
+
+/**
+ * Removes `key` and its value from the map.
+ *
+ * @private
+ * @name delete
+ * @memberOf MapCache
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ */
+function mapCacheDelete(key) {
+  var result = getMapData(this, key)['delete'](key);
+  this.size -= result ? 1 : 0;
+  return result;
+}
+
+module.exports = mapCacheDelete;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_mapCacheGet.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_mapCacheGet.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getMapData = __webpack_require__(/*! ./_getMapData */ "./node_modules/lodash/_getMapData.js");
+
+/**
+ * Gets the map value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf MapCache
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
+ */
+function mapCacheGet(key) {
+  return getMapData(this, key).get(key);
+}
+
+module.exports = mapCacheGet;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_mapCacheHas.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_mapCacheHas.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getMapData = __webpack_require__(/*! ./_getMapData */ "./node_modules/lodash/_getMapData.js");
+
+/**
+ * Checks if a map value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf MapCache
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function mapCacheHas(key) {
+  return getMapData(this, key).has(key);
+}
+
+module.exports = mapCacheHas;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_mapCacheSet.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_mapCacheSet.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getMapData = __webpack_require__(/*! ./_getMapData */ "./node_modules/lodash/_getMapData.js");
+
+/**
+ * Sets the map `key` to `value`.
+ *
+ * @private
+ * @name set
+ * @memberOf MapCache
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the map cache instance.
+ */
+function mapCacheSet(key, value) {
+  var data = getMapData(this, key),
+      size = data.size;
+
+  data.set(key, value);
+  this.size += data.size == size ? 0 : 1;
+  return this;
+}
+
+module.exports = mapCacheSet;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_mapToArray.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_mapToArray.js ***!
+  \********************************************/
+/***/ ((module) => {
+
+/**
+ * Converts `map` to its key-value pairs.
+ *
+ * @private
+ * @param {Object} map The map to convert.
+ * @returns {Array} Returns the key-value pairs.
+ */
+function mapToArray(map) {
+  var index = -1,
+      result = Array(map.size);
+
+  map.forEach(function(value, key) {
+    result[++index] = [key, value];
+  });
+  return result;
+}
+
+module.exports = mapToArray;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_matchesStrictComparable.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/lodash/_matchesStrictComparable.js ***!
+  \*********************************************************/
+/***/ ((module) => {
+
+/**
+ * A specialized version of `matchesProperty` for source values suitable
+ * for strict equality comparisons, i.e. `===`.
+ *
+ * @private
+ * @param {string} key The key of the property to get.
+ * @param {*} srcValue The value to match.
+ * @returns {Function} Returns the new spec function.
+ */
+function matchesStrictComparable(key, srcValue) {
+  return function(object) {
+    if (object == null) {
+      return false;
+    }
+    return object[key] === srcValue &&
+      (srcValue !== undefined || (key in Object(object)));
+  };
+}
+
+module.exports = matchesStrictComparable;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_memoizeCapped.js":
+/*!***********************************************!*\
+  !*** ./node_modules/lodash/_memoizeCapped.js ***!
+  \***********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var memoize = __webpack_require__(/*! ./memoize */ "./node_modules/lodash/memoize.js");
+
+/** Used as the maximum memoize cache size. */
+var MAX_MEMOIZE_SIZE = 500;
+
+/**
+ * A specialized version of `_.memoize` which clears the memoized function's
+ * cache when it exceeds `MAX_MEMOIZE_SIZE`.
+ *
+ * @private
+ * @param {Function} func The function to have its output memoized.
+ * @returns {Function} Returns the new memoized function.
+ */
+function memoizeCapped(func) {
+  var result = memoize(func, function(key) {
+    if (cache.size === MAX_MEMOIZE_SIZE) {
+      cache.clear();
+    }
+    return key;
+  });
+
+  var cache = result.cache;
+  return result;
+}
+
+module.exports = memoizeCapped;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_nativeCreate.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_nativeCreate.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var getNative = __webpack_require__(/*! ./_getNative */ "./node_modules/lodash/_getNative.js");
+
+/* Built-in method references that are verified to be native. */
+var nativeCreate = getNative(Object, 'create');
+
+module.exports = nativeCreate;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_nativeKeys.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_nativeKeys.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var overArg = __webpack_require__(/*! ./_overArg */ "./node_modules/lodash/_overArg.js");
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeKeys = overArg(Object.keys, Object);
+
+module.exports = nativeKeys;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_nodeUtil.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_nodeUtil.js ***!
+  \******************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+/* module decorator */ module = __webpack_require__.nmd(module);
+var freeGlobal = __webpack_require__(/*! ./_freeGlobal */ "./node_modules/lodash/_freeGlobal.js");
+
+/** Detect free variable `exports`. */
+var freeExports =  true && exports && !exports.nodeType && exports;
+
+/** Detect free variable `module`. */
+var freeModule = freeExports && "object" == 'object' && module && !module.nodeType && module;
+
+/** Detect the popular CommonJS extension `module.exports`. */
+var moduleExports = freeModule && freeModule.exports === freeExports;
+
+/** Detect free variable `process` from Node.js. */
+var freeProcess = moduleExports && freeGlobal.process;
+
+/** Used to access faster Node.js helpers. */
+var nodeUtil = (function() {
+  try {
+    // Use `util.types` for Node.js 10+.
+    var types = freeModule && freeModule.require && freeModule.require('util').types;
+
+    if (types) {
+      return types;
+    }
+
+    // Legacy `process.binding('util')` for Node.js < 10.
+    return freeProcess && freeProcess.binding && freeProcess.binding('util');
+  } catch (e) {}
+}());
+
+module.exports = nodeUtil;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_objectToString.js":
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_objectToString.js ***!
+  \************************************************/
+/***/ ((module) => {
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var nativeObjectToString = objectProto.toString;
+
+/**
+ * Converts `value` to a string using `Object.prototype.toString`.
+ *
+ * @private
+ * @param {*} value The value to convert.
+ * @returns {string} Returns the converted string.
+ */
+function objectToString(value) {
+  return nativeObjectToString.call(value);
+}
+
+module.exports = objectToString;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_overArg.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/_overArg.js ***!
+  \*****************************************/
+/***/ ((module) => {
+
+/**
+ * Creates a unary function that invokes `func` with its argument transformed.
+ *
+ * @private
+ * @param {Function} func The function to wrap.
+ * @param {Function} transform The argument transform.
+ * @returns {Function} Returns the new function.
+ */
+function overArg(func, transform) {
+  return function(arg) {
+    return func(transform(arg));
+  };
+}
+
+module.exports = overArg;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_root.js":
+/*!**************************************!*\
+  !*** ./node_modules/lodash/_root.js ***!
+  \**************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var freeGlobal = __webpack_require__(/*! ./_freeGlobal */ "./node_modules/lodash/_freeGlobal.js");
+
+/** Detect free variable `self`. */
+var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+/** Used as a reference to the global object. */
+var root = freeGlobal || freeSelf || Function('return this')();
+
+module.exports = root;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_setCacheAdd.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_setCacheAdd.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+/** Used to stand-in for `undefined` hash values. */
+var HASH_UNDEFINED = '__lodash_hash_undefined__';
+
+/**
+ * Adds `value` to the array cache.
+ *
+ * @private
+ * @name add
+ * @memberOf SetCache
+ * @alias push
+ * @param {*} value The value to cache.
+ * @returns {Object} Returns the cache instance.
+ */
+function setCacheAdd(value) {
+  this.__data__.set(value, HASH_UNDEFINED);
+  return this;
+}
+
+module.exports = setCacheAdd;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_setCacheHas.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_setCacheHas.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+/**
+ * Checks if `value` is in the array cache.
+ *
+ * @private
+ * @name has
+ * @memberOf SetCache
+ * @param {*} value The value to search for.
+ * @returns {number} Returns `true` if `value` is found, else `false`.
+ */
+function setCacheHas(value) {
+  return this.__data__.has(value);
+}
+
+module.exports = setCacheHas;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_setToArray.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_setToArray.js ***!
+  \********************************************/
+/***/ ((module) => {
+
+/**
+ * Converts `set` to an array of its values.
+ *
+ * @private
+ * @param {Object} set The set to convert.
+ * @returns {Array} Returns the values.
+ */
+function setToArray(set) {
+  var index = -1,
+      result = Array(set.size);
+
+  set.forEach(function(value) {
+    result[++index] = value;
+  });
+  return result;
+}
+
+module.exports = setToArray;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_stackClear.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/_stackClear.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var ListCache = __webpack_require__(/*! ./_ListCache */ "./node_modules/lodash/_ListCache.js");
+
+/**
+ * Removes all key-value entries from the stack.
+ *
+ * @private
+ * @name clear
+ * @memberOf Stack
+ */
+function stackClear() {
+  this.__data__ = new ListCache;
+  this.size = 0;
+}
+
+module.exports = stackClear;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_stackDelete.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/_stackDelete.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+/**
+ * Removes `key` and its value from the stack.
+ *
+ * @private
+ * @name delete
+ * @memberOf Stack
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ */
+function stackDelete(key) {
+  var data = this.__data__,
+      result = data['delete'](key);
+
+  this.size = data.size;
+  return result;
+}
+
+module.exports = stackDelete;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_stackGet.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_stackGet.js ***!
+  \******************************************/
+/***/ ((module) => {
+
+/**
+ * Gets the stack value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf Stack
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
+ */
+function stackGet(key) {
+  return this.__data__.get(key);
+}
+
+module.exports = stackGet;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_stackHas.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_stackHas.js ***!
+  \******************************************/
+/***/ ((module) => {
+
+/**
+ * Checks if a stack value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf Stack
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function stackHas(key) {
+  return this.__data__.has(key);
+}
+
+module.exports = stackHas;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_stackSet.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_stackSet.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var ListCache = __webpack_require__(/*! ./_ListCache */ "./node_modules/lodash/_ListCache.js"),
+    Map = __webpack_require__(/*! ./_Map */ "./node_modules/lodash/_Map.js"),
+    MapCache = __webpack_require__(/*! ./_MapCache */ "./node_modules/lodash/_MapCache.js");
+
+/** Used as the size to enable large array optimizations. */
+var LARGE_ARRAY_SIZE = 200;
+
+/**
+ * Sets the stack `key` to `value`.
+ *
+ * @private
+ * @name set
+ * @memberOf Stack
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the stack cache instance.
+ */
+function stackSet(key, value) {
+  var data = this.__data__;
+  if (data instanceof ListCache) {
+    var pairs = data.__data__;
+    if (!Map || (pairs.length < LARGE_ARRAY_SIZE - 1)) {
+      pairs.push([key, value]);
+      this.size = ++data.size;
+      return this;
+    }
+    data = this.__data__ = new MapCache(pairs);
+  }
+  data.set(key, value);
+  this.size = data.size;
+  return this;
+}
+
+module.exports = stackSet;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_stringToArray.js":
+/*!***********************************************!*\
+  !*** ./node_modules/lodash/_stringToArray.js ***!
+  \***********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var asciiToArray = __webpack_require__(/*! ./_asciiToArray */ "./node_modules/lodash/_asciiToArray.js"),
+    hasUnicode = __webpack_require__(/*! ./_hasUnicode */ "./node_modules/lodash/_hasUnicode.js"),
+    unicodeToArray = __webpack_require__(/*! ./_unicodeToArray */ "./node_modules/lodash/_unicodeToArray.js");
+
+/**
+ * Converts `string` to an array.
+ *
+ * @private
+ * @param {string} string The string to convert.
+ * @returns {Array} Returns the converted array.
+ */
+function stringToArray(string) {
+  return hasUnicode(string)
+    ? unicodeToArray(string)
+    : asciiToArray(string);
+}
+
+module.exports = stringToArray;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_stringToPath.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_stringToPath.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var memoizeCapped = __webpack_require__(/*! ./_memoizeCapped */ "./node_modules/lodash/_memoizeCapped.js");
+
+/** Used to match property names within property paths. */
+var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
+
+/** Used to match backslashes in property paths. */
+var reEscapeChar = /\\(\\)?/g;
+
+/**
+ * Converts `string` to a property path array.
+ *
+ * @private
+ * @param {string} string The string to convert.
+ * @returns {Array} Returns the property path array.
+ */
+var stringToPath = memoizeCapped(function(string) {
+  var result = [];
+  if (string.charCodeAt(0) === 46 /* . */) {
+    result.push('');
+  }
+  string.replace(rePropName, function(match, number, quote, subString) {
+    result.push(quote ? subString.replace(reEscapeChar, '$1') : (number || match));
+  });
+  return result;
+});
+
+module.exports = stringToPath;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_toKey.js":
+/*!***************************************!*\
+  !*** ./node_modules/lodash/_toKey.js ***!
+  \***************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var isSymbol = __webpack_require__(/*! ./isSymbol */ "./node_modules/lodash/isSymbol.js");
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0;
+
+/**
+ * Converts `value` to a string key if it's not a string or symbol.
+ *
+ * @private
+ * @param {*} value The value to inspect.
+ * @returns {string|symbol} Returns the key.
+ */
+function toKey(value) {
+  if (typeof value == 'string' || isSymbol(value)) {
+    return value;
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+}
+
+module.exports = toKey;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_toSource.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/_toSource.js ***!
+  \******************************************/
+/***/ ((module) => {
+
+/** Used for built-in method references. */
+var funcProto = Function.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var funcToString = funcProto.toString;
+
+/**
+ * Converts `func` to its source code.
+ *
+ * @private
+ * @param {Function} func The function to convert.
+ * @returns {string} Returns the source code.
+ */
+function toSource(func) {
+  if (func != null) {
+    try {
+      return funcToString.call(func);
+    } catch (e) {}
+    try {
+      return (func + '');
+    } catch (e) {}
+  }
+  return '';
+}
+
+module.exports = toSource;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_unicodeToArray.js":
+/*!************************************************!*\
+  !*** ./node_modules/lodash/_unicodeToArray.js ***!
+  \************************************************/
+/***/ ((module) => {
+
+/** Used to compose unicode character classes. */
+var rsAstralRange = '\\ud800-\\udfff',
+    rsComboMarksRange = '\\u0300-\\u036f',
+    reComboHalfMarksRange = '\\ufe20-\\ufe2f',
+    rsComboSymbolsRange = '\\u20d0-\\u20ff',
+    rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange,
+    rsVarRange = '\\ufe0e\\ufe0f';
+
+/** Used to compose unicode capture groups. */
+var rsAstral = '[' + rsAstralRange + ']',
+    rsCombo = '[' + rsComboRange + ']',
+    rsFitz = '\\ud83c[\\udffb-\\udfff]',
+    rsModifier = '(?:' + rsCombo + '|' + rsFitz + ')',
+    rsNonAstral = '[^' + rsAstralRange + ']',
+    rsRegional = '(?:\\ud83c[\\udde6-\\uddff]){2}',
+    rsSurrPair = '[\\ud800-\\udbff][\\udc00-\\udfff]',
+    rsZWJ = '\\u200d';
+
+/** Used to compose unicode regexes. */
+var reOptMod = rsModifier + '?',
+    rsOptVar = '[' + rsVarRange + ']?',
+    rsOptJoin = '(?:' + rsZWJ + '(?:' + [rsNonAstral, rsRegional, rsSurrPair].join('|') + ')' + rsOptVar + reOptMod + ')*',
+    rsSeq = rsOptVar + reOptMod + rsOptJoin,
+    rsSymbol = '(?:' + [rsNonAstral + rsCombo + '?', rsCombo, rsRegional, rsSurrPair, rsAstral].join('|') + ')';
+
+/** Used to match [string symbols](https://mathiasbynens.be/notes/javascript-unicode). */
+var reUnicode = RegExp(rsFitz + '(?=' + rsFitz + ')|' + rsSymbol + rsSeq, 'g');
+
+/**
+ * Converts a Unicode `string` to an array.
+ *
+ * @private
+ * @param {string} string The string to convert.
+ * @returns {Array} Returns the converted array.
+ */
+function unicodeToArray(string) {
+  return string.match(reUnicode) || [];
+}
+
+module.exports = unicodeToArray;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/_unicodeWords.js":
+/*!**********************************************!*\
+  !*** ./node_modules/lodash/_unicodeWords.js ***!
+  \**********************************************/
+/***/ ((module) => {
+
+/** Used to compose unicode character classes. */
+var rsAstralRange = '\\ud800-\\udfff',
+    rsComboMarksRange = '\\u0300-\\u036f',
+    reComboHalfMarksRange = '\\ufe20-\\ufe2f',
+    rsComboSymbolsRange = '\\u20d0-\\u20ff',
+    rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange,
+    rsDingbatRange = '\\u2700-\\u27bf',
+    rsLowerRange = 'a-z\\xdf-\\xf6\\xf8-\\xff',
+    rsMathOpRange = '\\xac\\xb1\\xd7\\xf7',
+    rsNonCharRange = '\\x00-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\xbf',
+    rsPunctuationRange = '\\u2000-\\u206f',
+    rsSpaceRange = ' \\t\\x0b\\f\\xa0\\ufeff\\n\\r\\u2028\\u2029\\u1680\\u180e\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\\u202f\\u205f\\u3000',
+    rsUpperRange = 'A-Z\\xc0-\\xd6\\xd8-\\xde',
+    rsVarRange = '\\ufe0e\\ufe0f',
+    rsBreakRange = rsMathOpRange + rsNonCharRange + rsPunctuationRange + rsSpaceRange;
+
+/** Used to compose unicode capture groups. */
+var rsApos = "['\u2019]",
+    rsBreak = '[' + rsBreakRange + ']',
+    rsCombo = '[' + rsComboRange + ']',
+    rsDigits = '\\d+',
+    rsDingbat = '[' + rsDingbatRange + ']',
+    rsLower = '[' + rsLowerRange + ']',
+    rsMisc = '[^' + rsAstralRange + rsBreakRange + rsDigits + rsDingbatRange + rsLowerRange + rsUpperRange + ']',
+    rsFitz = '\\ud83c[\\udffb-\\udfff]',
+    rsModifier = '(?:' + rsCombo + '|' + rsFitz + ')',
+    rsNonAstral = '[^' + rsAstralRange + ']',
+    rsRegional = '(?:\\ud83c[\\udde6-\\uddff]){2}',
+    rsSurrPair = '[\\ud800-\\udbff][\\udc00-\\udfff]',
+    rsUpper = '[' + rsUpperRange + ']',
+    rsZWJ = '\\u200d';
+
+/** Used to compose unicode regexes. */
+var rsMiscLower = '(?:' + rsLower + '|' + rsMisc + ')',
+    rsMiscUpper = '(?:' + rsUpper + '|' + rsMisc + ')',
+    rsOptContrLower = '(?:' + rsApos + '(?:d|ll|m|re|s|t|ve))?',
+    rsOptContrUpper = '(?:' + rsApos + '(?:D|LL|M|RE|S|T|VE))?',
+    reOptMod = rsModifier + '?',
+    rsOptVar = '[' + rsVarRange + ']?',
+    rsOptJoin = '(?:' + rsZWJ + '(?:' + [rsNonAstral, rsRegional, rsSurrPair].join('|') + ')' + rsOptVar + reOptMod + ')*',
+    rsOrdLower = '\\d*(?:1st|2nd|3rd|(?![123])\\dth)(?=\\b|[A-Z_])',
+    rsOrdUpper = '\\d*(?:1ST|2ND|3RD|(?![123])\\dTH)(?=\\b|[a-z_])',
+    rsSeq = rsOptVar + reOptMod + rsOptJoin,
+    rsEmoji = '(?:' + [rsDingbat, rsRegional, rsSurrPair].join('|') + ')' + rsSeq;
+
+/** Used to match complex or compound words. */
+var reUnicodeWord = RegExp([
+  rsUpper + '?' + rsLower + '+' + rsOptContrLower + '(?=' + [rsBreak, rsUpper, '$'].join('|') + ')',
+  rsMiscUpper + '+' + rsOptContrUpper + '(?=' + [rsBreak, rsUpper + rsMiscLower, '$'].join('|') + ')',
+  rsUpper + '?' + rsMiscLower + '+' + rsOptContrLower,
+  rsUpper + '+' + rsOptContrUpper,
+  rsOrdUpper,
+  rsOrdLower,
+  rsDigits,
+  rsEmoji
+].join('|'), 'g');
+
+/**
+ * Splits a Unicode `string` into an array of its words.
+ *
+ * @private
+ * @param {string} The string to inspect.
+ * @returns {Array} Returns the words of `string`.
+ */
+function unicodeWords(string) {
+  return string.match(reUnicodeWord) || [];
+}
+
+module.exports = unicodeWords;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/camelCase.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/camelCase.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var capitalize = __webpack_require__(/*! ./capitalize */ "./node_modules/lodash/capitalize.js"),
+    createCompounder = __webpack_require__(/*! ./_createCompounder */ "./node_modules/lodash/_createCompounder.js");
+
+/**
+ * Converts `string` to [camel case](https://en.wikipedia.org/wiki/CamelCase).
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to convert.
+ * @returns {string} Returns the camel cased string.
+ * @example
+ *
+ * _.camelCase('Foo Bar');
+ * // => 'fooBar'
+ *
+ * _.camelCase('--foo-bar--');
+ * // => 'fooBar'
+ *
+ * _.camelCase('__FOO_BAR__');
+ * // => 'fooBar'
+ */
+var camelCase = createCompounder(function(result, word, index) {
+  word = word.toLowerCase();
+  return result + (index ? capitalize(word) : word);
+});
+
+module.exports = camelCase;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/capitalize.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/capitalize.js ***!
+  \*******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var toString = __webpack_require__(/*! ./toString */ "./node_modules/lodash/toString.js"),
+    upperFirst = __webpack_require__(/*! ./upperFirst */ "./node_modules/lodash/upperFirst.js");
+
+/**
+ * Converts the first character of `string` to upper case and the remaining
+ * to lower case.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to capitalize.
+ * @returns {string} Returns the capitalized string.
+ * @example
+ *
+ * _.capitalize('FRED');
+ * // => 'Fred'
+ */
+function capitalize(string) {
+  return upperFirst(toString(string).toLowerCase());
+}
+
+module.exports = capitalize;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/deburr.js":
+/*!***************************************!*\
+  !*** ./node_modules/lodash/deburr.js ***!
+  \***************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var deburrLetter = __webpack_require__(/*! ./_deburrLetter */ "./node_modules/lodash/_deburrLetter.js"),
+    toString = __webpack_require__(/*! ./toString */ "./node_modules/lodash/toString.js");
+
+/** Used to match Latin Unicode letters (excluding mathematical operators). */
+var reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
+
+/** Used to compose unicode character classes. */
+var rsComboMarksRange = '\\u0300-\\u036f',
+    reComboHalfMarksRange = '\\ufe20-\\ufe2f',
+    rsComboSymbolsRange = '\\u20d0-\\u20ff',
+    rsComboRange = rsComboMarksRange + reComboHalfMarksRange + rsComboSymbolsRange;
+
+/** Used to compose unicode capture groups. */
+var rsCombo = '[' + rsComboRange + ']';
+
+/**
+ * Used to match [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) and
+ * [combining diacritical marks for symbols](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks_for_Symbols).
+ */
+var reComboMark = RegExp(rsCombo, 'g');
+
+/**
+ * Deburrs `string` by converting
+ * [Latin-1 Supplement](https://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)#Character_table)
+ * and [Latin Extended-A](https://en.wikipedia.org/wiki/Latin_Extended-A)
+ * letters to basic Latin letters and removing
+ * [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks).
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to deburr.
+ * @returns {string} Returns the deburred string.
+ * @example
+ *
+ * _.deburr('déjà vu');
+ * // => 'deja vu'
+ */
+function deburr(string) {
+  string = toString(string);
+  return string && string.replace(reLatin, deburrLetter).replace(reComboMark, '');
+}
+
+module.exports = deburr;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/eq.js":
+/*!***********************************!*\
+  !*** ./node_modules/lodash/eq.js ***!
+  \***********************************/
+/***/ ((module) => {
+
+/**
+ * Performs a
+ * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+ * comparison between two values to determine if they are equivalent.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to compare.
+ * @param {*} other The other value to compare.
+ * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+ * @example
+ *
+ * var object = { 'a': 1 };
+ * var other = { 'a': 1 };
+ *
+ * _.eq(object, object);
+ * // => true
+ *
+ * _.eq(object, other);
+ * // => false
+ *
+ * _.eq('a', 'a');
+ * // => true
+ *
+ * _.eq('a', Object('a'));
+ * // => false
+ *
+ * _.eq(NaN, NaN);
+ * // => true
+ */
+function eq(value, other) {
+  return value === other || (value !== value && other !== other);
+}
+
+module.exports = eq;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/get.js":
+/*!************************************!*\
+  !*** ./node_modules/lodash/get.js ***!
+  \************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseGet = __webpack_require__(/*! ./_baseGet */ "./node_modules/lodash/_baseGet.js");
+
+/**
+ * Gets the value at `path` of `object`. If the resolved value is
+ * `undefined`, the `defaultValue` is returned in its place.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.7.0
+ * @category Object
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path of the property to get.
+ * @param {*} [defaultValue] The value returned for `undefined` resolved values.
+ * @returns {*} Returns the resolved value.
+ * @example
+ *
+ * var object = { 'a': [{ 'b': { 'c': 3 } }] };
+ *
+ * _.get(object, 'a[0].b.c');
+ * // => 3
+ *
+ * _.get(object, ['a', '0', 'b', 'c']);
+ * // => 3
+ *
+ * _.get(object, 'a.b.c', 'default');
+ * // => 'default'
+ */
+function get(object, path, defaultValue) {
+  var result = object == null ? undefined : baseGet(object, path);
+  return result === undefined ? defaultValue : result;
+}
+
+module.exports = get;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/has.js":
+/*!************************************!*\
+  !*** ./node_modules/lodash/has.js ***!
+  \************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseHas = __webpack_require__(/*! ./_baseHas */ "./node_modules/lodash/_baseHas.js"),
+    hasPath = __webpack_require__(/*! ./_hasPath */ "./node_modules/lodash/_hasPath.js");
+
+/**
+ * Checks if `path` is a direct property of `object`.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path to check.
+ * @returns {boolean} Returns `true` if `path` exists, else `false`.
+ * @example
+ *
+ * var object = { 'a': { 'b': 2 } };
+ * var other = _.create({ 'a': _.create({ 'b': 2 }) });
+ *
+ * _.has(object, 'a');
+ * // => true
+ *
+ * _.has(object, 'a.b');
+ * // => true
+ *
+ * _.has(object, ['a', 'b']);
+ * // => true
+ *
+ * _.has(other, 'a');
+ * // => false
+ */
+function has(object, path) {
+  return object != null && hasPath(object, path, baseHas);
+}
+
+module.exports = has;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/hasIn.js":
+/*!**************************************!*\
+  !*** ./node_modules/lodash/hasIn.js ***!
+  \**************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseHasIn = __webpack_require__(/*! ./_baseHasIn */ "./node_modules/lodash/_baseHasIn.js"),
+    hasPath = __webpack_require__(/*! ./_hasPath */ "./node_modules/lodash/_hasPath.js");
+
+/**
+ * Checks if `path` is a direct or inherited property of `object`.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Object
+ * @param {Object} object The object to query.
+ * @param {Array|string} path The path to check.
+ * @returns {boolean} Returns `true` if `path` exists, else `false`.
+ * @example
+ *
+ * var object = _.create({ 'a': _.create({ 'b': 2 }) });
+ *
+ * _.hasIn(object, 'a');
+ * // => true
+ *
+ * _.hasIn(object, 'a.b');
+ * // => true
+ *
+ * _.hasIn(object, ['a', 'b']);
+ * // => true
+ *
+ * _.hasIn(object, 'b');
+ * // => false
+ */
+function hasIn(object, path) {
+  return object != null && hasPath(object, path, baseHasIn);
+}
+
+module.exports = hasIn;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/identity.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/identity.js ***!
+  \*****************************************/
+/***/ ((module) => {
+
+/**
+ * This method returns the first argument it receives.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Util
+ * @param {*} value Any value.
+ * @returns {*} Returns `value`.
+ * @example
+ *
+ * var object = { 'a': 1 };
+ *
+ * console.log(_.identity(object) === object);
+ * // => true
+ */
+function identity(value) {
+  return value;
+}
+
+module.exports = identity;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isArguments.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/isArguments.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseIsArguments = __webpack_require__(/*! ./_baseIsArguments */ "./node_modules/lodash/_baseIsArguments.js"),
+    isObjectLike = __webpack_require__(/*! ./isObjectLike */ "./node_modules/lodash/isObjectLike.js");
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Built-in value references. */
+var propertyIsEnumerable = objectProto.propertyIsEnumerable;
+
+/**
+ * Checks if `value` is likely an `arguments` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+ *  else `false`.
+ * @example
+ *
+ * _.isArguments(function() { return arguments; }());
+ * // => true
+ *
+ * _.isArguments([1, 2, 3]);
+ * // => false
+ */
+var isArguments = baseIsArguments(function() { return arguments; }()) ? baseIsArguments : function(value) {
+  return isObjectLike(value) && hasOwnProperty.call(value, 'callee') &&
+    !propertyIsEnumerable.call(value, 'callee');
+};
+
+module.exports = isArguments;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isArray.js":
+/*!****************************************!*\
+  !*** ./node_modules/lodash/isArray.js ***!
+  \****************************************/
+/***/ ((module) => {
+
+/**
+ * Checks if `value` is classified as an `Array` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(document.body.children);
+ * // => false
+ *
+ * _.isArray('abc');
+ * // => false
+ *
+ * _.isArray(_.noop);
+ * // => false
+ */
+var isArray = Array.isArray;
+
+module.exports = isArray;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isArrayLike.js":
+/*!********************************************!*\
+  !*** ./node_modules/lodash/isArrayLike.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var isFunction = __webpack_require__(/*! ./isFunction */ "./node_modules/lodash/isFunction.js"),
+    isLength = __webpack_require__(/*! ./isLength */ "./node_modules/lodash/isLength.js");
+
+/**
+ * Checks if `value` is array-like. A value is considered array-like if it's
+ * not a function and has a `value.length` that's an integer greater than or
+ * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+ * @example
+ *
+ * _.isArrayLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isArrayLike(document.body.children);
+ * // => true
+ *
+ * _.isArrayLike('abc');
+ * // => true
+ *
+ * _.isArrayLike(_.noop);
+ * // => false
+ */
+function isArrayLike(value) {
+  return value != null && isLength(value.length) && !isFunction(value);
+}
+
+module.exports = isArrayLike;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isBuffer.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/isBuffer.js ***!
+  \*****************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+/* module decorator */ module = __webpack_require__.nmd(module);
+var root = __webpack_require__(/*! ./_root */ "./node_modules/lodash/_root.js"),
+    stubFalse = __webpack_require__(/*! ./stubFalse */ "./node_modules/lodash/stubFalse.js");
+
+/** Detect free variable `exports`. */
+var freeExports =  true && exports && !exports.nodeType && exports;
+
+/** Detect free variable `module`. */
+var freeModule = freeExports && "object" == 'object' && module && !module.nodeType && module;
+
+/** Detect the popular CommonJS extension `module.exports`. */
+var moduleExports = freeModule && freeModule.exports === freeExports;
+
+/** Built-in value references. */
+var Buffer = moduleExports ? root.Buffer : undefined;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeIsBuffer = Buffer ? Buffer.isBuffer : undefined;
+
+/**
+ * Checks if `value` is a buffer.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.3.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a buffer, else `false`.
+ * @example
+ *
+ * _.isBuffer(new Buffer(2));
+ * // => true
+ *
+ * _.isBuffer(new Uint8Array(2));
+ * // => false
+ */
+var isBuffer = nativeIsBuffer || stubFalse;
+
+module.exports = isBuffer;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isFunction.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/isFunction.js ***!
+  \*******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseGetTag = __webpack_require__(/*! ./_baseGetTag */ "./node_modules/lodash/_baseGetTag.js"),
+    isObject = __webpack_require__(/*! ./isObject */ "./node_modules/lodash/isObject.js");
+
+/** `Object#toString` result references. */
+var asyncTag = '[object AsyncFunction]',
+    funcTag = '[object Function]',
+    genTag = '[object GeneratorFunction]',
+    proxyTag = '[object Proxy]';
+
+/**
+ * Checks if `value` is classified as a `Function` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a function, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ *
+ * _.isFunction(/abc/);
+ * // => false
+ */
+function isFunction(value) {
+  if (!isObject(value)) {
+    return false;
+  }
+  // The use of `Object#toString` avoids issues with the `typeof` operator
+  // in Safari 9 which returns 'object' for typed arrays and other constructors.
+  var tag = baseGetTag(value);
+  return tag == funcTag || tag == genTag || tag == asyncTag || tag == proxyTag;
+}
+
+module.exports = isFunction;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isLength.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/isLength.js ***!
+  \*****************************************/
+/***/ ((module) => {
+
+/** Used as references for various `Number` constants. */
+var MAX_SAFE_INTEGER = 9007199254740991;
+
+/**
+ * Checks if `value` is a valid array-like length.
+ *
+ * **Note:** This method is loosely based on
+ * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+ * @example
+ *
+ * _.isLength(3);
+ * // => true
+ *
+ * _.isLength(Number.MIN_VALUE);
+ * // => false
+ *
+ * _.isLength(Infinity);
+ * // => false
+ *
+ * _.isLength('3');
+ * // => false
+ */
+function isLength(value) {
+  return typeof value == 'number' &&
+    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+}
+
+module.exports = isLength;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isObject.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/isObject.js ***!
+  \*****************************************/
+/***/ ((module) => {
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return value != null && (type == 'object' || type == 'function');
+}
+
+module.exports = isObject;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isObjectLike.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/isObjectLike.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return value != null && typeof value == 'object';
+}
+
+module.exports = isObjectLike;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isSymbol.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/isSymbol.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseGetTag = __webpack_require__(/*! ./_baseGetTag */ "./node_modules/lodash/_baseGetTag.js"),
+    isObjectLike = __webpack_require__(/*! ./isObjectLike */ "./node_modules/lodash/isObjectLike.js");
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && baseGetTag(value) == symbolTag);
+}
+
+module.exports = isSymbol;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/isTypedArray.js":
+/*!*********************************************!*\
+  !*** ./node_modules/lodash/isTypedArray.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseIsTypedArray = __webpack_require__(/*! ./_baseIsTypedArray */ "./node_modules/lodash/_baseIsTypedArray.js"),
+    baseUnary = __webpack_require__(/*! ./_baseUnary */ "./node_modules/lodash/_baseUnary.js"),
+    nodeUtil = __webpack_require__(/*! ./_nodeUtil */ "./node_modules/lodash/_nodeUtil.js");
+
+/* Node.js helper references. */
+var nodeIsTypedArray = nodeUtil && nodeUtil.isTypedArray;
+
+/**
+ * Checks if `value` is classified as a typed array.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a typed array, else `false`.
+ * @example
+ *
+ * _.isTypedArray(new Uint8Array);
+ * // => true
+ *
+ * _.isTypedArray([]);
+ * // => false
+ */
+var isTypedArray = nodeIsTypedArray ? baseUnary(nodeIsTypedArray) : baseIsTypedArray;
+
+module.exports = isTypedArray;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/keys.js":
+/*!*************************************!*\
+  !*** ./node_modules/lodash/keys.js ***!
+  \*************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var arrayLikeKeys = __webpack_require__(/*! ./_arrayLikeKeys */ "./node_modules/lodash/_arrayLikeKeys.js"),
+    baseKeys = __webpack_require__(/*! ./_baseKeys */ "./node_modules/lodash/_baseKeys.js"),
+    isArrayLike = __webpack_require__(/*! ./isArrayLike */ "./node_modules/lodash/isArrayLike.js");
+
+/**
+ * Creates an array of the own enumerable property names of `object`.
+ *
+ * **Note:** Non-object values are coerced to objects. See the
+ * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
+ * for more details.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.keys(new Foo);
+ * // => ['a', 'b'] (iteration order is not guaranteed)
+ *
+ * _.keys('hi');
+ * // => ['0', '1']
+ */
+function keys(object) {
+  return isArrayLike(object) ? arrayLikeKeys(object) : baseKeys(object);
+}
+
+module.exports = keys;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/mapKeys.js":
+/*!****************************************!*\
+  !*** ./node_modules/lodash/mapKeys.js ***!
+  \****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseAssignValue = __webpack_require__(/*! ./_baseAssignValue */ "./node_modules/lodash/_baseAssignValue.js"),
+    baseForOwn = __webpack_require__(/*! ./_baseForOwn */ "./node_modules/lodash/_baseForOwn.js"),
+    baseIteratee = __webpack_require__(/*! ./_baseIteratee */ "./node_modules/lodash/_baseIteratee.js");
+
+/**
+ * The opposite of `_.mapValues`; this method creates an object with the
+ * same values as `object` and keys generated by running each own enumerable
+ * string keyed property of `object` thru `iteratee`. The iteratee is invoked
+ * with three arguments: (value, key, object).
+ *
+ * @static
+ * @memberOf _
+ * @since 3.8.0
+ * @category Object
+ * @param {Object} object The object to iterate over.
+ * @param {Function} [iteratee=_.identity] The function invoked per iteration.
+ * @returns {Object} Returns the new mapped object.
+ * @see _.mapValues
+ * @example
+ *
+ * _.mapKeys({ 'a': 1, 'b': 2 }, function(value, key) {
+ *   return key + value;
+ * });
+ * // => { 'a1': 1, 'b2': 2 }
+ */
+function mapKeys(object, iteratee) {
+  var result = {};
+  iteratee = baseIteratee(iteratee, 3);
+
+  baseForOwn(object, function(value, key, object) {
+    baseAssignValue(result, iteratee(value, key, object), value);
+  });
+  return result;
+}
+
+module.exports = mapKeys;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/mapValues.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/mapValues.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseAssignValue = __webpack_require__(/*! ./_baseAssignValue */ "./node_modules/lodash/_baseAssignValue.js"),
+    baseForOwn = __webpack_require__(/*! ./_baseForOwn */ "./node_modules/lodash/_baseForOwn.js"),
+    baseIteratee = __webpack_require__(/*! ./_baseIteratee */ "./node_modules/lodash/_baseIteratee.js");
+
+/**
+ * Creates an object with the same keys as `object` and values generated
+ * by running each own enumerable string keyed property of `object` thru
+ * `iteratee`. The iteratee is invoked with three arguments:
+ * (value, key, object).
+ *
+ * @static
+ * @memberOf _
+ * @since 2.4.0
+ * @category Object
+ * @param {Object} object The object to iterate over.
+ * @param {Function} [iteratee=_.identity] The function invoked per iteration.
+ * @returns {Object} Returns the new mapped object.
+ * @see _.mapKeys
+ * @example
+ *
+ * var users = {
+ *   'fred':    { 'user': 'fred',    'age': 40 },
+ *   'pebbles': { 'user': 'pebbles', 'age': 1 }
+ * };
+ *
+ * _.mapValues(users, function(o) { return o.age; });
+ * // => { 'fred': 40, 'pebbles': 1 } (iteration order is not guaranteed)
+ *
+ * // The `_.property` iteratee shorthand.
+ * _.mapValues(users, 'age');
+ * // => { 'fred': 40, 'pebbles': 1 } (iteration order is not guaranteed)
+ */
+function mapValues(object, iteratee) {
+  var result = {};
+  iteratee = baseIteratee(iteratee, 3);
+
+  baseForOwn(object, function(value, key, object) {
+    baseAssignValue(result, key, iteratee(value, key, object));
+  });
+  return result;
+}
+
+module.exports = mapValues;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/memoize.js":
+/*!****************************************!*\
+  !*** ./node_modules/lodash/memoize.js ***!
+  \****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var MapCache = __webpack_require__(/*! ./_MapCache */ "./node_modules/lodash/_MapCache.js");
+
+/** Error message constants. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/**
+ * Creates a function that memoizes the result of `func`. If `resolver` is
+ * provided, it determines the cache key for storing the result based on the
+ * arguments provided to the memoized function. By default, the first argument
+ * provided to the memoized function is used as the map cache key. The `func`
+ * is invoked with the `this` binding of the memoized function.
+ *
+ * **Note:** The cache is exposed as the `cache` property on the memoized
+ * function. Its creation may be customized by replacing the `_.memoize.Cache`
+ * constructor with one whose instances implement the
+ * [`Map`](http://ecma-international.org/ecma-262/7.0/#sec-properties-of-the-map-prototype-object)
+ * method interface of `clear`, `delete`, `get`, `has`, and `set`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Function
+ * @param {Function} func The function to have its output memoized.
+ * @param {Function} [resolver] The function to resolve the cache key.
+ * @returns {Function} Returns the new memoized function.
+ * @example
+ *
+ * var object = { 'a': 1, 'b': 2 };
+ * var other = { 'c': 3, 'd': 4 };
+ *
+ * var values = _.memoize(_.values);
+ * values(object);
+ * // => [1, 2]
+ *
+ * values(other);
+ * // => [3, 4]
+ *
+ * object.a = 2;
+ * values(object);
+ * // => [1, 2]
+ *
+ * // Modify the result cache.
+ * values.cache.set(object, ['a', 'b']);
+ * values(object);
+ * // => ['a', 'b']
+ *
+ * // Replace `_.memoize.Cache`.
+ * _.memoize.Cache = WeakMap;
+ */
+function memoize(func, resolver) {
+  if (typeof func != 'function' || (resolver != null && typeof resolver != 'function')) {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  var memoized = function() {
+    var args = arguments,
+        key = resolver ? resolver.apply(this, args) : args[0],
+        cache = memoized.cache;
+
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    var result = func.apply(this, args);
+    memoized.cache = cache.set(key, result) || cache;
+    return result;
+  };
+  memoized.cache = new (memoize.Cache || MapCache);
+  return memoized;
+}
+
+// Expose `MapCache`.
+memoize.Cache = MapCache;
+
+module.exports = memoize;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/property.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/property.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseProperty = __webpack_require__(/*! ./_baseProperty */ "./node_modules/lodash/_baseProperty.js"),
+    basePropertyDeep = __webpack_require__(/*! ./_basePropertyDeep */ "./node_modules/lodash/_basePropertyDeep.js"),
+    isKey = __webpack_require__(/*! ./_isKey */ "./node_modules/lodash/_isKey.js"),
+    toKey = __webpack_require__(/*! ./_toKey */ "./node_modules/lodash/_toKey.js");
+
+/**
+ * Creates a function that returns the value at `path` of a given object.
+ *
+ * @static
+ * @memberOf _
+ * @since 2.4.0
+ * @category Util
+ * @param {Array|string} path The path of the property to get.
+ * @returns {Function} Returns the new accessor function.
+ * @example
+ *
+ * var objects = [
+ *   { 'a': { 'b': 2 } },
+ *   { 'a': { 'b': 1 } }
+ * ];
+ *
+ * _.map(objects, _.property('a.b'));
+ * // => [2, 1]
+ *
+ * _.map(_.sortBy(objects, _.property(['a', 'b'])), 'a.b');
+ * // => [1, 2]
+ */
+function property(path) {
+  return isKey(path) ? baseProperty(toKey(path)) : basePropertyDeep(path);
+}
+
+module.exports = property;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/snakeCase.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/snakeCase.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var createCompounder = __webpack_require__(/*! ./_createCompounder */ "./node_modules/lodash/_createCompounder.js");
+
+/**
+ * Converts `string` to
+ * [snake case](https://en.wikipedia.org/wiki/Snake_case).
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to convert.
+ * @returns {string} Returns the snake cased string.
+ * @example
+ *
+ * _.snakeCase('Foo Bar');
+ * // => 'foo_bar'
+ *
+ * _.snakeCase('fooBar');
+ * // => 'foo_bar'
+ *
+ * _.snakeCase('--FOO-BAR--');
+ * // => 'foo_bar'
+ */
+var snakeCase = createCompounder(function(result, word, index) {
+  return result + (index ? '_' : '') + word.toLowerCase();
+});
+
+module.exports = snakeCase;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/stubArray.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/stubArray.js ***!
+  \******************************************/
+/***/ ((module) => {
+
+/**
+ * This method returns a new empty array.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.13.0
+ * @category Util
+ * @returns {Array} Returns the new empty array.
+ * @example
+ *
+ * var arrays = _.times(2, _.stubArray);
+ *
+ * console.log(arrays);
+ * // => [[], []]
+ *
+ * console.log(arrays[0] === arrays[1]);
+ * // => false
+ */
+function stubArray() {
+  return [];
+}
+
+module.exports = stubArray;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/stubFalse.js":
+/*!******************************************!*\
+  !*** ./node_modules/lodash/stubFalse.js ***!
+  \******************************************/
+/***/ ((module) => {
+
+/**
+ * This method returns `false`.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.13.0
+ * @category Util
+ * @returns {boolean} Returns `false`.
+ * @example
+ *
+ * _.times(2, _.stubFalse);
+ * // => [false, false]
+ */
+function stubFalse() {
+  return false;
+}
+
+module.exports = stubFalse;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/toString.js":
+/*!*****************************************!*\
+  !*** ./node_modules/lodash/toString.js ***!
+  \*****************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var baseToString = __webpack_require__(/*! ./_baseToString */ "./node_modules/lodash/_baseToString.js");
+
+/**
+ * Converts `value` to a string. An empty string is returned for `null`
+ * and `undefined` values. The sign of `-0` is preserved.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {string} Returns the converted string.
+ * @example
+ *
+ * _.toString(null);
+ * // => ''
+ *
+ * _.toString(-0);
+ * // => '-0'
+ *
+ * _.toString([1, 2, 3]);
+ * // => '1,2,3'
+ */
+function toString(value) {
+  return value == null ? '' : baseToString(value);
+}
+
+module.exports = toString;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/upperFirst.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash/upperFirst.js ***!
+  \*******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var createCaseFirst = __webpack_require__(/*! ./_createCaseFirst */ "./node_modules/lodash/_createCaseFirst.js");
+
+/**
+ * Converts the first character of `string` to upper case.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category String
+ * @param {string} [string=''] The string to convert.
+ * @returns {string} Returns the converted string.
+ * @example
+ *
+ * _.upperFirst('fred');
+ * // => 'Fred'
+ *
+ * _.upperFirst('FRED');
+ * // => 'FRED'
+ */
+var upperFirst = createCaseFirst('toUpperCase');
+
+module.exports = upperFirst;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash/words.js":
+/*!**************************************!*\
+  !*** ./node_modules/lodash/words.js ***!
+  \**************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var asciiWords = __webpack_require__(/*! ./_asciiWords */ "./node_modules/lodash/_asciiWords.js"),
+    hasUnicodeWord = __webpack_require__(/*! ./_hasUnicodeWord */ "./node_modules/lodash/_hasUnicodeWord.js"),
+    toString = __webpack_require__(/*! ./toString */ "./node_modules/lodash/toString.js"),
+    unicodeWords = __webpack_require__(/*! ./_unicodeWords */ "./node_modules/lodash/_unicodeWords.js");
+
+/**
+ * Splits `string` into an array of its words.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category String
+ * @param {string} [string=''] The string to inspect.
+ * @param {RegExp|string} [pattern] The pattern to match words.
+ * @param- {Object} [guard] Enables use as an iteratee for methods like `_.map`.
+ * @returns {Array} Returns the words of `string`.
+ * @example
+ *
+ * _.words('fred, barney, & pebbles');
+ * // => ['fred', 'barney', 'pebbles']
+ *
+ * _.words('fred, barney, & pebbles', /[^, ]+/g);
+ * // => ['fred', 'barney', '&', 'pebbles']
+ */
+function words(string, pattern, guard) {
+  string = toString(string);
+  pattern = guard ? undefined : pattern;
+
+  if (pattern === undefined) {
+    return hasUnicodeWord(string) ? unicodeWords(string) : asciiWords(string);
+  }
+  return string.match(pattern) || [];
+}
+
+module.exports = words;
+
+
+/***/ }),
+
+/***/ "./node_modules/nanoclone/src/index.js":
+/*!*********************************************!*\
+  !*** ./node_modules/nanoclone/src/index.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ clone)
+/* harmony export */ });
+// ES6 Map
+var map
+try {
+  map = Map
+} catch (_) { }
+var set
+
+// ES6 Set
+try {
+  set = Set
+} catch (_) { }
+
+function baseClone (src, circulars, clones) {
+  // Null/undefined/functions/etc
+  if (!src || typeof src !== 'object' || typeof src === 'function') {
+    return src
+  }
+
+  // DOM Node
+  if (src.nodeType && 'cloneNode' in src) {
+    return src.cloneNode(true)
+  }
+
+  // Date
+  if (src instanceof Date) {
+    return new Date(src.getTime())
+  }
+
+  // RegExp
+  if (src instanceof RegExp) {
+    return new RegExp(src)
+  }
+
+  // Arrays
+  if (Array.isArray(src)) {
+    return src.map(clone)
+  }
+
+  // ES6 Maps
+  if (map && src instanceof map) {
+    return new Map(Array.from(src.entries()))
+  }
+
+  // ES6 Sets
+  if (set && src instanceof set) {
+    return new Set(Array.from(src.values()))
+  }
+
+  // Object
+  if (src instanceof Object) {
+    circulars.push(src)
+    var obj = Object.create(src)
+    clones.push(obj)
+    for (var key in src) {
+      var idx = circulars.findIndex(function (i) {
+        return i === src[key]
+      })
+      obj[key] = idx > -1 ? clones[idx] : baseClone(src[key], circulars, clones)
+    }
+    return obj
+  }
+
+  // ???
+  return src
+}
+
+function clone (src) {
+  return baseClone(src, [], [])
+}
+
 
 /***/ }),
 
@@ -27390,6 +33074,175 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
+/***/ "./node_modules/property-expr/index.js":
+/*!*********************************************!*\
+  !*** ./node_modules/property-expr/index.js ***!
+  \*********************************************/
+/***/ ((module) => {
+
+"use strict";
+/**
+ * Based on Kendo UI Core expression code <https://github.com/telerik/kendo-ui-core#license-information>
+ */
+
+
+function Cache(maxSize) {
+  this._maxSize = maxSize
+  this.clear()
+}
+Cache.prototype.clear = function () {
+  this._size = 0
+  this._values = Object.create(null)
+}
+Cache.prototype.get = function (key) {
+  return this._values[key]
+}
+Cache.prototype.set = function (key, value) {
+  this._size >= this._maxSize && this.clear()
+  if (!(key in this._values)) this._size++
+
+  return (this._values[key] = value)
+}
+
+var SPLIT_REGEX = /[^.^\]^[]+|(?=\[\]|\.\.)/g,
+  DIGIT_REGEX = /^\d+$/,
+  LEAD_DIGIT_REGEX = /^\d/,
+  SPEC_CHAR_REGEX = /[~`!#$%\^&*+=\-\[\]\\';,/{}|\\":<>\?]/g,
+  CLEAN_QUOTES_REGEX = /^\s*(['"]?)(.*?)(\1)\s*$/,
+  MAX_CACHE_SIZE = 512
+
+var pathCache = new Cache(MAX_CACHE_SIZE),
+  setCache = new Cache(MAX_CACHE_SIZE),
+  getCache = new Cache(MAX_CACHE_SIZE)
+
+var config
+
+module.exports = {
+  Cache: Cache,
+
+  split: split,
+
+  normalizePath: normalizePath,
+
+  setter: function (path) {
+    var parts = normalizePath(path)
+
+    return (
+      setCache.get(path) ||
+      setCache.set(path, function setter(obj, value) {
+        var index = 0
+        var len = parts.length
+        var data = obj
+
+        while (index < len - 1) {
+          var part = parts[index]
+          if (
+            part === '__proto__' ||
+            part === 'constructor' ||
+            part === 'prototype'
+          ) {
+            return obj
+          }
+
+          data = data[parts[index++]]
+        }
+        data[parts[index]] = value
+      })
+    )
+  },
+
+  getter: function (path, safe) {
+    var parts = normalizePath(path)
+    return (
+      getCache.get(path) ||
+      getCache.set(path, function getter(data) {
+        var index = 0,
+          len = parts.length
+        while (index < len) {
+          if (data != null || !safe) data = data[parts[index++]]
+          else return
+        }
+        return data
+      })
+    )
+  },
+
+  join: function (segments) {
+    return segments.reduce(function (path, part) {
+      return (
+        path +
+        (isQuoted(part) || DIGIT_REGEX.test(part)
+          ? '[' + part + ']'
+          : (path ? '.' : '') + part)
+      )
+    }, '')
+  },
+
+  forEach: function (path, cb, thisArg) {
+    forEach(Array.isArray(path) ? path : split(path), cb, thisArg)
+  },
+}
+
+function normalizePath(path) {
+  return (
+    pathCache.get(path) ||
+    pathCache.set(
+      path,
+      split(path).map(function (part) {
+        return part.replace(CLEAN_QUOTES_REGEX, '$2')
+      })
+    )
+  )
+}
+
+function split(path) {
+  return path.match(SPLIT_REGEX) || ['']
+}
+
+function forEach(parts, iter, thisArg) {
+  var len = parts.length,
+    part,
+    idx,
+    isArray,
+    isBracket
+
+  for (idx = 0; idx < len; idx++) {
+    part = parts[idx]
+
+    if (part) {
+      if (shouldBeQuoted(part)) {
+        part = '"' + part + '"'
+      }
+
+      isBracket = isQuoted(part)
+      isArray = !isBracket && /^\d+$/.test(part)
+
+      iter.call(thisArg, part, isBracket, isArray, idx, parts)
+    }
+  }
+}
+
+function isQuoted(str) {
+  return (
+    typeof str === 'string' && str && ["'", '"'].indexOf(str.charAt(0)) !== -1
+  )
+}
+
+function hasLeadingNumber(part) {
+  return part.match(LEAD_DIGIT_REGEX) && !part.match(DIGIT_REGEX)
+}
+
+function hasSpecialChars(part) {
+  return SPEC_CHAR_REGEX.test(part)
+}
+
+function shouldBeQuoted(part) {
+  return !isQuoted(part) && (hasLeadingNumber(part) || hasSpecialChars(part))
+}
+
+
+/***/ }),
+
 /***/ "./node_modules/vue3-tel-input/dist/vue3-tel-input.css":
 /*!*************************************************************!*\
   !*** ./node_modules/vue3-tel-input/dist/vue3-tel-input.css ***!
@@ -27447,6 +33300,36 @@ var update = _style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMP
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_css_loader_dist_cjs_js_clonedRuleSet_8_use_1_vue_loader_dist_stylePostLoader_js_postcss_loader_dist_cjs_js_clonedRuleSet_8_use_2_default_css_vue_type_style_index_0_lang_css__WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/FirstStep.vue?vue&type=style&index=0&id=64171eee&lang=css":
+/*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/FirstStep.vue?vue&type=style&index=0&id=64171eee&lang=css ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_clonedRuleSet_8_use_1_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_8_use_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_FirstStep_vue_vue_type_style_index_0_id_64171eee_lang_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!../../node_modules/vue-loader/dist/stylePostLoader.js!../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./FirstStep.vue?vue&type=style&index=0&id=64171eee&lang=css */ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/FirstStep.vue?vue&type=style&index=0&id=64171eee&lang=css");
+
+            
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_8_use_1_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_8_use_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_FirstStep_vue_vue_type_style_index_0_id_64171eee_lang_css__WEBPACK_IMPORTED_MODULE_1__["default"], options);
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_8_use_1_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_8_use_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_FirstStep_vue_vue_type_style_index_0_id_64171eee_lang_css__WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
 
 /***/ }),
 
@@ -27759,6 +33642,3183 @@ module.exports = function (list, options) {
 
 /***/ }),
 
+/***/ "./node_modules/toposort/index.js":
+/*!****************************************!*\
+  !*** ./node_modules/toposort/index.js ***!
+  \****************************************/
+/***/ ((module) => {
+
+
+/**
+ * Topological sorting function
+ *
+ * @param {Array} edges
+ * @returns {Array}
+ */
+
+module.exports = function(edges) {
+  return toposort(uniqueNodes(edges), edges)
+}
+
+module.exports.array = toposort
+
+function toposort(nodes, edges) {
+  var cursor = nodes.length
+    , sorted = new Array(cursor)
+    , visited = {}
+    , i = cursor
+    // Better data structures make algorithm much faster.
+    , outgoingEdges = makeOutgoingEdges(edges)
+    , nodesHash = makeNodesHash(nodes)
+
+  // check for unknown nodes
+  edges.forEach(function(edge) {
+    if (!nodesHash.has(edge[0]) || !nodesHash.has(edge[1])) {
+      throw new Error('Unknown node. There is an unknown node in the supplied edges.')
+    }
+  })
+
+  while (i--) {
+    if (!visited[i]) visit(nodes[i], i, new Set())
+  }
+
+  return sorted
+
+  function visit(node, i, predecessors) {
+    if(predecessors.has(node)) {
+      var nodeRep
+      try {
+        nodeRep = ", node was:" + JSON.stringify(node)
+      } catch(e) {
+        nodeRep = ""
+      }
+      throw new Error('Cyclic dependency' + nodeRep)
+    }
+
+    if (!nodesHash.has(node)) {
+      throw new Error('Found unknown node. Make sure to provided all involved nodes. Unknown node: '+JSON.stringify(node))
+    }
+
+    if (visited[i]) return;
+    visited[i] = true
+
+    var outgoing = outgoingEdges.get(node) || new Set()
+    outgoing = Array.from(outgoing)
+
+    if (i = outgoing.length) {
+      predecessors.add(node)
+      do {
+        var child = outgoing[--i]
+        visit(child, nodesHash.get(child), predecessors)
+      } while (i)
+      predecessors.delete(node)
+    }
+
+    sorted[--cursor] = node
+  }
+}
+
+function uniqueNodes(arr){
+  var res = new Set()
+  for (var i = 0, len = arr.length; i < len; i++) {
+    var edge = arr[i]
+    res.add(edge[0])
+    res.add(edge[1])
+  }
+  return Array.from(res)
+}
+
+function makeOutgoingEdges(arr){
+  var edges = new Map()
+  for (var i = 0, len = arr.length; i < len; i++) {
+    var edge = arr[i]
+    if (!edges.has(edge[0])) edges.set(edge[0], new Set())
+    if (!edges.has(edge[1])) edges.set(edge[1], new Set())
+    edges.get(edge[0]).add(edge[1])
+  }
+  return edges
+}
+
+function makeNodesHash(arr){
+  var res = new Map()
+  for (var i = 0, len = arr.length; i < len; i++) {
+    res.set(arr[i], i)
+  }
+  return res
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/vee-validate/dist/vee-validate.esm.js":
+/*!************************************************************!*\
+  !*** ./node_modules/vee-validate/dist/vee-validate.esm.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ErrorMessage": () => (/* binding */ ErrorMessage),
+/* harmony export */   "Field": () => (/* binding */ Field),
+/* harmony export */   "FieldArray": () => (/* binding */ FieldArray),
+/* harmony export */   "FieldContextKey": () => (/* binding */ FieldContextKey),
+/* harmony export */   "Form": () => (/* binding */ Form),
+/* harmony export */   "FormContextKey": () => (/* binding */ FormContextKey),
+/* harmony export */   "configure": () => (/* binding */ configure),
+/* harmony export */   "defineRule": () => (/* binding */ defineRule),
+/* harmony export */   "useField": () => (/* binding */ useField),
+/* harmony export */   "useFieldArray": () => (/* binding */ useFieldArray),
+/* harmony export */   "useFieldError": () => (/* binding */ useFieldError),
+/* harmony export */   "useFieldValue": () => (/* binding */ useFieldValue),
+/* harmony export */   "useForm": () => (/* binding */ useForm),
+/* harmony export */   "useFormErrors": () => (/* binding */ useFormErrors),
+/* harmony export */   "useFormValues": () => (/* binding */ useFormValues),
+/* harmony export */   "useIsFieldDirty": () => (/* binding */ useIsFieldDirty),
+/* harmony export */   "useIsFieldTouched": () => (/* binding */ useIsFieldTouched),
+/* harmony export */   "useIsFieldValid": () => (/* binding */ useIsFieldValid),
+/* harmony export */   "useIsFormDirty": () => (/* binding */ useIsFormDirty),
+/* harmony export */   "useIsFormTouched": () => (/* binding */ useIsFormTouched),
+/* harmony export */   "useIsFormValid": () => (/* binding */ useIsFormValid),
+/* harmony export */   "useIsSubmitting": () => (/* binding */ useIsSubmitting),
+/* harmony export */   "useResetForm": () => (/* binding */ useResetForm),
+/* harmony export */   "useSubmitCount": () => (/* binding */ useSubmitCount),
+/* harmony export */   "useSubmitForm": () => (/* binding */ useSubmitForm),
+/* harmony export */   "useValidateField": () => (/* binding */ useValidateField),
+/* harmony export */   "useValidateForm": () => (/* binding */ useValidateForm),
+/* harmony export */   "validate": () => (/* binding */ validate)
+/* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");
+/* harmony import */ var _vue_devtools_api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @vue/devtools-api */ "./node_modules/@vue/devtools-api/lib/esm/index.js");
+/**
+  * vee-validate v4.5.11
+  * (c) 2022 Abdelrahman Awad
+  * @license MIT
+  */
+
+
+
+function isCallable(fn) {
+    return typeof fn === 'function';
+}
+function isNullOrUndefined(value) {
+    return value === null || value === undefined;
+}
+const isObject = (obj) => obj !== null && !!obj && typeof obj === 'object' && !Array.isArray(obj);
+function isIndex(value) {
+    return Number(value) >= 0;
+}
+function toNumber(value) {
+    const n = parseFloat(value);
+    return isNaN(n) ? value : n;
+}
+
+const RULES = {};
+/**
+ * Adds a custom validator to the list of validation rules.
+ */
+function defineRule(id, validator) {
+    // makes sure new rules are properly formatted.
+    guardExtend(id, validator);
+    RULES[id] = validator;
+}
+/**
+ * Gets an already defined rule
+ */
+function resolveRule(id) {
+    return RULES[id];
+}
+/**
+ * Guards from extension violations.
+ */
+function guardExtend(id, validator) {
+    if (isCallable(validator)) {
+        return;
+    }
+    throw new Error(`Extension Error: The validator '${id}' must be a function.`);
+}
+
+const FormContextKey = Symbol('vee-validate-form');
+const FieldContextKey = Symbol('vee-validate-field-instance');
+const IS_ABSENT = Symbol('Default empty value');
+
+function isLocator(value) {
+    return isCallable(value) && !!value.__locatorRef;
+}
+/**
+ * Checks if an tag name is a native HTML tag and not a Vue component
+ */
+function isHTMLTag(tag) {
+    return ['input', 'textarea', 'select'].includes(tag);
+}
+/**
+ * Checks if an input is of type file
+ */
+function isFileInputNode(tag, attrs) {
+    return isHTMLTag(tag) && attrs.type === 'file';
+}
+function isYupValidator(value) {
+    return !!value && isCallable(value.validate);
+}
+function hasCheckedAttr(type) {
+    return type === 'checkbox' || type === 'radio';
+}
+function isContainerValue(value) {
+    return isObject(value) || Array.isArray(value);
+}
+/**
+ * True if the value is an empty object or array
+ */
+function isEmptyContainer(value) {
+    if (Array.isArray(value)) {
+        return value.length === 0;
+    }
+    return isObject(value) && Object.keys(value).length === 0;
+}
+/**
+ * Checks if the path opted out of nested fields using `[fieldName]` syntax
+ */
+function isNotNestedPath(path) {
+    return /^\[.+\]$/i.test(path);
+}
+/**
+ * Checks if an element is a native HTML5 multi-select input element
+ */
+function isNativeMultiSelect(el) {
+    return isNativeSelect(el) && el.multiple;
+}
+/**
+ * Checks if an element is a native HTML5 select input element
+ */
+function isNativeSelect(el) {
+    return el.tagName === 'SELECT';
+}
+/**
+ * Checks if a tag name with attrs object will render a native multi-select element
+ */
+function isNativeMultiSelectNode(tag, attrs) {
+    // The falsy value array is the values that Vue won't add the `multiple` prop if it has one of these values
+    const hasTruthyBindingValue = ![false, null, undefined, 0].includes(attrs.multiple) && !Number.isNaN(attrs.multiple);
+    return tag === 'select' && 'multiple' in attrs && hasTruthyBindingValue;
+}
+/**
+ * Checks if a node should have a `:value` binding or not
+ *
+ * These nodes should not have a value binding
+ * For files, because they are not reactive
+ * For multi-selects because the value binding will reset the value
+ */
+function shouldHaveValueBinding(tag, attrs) {
+    return isNativeMultiSelectNode(tag, attrs) || isFileInputNode(tag, attrs);
+}
+function isFormSubmitEvent(evt) {
+    return isEvent(evt) && evt.target && 'submit' in evt.target;
+}
+function isEvent(evt) {
+    if (!evt) {
+        return false;
+    }
+    if (typeof Event !== 'undefined' && isCallable(Event) && evt instanceof Event) {
+        return true;
+    }
+    // this is for IE and Cypress #3161
+    /* istanbul ignore next */
+    if (evt && evt.srcElement) {
+        return true;
+    }
+    return false;
+}
+function isPropPresent(obj, prop) {
+    return prop in obj && obj[prop] !== IS_ABSENT;
+}
+
+function cleanupNonNestedPath(path) {
+    if (isNotNestedPath(path)) {
+        return path.replace(/\[|\]/gi, '');
+    }
+    return path;
+}
+function getFromPath(object, path, fallback) {
+    if (!object) {
+        return fallback;
+    }
+    if (isNotNestedPath(path)) {
+        return object[cleanupNonNestedPath(path)];
+    }
+    const resolvedValue = (path || '')
+        .split(/\.|\[(\d+)\]/)
+        .filter(Boolean)
+        .reduce((acc, propKey) => {
+        if (isContainerValue(acc) && propKey in acc) {
+            return acc[propKey];
+        }
+        return fallback;
+    }, object);
+    return resolvedValue;
+}
+/**
+ * Sets a nested property value in a path, creates the path properties if it doesn't exist
+ */
+function setInPath(object, path, value) {
+    if (isNotNestedPath(path)) {
+        object[cleanupNonNestedPath(path)] = value;
+        return;
+    }
+    const keys = path.split(/\.|\[(\d+)\]/).filter(Boolean);
+    let acc = object;
+    for (let i = 0; i < keys.length; i++) {
+        // Last key, set it
+        if (i === keys.length - 1) {
+            acc[keys[i]] = value;
+            return;
+        }
+        // Key does not exist, create a container for it
+        if (!(keys[i] in acc) || isNullOrUndefined(acc[keys[i]])) {
+            // container can be either an object or an array depending on the next key if it exists
+            acc[keys[i]] = isIndex(keys[i + 1]) ? [] : {};
+        }
+        acc = acc[keys[i]];
+    }
+}
+function unset(object, key) {
+    if (Array.isArray(object) && isIndex(key)) {
+        object.splice(Number(key), 1);
+        return;
+    }
+    if (isObject(object)) {
+        delete object[key];
+    }
+}
+/**
+ * Removes a nested property from object
+ */
+function unsetPath(object, path) {
+    if (isNotNestedPath(path)) {
+        delete object[cleanupNonNestedPath(path)];
+        return;
+    }
+    const keys = path.split(/\.|\[(\d+)\]/).filter(Boolean);
+    let acc = object;
+    for (let i = 0; i < keys.length; i++) {
+        // Last key, unset it
+        if (i === keys.length - 1) {
+            unset(acc, keys[i]);
+            break;
+        }
+        // Key does not exist, exit
+        if (!(keys[i] in acc) || isNullOrUndefined(acc[keys[i]])) {
+            break;
+        }
+        acc = acc[keys[i]];
+    }
+    const pathValues = keys.map((_, idx) => {
+        return getFromPath(object, keys.slice(0, idx).join('.'));
+    });
+    for (let i = pathValues.length - 1; i >= 0; i--) {
+        if (!isEmptyContainer(pathValues[i])) {
+            continue;
+        }
+        if (i === 0) {
+            unset(object, keys[0]);
+            continue;
+        }
+        unset(pathValues[i - 1], keys[i - 1]);
+    }
+}
+/**
+ * A typed version of Object.keys
+ */
+function keysOf(record) {
+    return Object.keys(record);
+}
+// Uses same component provide as its own injections
+// Due to changes in https://github.com/vuejs/vue-next/pull/2424
+function injectWithSelf(symbol, def = undefined) {
+    const vm = (0,vue__WEBPACK_IMPORTED_MODULE_0__.getCurrentInstance)();
+    return (vm === null || vm === void 0 ? void 0 : vm.provides[symbol]) || (0,vue__WEBPACK_IMPORTED_MODULE_0__.inject)(symbol, def);
+}
+function warn(message) {
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.warn)(`[vee-validate]: ${message}`);
+}
+/**
+ * Ensures we deal with a singular field value
+ */
+function normalizeField(field) {
+    if (Array.isArray(field)) {
+        return field[0];
+    }
+    return field;
+}
+function resolveNextCheckboxValue(currentValue, checkedValue, uncheckedValue) {
+    if (Array.isArray(currentValue)) {
+        const newVal = [...currentValue];
+        const idx = newVal.indexOf(checkedValue);
+        idx >= 0 ? newVal.splice(idx, 1) : newVal.push(checkedValue);
+        return newVal;
+    }
+    return currentValue === checkedValue ? uncheckedValue : checkedValue;
+}
+/**
+ * Creates a throttled function that only invokes the provided function (`func`) at most once per within a given number of milliseconds
+ * (`limit`)
+ */
+function throttle(func, limit) {
+    let inThrottle;
+    let lastResult;
+    return function (...args) {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const context = this;
+        if (!inThrottle) {
+            inThrottle = true;
+            setTimeout(() => (inThrottle = false), limit);
+            lastResult = func.apply(context, args);
+        }
+        return lastResult;
+    };
+}
+function debounceAsync(inner, ms = 0) {
+    let timer = null;
+    let resolves = [];
+    return function (...args) {
+        // Run the function after a certain amount of time
+        if (timer) {
+            window.clearTimeout(timer);
+        }
+        timer = window.setTimeout(() => {
+            // Get the result of the inner function, then apply it to the resolve function of
+            // each promise that has been created since the last time the inner function was run
+            const result = inner(...args);
+            resolves.forEach(r => r(result));
+            resolves = [];
+        }, ms);
+        return new Promise(resolve => resolves.push(resolve));
+    };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const normalizeChildren = (tag, context, slotProps) => {
+    if (!context.slots.default) {
+        return context.slots.default;
+    }
+    if (typeof tag === 'string' || !tag) {
+        return context.slots.default(slotProps());
+    }
+    return {
+        default: () => { var _a, _b; return (_b = (_a = context.slots).default) === null || _b === void 0 ? void 0 : _b.call(_a, slotProps()); },
+    };
+};
+/**
+ * Vue adds a `_value` prop at the moment on the input elements to store the REAL value on them, real values are different than the `value` attribute
+ * as they do not get casted to strings unlike `el.value` which preserves user-code behavior
+ */
+function getBoundValue(el) {
+    if (hasValueBinding(el)) {
+        return el._value;
+    }
+    return undefined;
+}
+/**
+ * Vue adds a `_value` prop at the moment on the input elements to store the REAL value on them, real values are different than the `value` attribute
+ * as they do not get casted to strings unlike `el.value` which preserves user-code behavior
+ */
+function hasValueBinding(el) {
+    return '_value' in el;
+}
+
+function normalizeEventValue(value) {
+    if (!isEvent(value)) {
+        return value;
+    }
+    const input = value.target;
+    // Vue sets the current bound value on `_value` prop
+    // for checkboxes it it should fetch the value binding type as is (boolean instead of string)
+    if (hasCheckedAttr(input.type) && hasValueBinding(input)) {
+        return getBoundValue(input);
+    }
+    if (input.type === 'file' && input.files) {
+        return Array.from(input.files);
+    }
+    if (isNativeMultiSelect(input)) {
+        return Array.from(input.options)
+            .filter(opt => opt.selected && !opt.disabled)
+            .map(getBoundValue);
+    }
+    // makes sure we get the actual `option` bound value
+    // #3440
+    if (isNativeSelect(input)) {
+        const selectedOption = Array.from(input.options).find(opt => opt.selected);
+        return selectedOption ? getBoundValue(selectedOption) : input.value;
+    }
+    return input.value;
+}
+
+/**
+ * Normalizes the given rules expression.
+ */
+function normalizeRules(rules) {
+    const acc = {};
+    Object.defineProperty(acc, '_$$isNormalized', {
+        value: true,
+        writable: false,
+        enumerable: false,
+        configurable: false,
+    });
+    if (!rules) {
+        return acc;
+    }
+    // Object is already normalized, skip.
+    if (isObject(rules) && rules._$$isNormalized) {
+        return rules;
+    }
+    if (isObject(rules)) {
+        return Object.keys(rules).reduce((prev, curr) => {
+            const params = normalizeParams(rules[curr]);
+            if (rules[curr] !== false) {
+                prev[curr] = buildParams(params);
+            }
+            return prev;
+        }, acc);
+    }
+    /* istanbul ignore if */
+    if (typeof rules !== 'string') {
+        return acc;
+    }
+    return rules.split('|').reduce((prev, rule) => {
+        const parsedRule = parseRule(rule);
+        if (!parsedRule.name) {
+            return prev;
+        }
+        prev[parsedRule.name] = buildParams(parsedRule.params);
+        return prev;
+    }, acc);
+}
+/**
+ * Normalizes a rule param.
+ */
+function normalizeParams(params) {
+    if (params === true) {
+        return [];
+    }
+    if (Array.isArray(params)) {
+        return params;
+    }
+    if (isObject(params)) {
+        return params;
+    }
+    return [params];
+}
+function buildParams(provided) {
+    const mapValueToLocator = (value) => {
+        // A target param using interpolation
+        if (typeof value === 'string' && value[0] === '@') {
+            return createLocator(value.slice(1));
+        }
+        return value;
+    };
+    if (Array.isArray(provided)) {
+        return provided.map(mapValueToLocator);
+    }
+    // #3073
+    if (provided instanceof RegExp) {
+        return [provided];
+    }
+    return Object.keys(provided).reduce((prev, key) => {
+        prev[key] = mapValueToLocator(provided[key]);
+        return prev;
+    }, {});
+}
+/**
+ * Parses a rule string expression.
+ */
+const parseRule = (rule) => {
+    let params = [];
+    const name = rule.split(':')[0];
+    if (rule.includes(':')) {
+        params = rule.split(':').slice(1).join(':').split(',');
+    }
+    return { name, params };
+};
+function createLocator(value) {
+    const locator = (crossTable) => {
+        const val = getFromPath(crossTable, value) || crossTable[value];
+        return val;
+    };
+    locator.__locatorRef = value;
+    return locator;
+}
+function extractLocators(params) {
+    if (Array.isArray(params)) {
+        return params.filter(isLocator);
+    }
+    return keysOf(params)
+        .filter(key => isLocator(params[key]))
+        .map(key => params[key]);
+}
+
+const DEFAULT_CONFIG = {
+    generateMessage: ({ field }) => `${field} is not valid.`,
+    bails: true,
+    validateOnBlur: true,
+    validateOnChange: true,
+    validateOnInput: false,
+    validateOnModelUpdate: true,
+};
+let currentConfig = Object.assign({}, DEFAULT_CONFIG);
+const getConfig = () => currentConfig;
+const setConfig = (newConf) => {
+    currentConfig = Object.assign(Object.assign({}, currentConfig), newConf);
+};
+const configure = setConfig;
+
+/**
+ * Validates a value against the rules.
+ */
+async function validate(value, rules, options = {}) {
+    const shouldBail = options === null || options === void 0 ? void 0 : options.bails;
+    const field = {
+        name: (options === null || options === void 0 ? void 0 : options.name) || '{field}',
+        rules,
+        bails: shouldBail !== null && shouldBail !== void 0 ? shouldBail : true,
+        formData: (options === null || options === void 0 ? void 0 : options.values) || {},
+    };
+    const result = await _validate(field, value);
+    const errors = result.errors;
+    return {
+        errors,
+        valid: !errors.length,
+    };
+}
+/**
+ * Starts the validation process.
+ */
+async function _validate(field, value) {
+    if (isYupValidator(field.rules)) {
+        return validateFieldWithYup(value, field.rules, { bails: field.bails });
+    }
+    // if a generic function or chain of generic functions
+    if (isCallable(field.rules) || Array.isArray(field.rules)) {
+        const ctx = {
+            field: field.name,
+            form: field.formData,
+            value: value,
+        };
+        // Normalize the pipeline
+        const pipeline = Array.isArray(field.rules) ? field.rules : [field.rules];
+        const length = pipeline.length;
+        const errors = [];
+        for (let i = 0; i < length; i++) {
+            const rule = pipeline[i];
+            const result = await rule(value, ctx);
+            const isValid = typeof result !== 'string' && result;
+            if (isValid) {
+                continue;
+            }
+            const message = typeof result === 'string' ? result : _generateFieldError(ctx);
+            errors.push(message);
+            if (field.bails) {
+                return {
+                    errors,
+                };
+            }
+        }
+        return {
+            errors,
+        };
+    }
+    const normalizedContext = Object.assign(Object.assign({}, field), { rules: normalizeRules(field.rules) });
+    const errors = [];
+    const rulesKeys = Object.keys(normalizedContext.rules);
+    const length = rulesKeys.length;
+    for (let i = 0; i < length; i++) {
+        const rule = rulesKeys[i];
+        const result = await _test(normalizedContext, value, {
+            name: rule,
+            params: normalizedContext.rules[rule],
+        });
+        if (result.error) {
+            errors.push(result.error);
+            if (field.bails) {
+                return {
+                    errors,
+                };
+            }
+        }
+    }
+    return {
+        errors,
+    };
+}
+/**
+ * Handles yup validation
+ */
+async function validateFieldWithYup(value, validator, opts) {
+    var _a;
+    const errors = await validator
+        .validate(value, {
+        abortEarly: (_a = opts.bails) !== null && _a !== void 0 ? _a : true,
+    })
+        .then(() => [])
+        .catch((err) => {
+        // Yup errors have a name prop one them.
+        // https://github.com/jquense/yup#validationerrorerrors-string--arraystring-value-any-path-string
+        if (err.name === 'ValidationError') {
+            return err.errors;
+        }
+        // re-throw the error so we don't hide it
+        throw err;
+    });
+    return {
+        errors,
+    };
+}
+/**
+ * Tests a single input value against a rule.
+ */
+async function _test(field, value, rule) {
+    const validator = resolveRule(rule.name);
+    if (!validator) {
+        throw new Error(`No such validator '${rule.name}' exists.`);
+    }
+    const params = fillTargetValues(rule.params, field.formData);
+    const ctx = {
+        field: field.name,
+        value,
+        form: field.formData,
+        rule: Object.assign(Object.assign({}, rule), { params }),
+    };
+    const result = await validator(value, params, ctx);
+    if (typeof result === 'string') {
+        return {
+            error: result,
+        };
+    }
+    return {
+        error: result ? undefined : _generateFieldError(ctx),
+    };
+}
+/**
+ * Generates error messages.
+ */
+function _generateFieldError(fieldCtx) {
+    const message = getConfig().generateMessage;
+    if (!message) {
+        return 'Field is invalid';
+    }
+    return message(fieldCtx);
+}
+function fillTargetValues(params, crossTable) {
+    const normalize = (value) => {
+        if (isLocator(value)) {
+            return value(crossTable);
+        }
+        return value;
+    };
+    if (Array.isArray(params)) {
+        return params.map(normalize);
+    }
+    return Object.keys(params).reduce((acc, param) => {
+        acc[param] = normalize(params[param]);
+        return acc;
+    }, {});
+}
+async function validateYupSchema(schema, values) {
+    const errorObjects = await schema
+        .validate(values, { abortEarly: false })
+        .then(() => [])
+        .catch((err) => {
+        // Yup errors have a name prop one them.
+        // https://github.com/jquense/yup#validationerrorerrors-string--arraystring-value-any-path-string
+        if (err.name !== 'ValidationError') {
+            throw err;
+        }
+        // list of aggregated errors
+        return err.inner || [];
+    });
+    const results = {};
+    const errors = {};
+    for (const error of errorObjects) {
+        const messages = error.errors;
+        results[error.path] = { valid: !messages.length, errors: messages };
+        if (messages.length) {
+            errors[error.path] = messages[0];
+        }
+    }
+    return {
+        valid: !errorObjects.length,
+        results,
+        errors,
+    };
+}
+async function validateObjectSchema(schema, values, opts) {
+    const paths = keysOf(schema);
+    const validations = paths.map(async (path) => {
+        var _a, _b, _c;
+        const fieldResult = await validate(getFromPath(values, path), schema[path], {
+            name: ((_a = opts === null || opts === void 0 ? void 0 : opts.names) === null || _a === void 0 ? void 0 : _a[path]) || path,
+            values: values,
+            bails: (_c = (_b = opts === null || opts === void 0 ? void 0 : opts.bailsMap) === null || _b === void 0 ? void 0 : _b[path]) !== null && _c !== void 0 ? _c : true,
+        });
+        return Object.assign(Object.assign({}, fieldResult), { path });
+    });
+    let isAllValid = true;
+    const validationResults = await Promise.all(validations);
+    const results = {};
+    const errors = {};
+    for (const result of validationResults) {
+        results[result.path] = {
+            valid: result.valid,
+            errors: result.errors,
+        };
+        if (!result.valid) {
+            isAllValid = false;
+            errors[result.path] = result.errors[0];
+        }
+    }
+    return {
+        valid: isAllValid,
+        results,
+        errors,
+    };
+}
+
+function set(obj, key, val) {
+	if (typeof val.value === 'object') val.value = klona(val.value);
+	if (!val.enumerable || val.get || val.set || !val.configurable || !val.writable || key === '__proto__') {
+		Object.defineProperty(obj, key, val);
+	} else obj[key] = val.value;
+}
+
+function klona(x) {
+	if (typeof x !== 'object') return x;
+
+	var i=0, k, list, tmp, str=Object.prototype.toString.call(x);
+
+	if (str === '[object Object]') {
+		tmp = Object.create(x.__proto__ || null);
+	} else if (str === '[object Array]') {
+		tmp = Array(x.length);
+	} else if (str === '[object Set]') {
+		tmp = new Set;
+		x.forEach(function (val) {
+			tmp.add(klona(val));
+		});
+	} else if (str === '[object Map]') {
+		tmp = new Map;
+		x.forEach(function (val, key) {
+			tmp.set(klona(key), klona(val));
+		});
+	} else if (str === '[object Date]') {
+		tmp = new Date(+x);
+	} else if (str === '[object RegExp]') {
+		tmp = new RegExp(x.source, x.flags);
+	} else if (str === '[object DataView]') {
+		tmp = new x.constructor( klona(x.buffer) );
+	} else if (str === '[object ArrayBuffer]') {
+		tmp = x.slice(0);
+	} else if (str.slice(-6) === 'Array]') {
+		// ArrayBuffer.isView(x)
+		// ~> `new` bcuz `Buffer.slice` => ref
+		tmp = new x.constructor(x);
+	}
+
+	if (tmp) {
+		for (list=Object.getOwnPropertySymbols(x); i < list.length; i++) {
+			set(tmp, list[i], Object.getOwnPropertyDescriptor(x, list[i]));
+		}
+
+		for (i=0, list=Object.getOwnPropertyNames(x); i < list.length; i++) {
+			if (Object.hasOwnProperty.call(tmp, k=list[i]) && tmp[k] === x[k]) continue;
+			set(tmp, k, Object.getOwnPropertyDescriptor(x, k));
+		}
+	}
+
+	return tmp || x;
+}
+
+var es6 = function equal(a, b) {
+  if (a === b) return true;
+
+  if (a && b && typeof a == 'object' && typeof b == 'object') {
+    if (a.constructor !== b.constructor) return false;
+
+    var length, i, keys;
+    if (Array.isArray(a)) {
+      length = a.length;
+      if (length != b.length) return false;
+      for (i = length; i-- !== 0;)
+        if (!equal(a[i], b[i])) return false;
+      return true;
+    }
+
+
+    if ((a instanceof Map) && (b instanceof Map)) {
+      if (a.size !== b.size) return false;
+      for (i of a.entries())
+        if (!b.has(i[0])) return false;
+      for (i of a.entries())
+        if (!equal(i[1], b.get(i[0]))) return false;
+      return true;
+    }
+
+    if ((a instanceof Set) && (b instanceof Set)) {
+      if (a.size !== b.size) return false;
+      for (i of a.entries())
+        if (!b.has(i[0])) return false;
+      return true;
+    }
+
+    if (ArrayBuffer.isView(a) && ArrayBuffer.isView(b)) {
+      length = a.length;
+      if (length != b.length) return false;
+      for (i = length; i-- !== 0;)
+        if (a[i] !== b[i]) return false;
+      return true;
+    }
+
+
+    if (a.constructor === RegExp) return a.source === b.source && a.flags === b.flags;
+    if (a.valueOf !== Object.prototype.valueOf) return a.valueOf() === b.valueOf();
+    if (a.toString !== Object.prototype.toString) return a.toString() === b.toString();
+
+    keys = Object.keys(a);
+    length = keys.length;
+    if (length !== Object.keys(b).length) return false;
+
+    for (i = length; i-- !== 0;)
+      if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
+
+    for (i = length; i-- !== 0;) {
+      var key = keys[i];
+
+      if (!equal(a[key], b[key])) return false;
+    }
+
+    return true;
+  }
+
+  // true if both NaN, false otherwise
+  return a!==a && b!==b;
+};
+
+let ID_COUNTER = 0;
+function useFieldState(path, init) {
+    const { value, initialValue, setInitialValue } = _useFieldValue(path, init.modelValue, !init.standalone);
+    const { errorMessage, errors, setErrors } = _useFieldErrors(path, !init.standalone);
+    const meta = _useFieldMeta(value, initialValue, errors);
+    const id = ID_COUNTER >= Number.MAX_SAFE_INTEGER ? 0 : ++ID_COUNTER;
+    function setState(state) {
+        var _a;
+        if ('value' in state) {
+            value.value = state.value;
+        }
+        if ('errors' in state) {
+            setErrors(state.errors);
+        }
+        if ('touched' in state) {
+            meta.touched = (_a = state.touched) !== null && _a !== void 0 ? _a : meta.touched;
+        }
+        if ('initialValue' in state) {
+            setInitialValue(state.initialValue);
+        }
+    }
+    return {
+        id,
+        path,
+        value,
+        initialValue,
+        meta,
+        errors,
+        errorMessage,
+        setState,
+    };
+}
+/**
+ * Creates the field value and resolves the initial value
+ */
+function _useFieldValue(path, modelValue, shouldInjectForm) {
+    const form = shouldInjectForm ? injectWithSelf(FormContextKey, undefined) : undefined;
+    const modelRef = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)((0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(modelValue));
+    function resolveInitialValue() {
+        if (!form) {
+            return (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(modelRef);
+        }
+        return getFromPath(form.meta.value.initialValues, (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path), (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(modelRef));
+    }
+    function setInitialValue(value) {
+        if (!form) {
+            modelRef.value = value;
+            return;
+        }
+        form.setFieldInitialValue((0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path), value);
+    }
+    const initialValue = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(resolveInitialValue);
+    // if no form is associated, use a regular ref.
+    if (!form) {
+        const value = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(resolveInitialValue());
+        return {
+            value,
+            initialValue,
+            setInitialValue,
+        };
+    }
+    // to set the initial value, first check if there is a current value, if there is then use it.
+    // otherwise use the configured initial value if it exists.
+    // prioritize model value over form values
+    // #3429
+    const currentValue = modelValue ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(modelValue) : getFromPath(form.values, (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path), (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(initialValue));
+    form.stageInitialValue((0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path), currentValue);
+    // otherwise use a computed setter that triggers the `setFieldValue`
+    const value = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)({
+        get() {
+            return getFromPath(form.values, (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path));
+        },
+        set(newVal) {
+            form.setFieldValue((0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path), newVal);
+        },
+    });
+    return {
+        value,
+        initialValue,
+        setInitialValue,
+    };
+}
+/**
+ * Creates meta flags state and some associated effects with them
+ */
+function _useFieldMeta(currentValue, initialValue, errors) {
+    const meta = (0,vue__WEBPACK_IMPORTED_MODULE_0__.reactive)({
+        touched: false,
+        pending: false,
+        valid: true,
+        validated: !!(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(errors).length,
+        initialValue: (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(initialValue)),
+        dirty: (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+            return !es6((0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(currentValue), (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(initialValue));
+        }),
+    });
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)(errors, value => {
+        meta.valid = !value.length;
+    }, {
+        immediate: true,
+        flush: 'sync',
+    });
+    return meta;
+}
+/**
+ * Creates the error message state for the field state
+ */
+function _useFieldErrors(path, shouldInjectForm) {
+    const form = shouldInjectForm ? injectWithSelf(FormContextKey, undefined) : undefined;
+    function normalizeErrors(messages) {
+        if (!messages) {
+            return [];
+        }
+        return Array.isArray(messages) ? messages : [messages];
+    }
+    if (!form) {
+        const errors = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)([]);
+        return {
+            errors,
+            errorMessage: (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => errors.value[0]),
+            setErrors: (messages) => {
+                errors.value = normalizeErrors(messages);
+            },
+        };
+    }
+    const errors = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => form.errorBag.value[(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path)] || []);
+    return {
+        errors,
+        errorMessage: (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => errors.value[0]),
+        setErrors: (messages) => {
+            form.setFieldErrorBag((0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path), normalizeErrors(messages));
+        },
+    };
+}
+
+function installDevtoolsPlugin(app) {
+    if ((true)) {
+        (0,_vue_devtools_api__WEBPACK_IMPORTED_MODULE_1__.setupDevtoolsPlugin)({
+            id: 'vee-validate-devtools-plugin',
+            label: 'VeeValidate Plugin',
+            packageName: 'vee-validate',
+            homepage: 'https://vee-validate.logaretm.com/v4',
+            app,
+            logo: 'https://vee-validate.logaretm.com/v4/logo.png',
+        }, setupApiHooks);
+    }
+}
+const DEVTOOLS_FORMS = {};
+const DEVTOOLS_FIELDS = {};
+let API;
+const refreshInspector = throttle(() => {
+    setTimeout(async () => {
+        await (0,vue__WEBPACK_IMPORTED_MODULE_0__.nextTick)();
+        API === null || API === void 0 ? void 0 : API.sendInspectorState(INSPECTOR_ID);
+        API === null || API === void 0 ? void 0 : API.sendInspectorTree(INSPECTOR_ID);
+    }, 100);
+}, 100);
+function registerFormWithDevTools(form) {
+    const vm = (0,vue__WEBPACK_IMPORTED_MODULE_0__.getCurrentInstance)();
+    if (!API) {
+        const app = vm === null || vm === void 0 ? void 0 : vm.appContext.app;
+        if (!app) {
+            return;
+        }
+        installDevtoolsPlugin(app);
+    }
+    DEVTOOLS_FORMS[form.formId] = Object.assign({}, form);
+    DEVTOOLS_FORMS[form.formId]._vm = vm;
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.onUnmounted)(() => {
+        delete DEVTOOLS_FORMS[form.formId];
+        refreshInspector();
+    });
+    refreshInspector();
+}
+function registerSingleFieldWithDevtools(field) {
+    const vm = (0,vue__WEBPACK_IMPORTED_MODULE_0__.getCurrentInstance)();
+    if (!API) {
+        const app = vm === null || vm === void 0 ? void 0 : vm.appContext.app;
+        if (!app) {
+            return;
+        }
+        installDevtoolsPlugin(app);
+    }
+    DEVTOOLS_FIELDS[field.id] = Object.assign({}, field);
+    DEVTOOLS_FIELDS[field.id]._vm = vm;
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.onUnmounted)(() => {
+        delete DEVTOOLS_FIELDS[field.id];
+        refreshInspector();
+    });
+    refreshInspector();
+}
+const INSPECTOR_ID = 'vee-validate-inspector';
+const COLORS = {
+    error: 0xbd4b4b,
+    success: 0x06d77b,
+    unknown: 0x54436b,
+    white: 0xffffff,
+    black: 0x000000,
+    blue: 0x035397,
+    purple: 0xb980f0,
+    orange: 0xf5a962,
+    gray: 0xbbbfca,
+};
+let SELECTED_NODE = null;
+function setupApiHooks(api) {
+    API = api;
+    api.addInspector({
+        id: INSPECTOR_ID,
+        icon: 'rule',
+        label: 'vee-validate',
+        noSelectionText: 'Select a vee-validate node to inspect',
+        actions: [
+            {
+                icon: 'done_outline',
+                tooltip: 'Validate selected item',
+                action: async () => {
+                    if (!SELECTED_NODE) {
+                        console.error('There is not a valid selected vee-validate node or component');
+                        return;
+                    }
+                    const result = await SELECTED_NODE.validate();
+                    console.log(result);
+                },
+            },
+            {
+                icon: 'delete_sweep',
+                tooltip: 'Clear validation state of the selected item',
+                action: () => {
+                    if (!SELECTED_NODE) {
+                        console.error('There is not a valid selected vee-validate node or component');
+                        return;
+                    }
+                    if ('id' in SELECTED_NODE) {
+                        SELECTED_NODE.resetField();
+                        return;
+                    }
+                    SELECTED_NODE.resetForm();
+                },
+            },
+        ],
+    });
+    api.on.getInspectorTree(payload => {
+        if (payload.inspectorId !== INSPECTOR_ID) {
+            return;
+        }
+        const forms = Object.values(DEVTOOLS_FORMS);
+        const fields = Object.values(DEVTOOLS_FIELDS);
+        payload.rootNodes = [
+            ...forms.map(mapFormForDevtoolsInspector),
+            ...fields.map(field => mapFieldForDevtoolsInspector(field)),
+        ];
+    });
+    api.on.getInspectorState((payload, ctx) => {
+        if (payload.inspectorId !== INSPECTOR_ID || ctx.currentTab !== `custom-inspector:${INSPECTOR_ID}`) {
+            return;
+        }
+        const { form, field, type } = decodeNodeId(payload.nodeId);
+        if (form && type === 'form') {
+            payload.state = buildFormState(form);
+            SELECTED_NODE = form;
+            return;
+        }
+        if (field && type === 'field') {
+            payload.state = buildFieldState(field);
+            SELECTED_NODE = field;
+            return;
+        }
+        SELECTED_NODE = null;
+    });
+}
+function mapFormForDevtoolsInspector(form) {
+    const { textColor, bgColor } = getTagTheme(form);
+    const formTreeNodes = {};
+    Object.values(form.fieldsByPath.value).forEach(field => {
+        const fieldInstance = Array.isArray(field) ? field[0] : field;
+        if (!fieldInstance) {
+            return;
+        }
+        setInPath(formTreeNodes, (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(fieldInstance.name), mapFieldForDevtoolsInspector(fieldInstance, form));
+    });
+    function buildFormTree(tree, path = []) {
+        const key = [...path].pop();
+        if ('id' in tree) {
+            return Object.assign(Object.assign({}, tree), { label: key || tree.label });
+        }
+        if (isObject(tree)) {
+            return {
+                id: `${path.join('.')}`,
+                label: key || '',
+                children: Object.keys(tree).map(key => buildFormTree(tree[key], [...path, key])),
+            };
+        }
+        if (Array.isArray(tree)) {
+            return {
+                id: `${path.join('.')}`,
+                label: `${key}[]`,
+                children: tree.map((c, idx) => buildFormTree(c, [...path, String(idx)])),
+            };
+        }
+        return { id: '', label: '', children: [] };
+    }
+    const { children } = buildFormTree(formTreeNodes);
+    return {
+        id: encodeNodeId(form),
+        label: 'Form',
+        children,
+        tags: [
+            {
+                label: 'Form',
+                textColor,
+                backgroundColor: bgColor,
+            },
+            {
+                label: `${Object.keys(form.fieldsByPath.value).length} fields`,
+                textColor: COLORS.white,
+                backgroundColor: COLORS.unknown,
+            },
+        ],
+    };
+}
+function mapFieldForDevtoolsInspector(field, form) {
+    const fieldInstance = normalizeField(field);
+    const { textColor, bgColor } = getTagTheme(fieldInstance);
+    const isGroup = Array.isArray(field) && field.length > 1;
+    return {
+        id: encodeNodeId(form, fieldInstance, !isGroup),
+        label: (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(fieldInstance.name),
+        children: Array.isArray(field) ? field.map(fieldItem => mapFieldForDevtoolsInspector(fieldItem, form)) : undefined,
+        tags: [
+            isGroup
+                ? undefined
+                : {
+                    label: 'Field',
+                    textColor,
+                    backgroundColor: bgColor,
+                },
+            !form
+                ? {
+                    label: 'Standalone',
+                    textColor: COLORS.black,
+                    backgroundColor: COLORS.gray,
+                }
+                : undefined,
+            !isGroup && fieldInstance.type === 'checkbox'
+                ? {
+                    label: 'Checkbox',
+                    textColor: COLORS.white,
+                    backgroundColor: COLORS.blue,
+                }
+                : undefined,
+            !isGroup && fieldInstance.type === 'radio'
+                ? {
+                    label: 'Radio',
+                    textColor: COLORS.white,
+                    backgroundColor: COLORS.purple,
+                }
+                : undefined,
+            isGroup
+                ? {
+                    label: 'Group',
+                    textColor: COLORS.black,
+                    backgroundColor: COLORS.orange,
+                }
+                : undefined,
+        ].filter(Boolean),
+    };
+}
+function encodeNodeId(form, field, encodeIndex = true) {
+    const fieldPath = form ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(field === null || field === void 0 ? void 0 : field.name) : field === null || field === void 0 ? void 0 : field.id;
+    const fieldGroup = fieldPath ? form === null || form === void 0 ? void 0 : form.fieldsByPath.value[fieldPath] : undefined;
+    let idx;
+    if (encodeIndex && field && Array.isArray(fieldGroup)) {
+        idx = fieldGroup.indexOf(field);
+    }
+    const idObject = { f: form === null || form === void 0 ? void 0 : form.formId, ff: fieldPath, idx, type: field ? 'field' : 'form' };
+    return btoa(JSON.stringify(idObject));
+}
+function decodeNodeId(nodeId) {
+    try {
+        const idObject = JSON.parse(atob(nodeId));
+        const form = DEVTOOLS_FORMS[idObject.f];
+        if (!form && idObject.ff) {
+            const field = DEVTOOLS_FIELDS[idObject.ff];
+            if (!field) {
+                return {};
+            }
+            return {
+                type: idObject.type,
+                field,
+            };
+        }
+        if (!form) {
+            return {};
+        }
+        const fieldGroup = form.fieldsByPath.value[idObject.ff];
+        return {
+            type: idObject.type,
+            form,
+            field: Array.isArray(fieldGroup) ? fieldGroup[idObject.idx || 0] : fieldGroup,
+        };
+    }
+    catch (err) {
+        // console.error(`Devtools: [vee-validate] Failed to parse node id ${nodeId}`);
+    }
+    return {};
+}
+function buildFieldState(field) {
+    const { errors, meta, value } = field;
+    return {
+        'Field state': [
+            { key: 'errors', value: errors.value },
+            {
+                key: 'initialValue',
+                value: meta.initialValue,
+            },
+            {
+                key: 'currentValue',
+                value: value.value,
+            },
+            {
+                key: 'touched',
+                value: meta.touched,
+            },
+            {
+                key: 'dirty',
+                value: meta.dirty,
+            },
+            {
+                key: 'valid',
+                value: meta.valid,
+            },
+        ],
+    };
+}
+function buildFormState(form) {
+    const { errorBag, meta, values, isSubmitting, submitCount } = form;
+    return {
+        'Form state': [
+            {
+                key: 'submitCount',
+                value: submitCount.value,
+            },
+            {
+                key: 'isSubmitting',
+                value: isSubmitting.value,
+            },
+            {
+                key: 'touched',
+                value: meta.value.touched,
+            },
+            {
+                key: 'dirty',
+                value: meta.value.dirty,
+            },
+            {
+                key: 'valid',
+                value: meta.value.valid,
+            },
+            {
+                key: 'initialValues',
+                value: meta.value.initialValues,
+            },
+            {
+                key: 'currentValues',
+                value: values,
+            },
+            {
+                key: 'errors',
+                value: keysOf(errorBag.value).reduce((acc, key) => {
+                    var _a;
+                    const message = (_a = errorBag.value[key]) === null || _a === void 0 ? void 0 : _a[0];
+                    if (message) {
+                        acc[key] = message;
+                    }
+                    return acc;
+                }, {}),
+            },
+        ],
+    };
+}
+/**
+ * Resolves the tag color based on the form state
+ */
+function getTagTheme(fieldOrForm) {
+    // const fallbackColors = {
+    //   bgColor: COLORS.unknown,
+    //   textColor: COLORS.white,
+    // };
+    const isValid = 'id' in fieldOrForm ? fieldOrForm.meta.valid : fieldOrForm.meta.value.valid;
+    return {
+        bgColor: isValid ? COLORS.success : COLORS.error,
+        textColor: isValid ? COLORS.black : COLORS.white,
+    };
+}
+
+/**
+ * Creates a field composite.
+ */
+function useField(name, rules, opts) {
+    if (hasCheckedAttr(opts === null || opts === void 0 ? void 0 : opts.type)) {
+        return useCheckboxField(name, rules, opts);
+    }
+    return _useField(name, rules, opts);
+}
+function _useField(name, rules, opts) {
+    const { initialValue: modelValue, validateOnMount, bails, type, checkedValue, label, validateOnValueUpdate, uncheckedValue, standalone, } = normalizeOptions((0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(name), opts);
+    const form = !standalone ? injectWithSelf(FormContextKey) : undefined;
+    // a flag indicating if the field is about to be removed/unmounted.
+    let markedForRemoval = false;
+    const { id, value, initialValue, meta, setState, errors, errorMessage } = useFieldState(name, {
+        modelValue,
+        standalone,
+    });
+    /**
+     * Handles common onBlur meta update
+     */
+    const handleBlur = () => {
+        meta.touched = true;
+    };
+    const normalizedRules = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        let rulesValue = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(rules);
+        const schema = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(form === null || form === void 0 ? void 0 : form.schema);
+        if (schema && !isYupValidator(schema)) {
+            rulesValue = extractRuleFromSchema(schema, (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(name)) || rulesValue;
+        }
+        if (isYupValidator(rulesValue) || isCallable(rulesValue) || Array.isArray(rulesValue)) {
+            return rulesValue;
+        }
+        return normalizeRules(rulesValue);
+    });
+    async function validateCurrentValue(mode) {
+        var _a, _b;
+        if (form === null || form === void 0 ? void 0 : form.validateSchema) {
+            return (_a = (await form.validateSchema(mode)).results[(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(name)]) !== null && _a !== void 0 ? _a : { valid: true, errors: [] };
+        }
+        return validate(value.value, normalizedRules.value, {
+            name: (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(label) || (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(name),
+            values: (_b = form === null || form === void 0 ? void 0 : form.values) !== null && _b !== void 0 ? _b : {},
+            bails,
+        });
+    }
+    async function validateWithStateMutation() {
+        meta.pending = true;
+        meta.validated = true;
+        const result = await validateCurrentValue('validated-only');
+        if (markedForRemoval) {
+            result.valid = true;
+            result.errors = [];
+        }
+        setState({ errors: result.errors });
+        meta.pending = false;
+        return result;
+    }
+    async function validateValidStateOnly() {
+        const result = await validateCurrentValue('silent');
+        if (markedForRemoval) {
+            result.valid = true;
+        }
+        meta.valid = result.valid;
+        return result;
+    }
+    function validate$1(opts) {
+        if (!(opts === null || opts === void 0 ? void 0 : opts.mode) || (opts === null || opts === void 0 ? void 0 : opts.mode) === 'force') {
+            return validateWithStateMutation();
+        }
+        if ((opts === null || opts === void 0 ? void 0 : opts.mode) === 'validated-only') {
+            return validateWithStateMutation();
+        }
+        return validateValidStateOnly();
+    }
+    // Common input/change event handler
+    const handleChange = (e, shouldValidate = true) => {
+        const newValue = normalizeEventValue(e);
+        value.value = newValue;
+        if (!validateOnValueUpdate && shouldValidate) {
+            validateWithStateMutation();
+        }
+    };
+    // Runs the initial validation
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.onMounted)(() => {
+        if (validateOnMount) {
+            return validateWithStateMutation();
+        }
+        // validate self initially if no form was handling this
+        // forms should have their own initial silent validation run to make things more efficient
+        if (!form || !form.validateSchema) {
+            validateValidStateOnly();
+        }
+    });
+    function setTouched(isTouched) {
+        meta.touched = isTouched;
+    }
+    let unwatchValue;
+    function watchValue() {
+        unwatchValue = (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)(value, validateOnValueUpdate ? validateWithStateMutation : validateValidStateOnly, {
+            deep: true,
+        });
+    }
+    watchValue();
+    function resetField(state) {
+        var _a;
+        unwatchValue === null || unwatchValue === void 0 ? void 0 : unwatchValue();
+        const newValue = state && 'value' in state ? state.value : initialValue.value;
+        setState({
+            value: klona(newValue),
+            initialValue: klona(newValue),
+            touched: (_a = state === null || state === void 0 ? void 0 : state.touched) !== null && _a !== void 0 ? _a : false,
+            errors: (state === null || state === void 0 ? void 0 : state.errors) || [],
+        });
+        meta.pending = false;
+        meta.validated = false;
+        validateValidStateOnly();
+        // need to watch at next tick to avoid triggering the value watcher
+        (0,vue__WEBPACK_IMPORTED_MODULE_0__.nextTick)(() => {
+            watchValue();
+        });
+    }
+    function setValue(newValue) {
+        value.value = newValue;
+    }
+    function setErrors(errors) {
+        setState({ errors: Array.isArray(errors) ? errors : [errors] });
+    }
+    const field = {
+        id,
+        name,
+        label,
+        value,
+        meta,
+        errors,
+        errorMessage,
+        type,
+        checkedValue,
+        uncheckedValue,
+        bails,
+        resetField,
+        handleReset: () => resetField(),
+        validate: validate$1,
+        handleChange,
+        handleBlur,
+        setState,
+        setTouched,
+        setErrors,
+        setValue,
+    };
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.provide)(FieldContextKey, field);
+    if ((0,vue__WEBPACK_IMPORTED_MODULE_0__.isRef)(rules) && typeof (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(rules) !== 'function') {
+        (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)(rules, (value, oldValue) => {
+            if (es6(value, oldValue)) {
+                return;
+            }
+            meta.validated ? validateWithStateMutation() : validateValidStateOnly();
+        }, {
+            deep: true,
+        });
+    }
+    if ((true)) {
+        field._vm = (0,vue__WEBPACK_IMPORTED_MODULE_0__.getCurrentInstance)();
+        (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)(() => (Object.assign(Object.assign({ errors: errors.value }, meta), { value: value.value })), refreshInspector, {
+            deep: true,
+        });
+        if (!form) {
+            registerSingleFieldWithDevtools(field);
+        }
+    }
+    // if no associated form return the field API immediately
+    if (!form) {
+        return field;
+    }
+    // associate the field with the given form
+    form.register(field);
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.onBeforeUnmount)(() => {
+        markedForRemoval = true;
+        form.unregister(field);
+    });
+    // extract cross-field dependencies in a computed prop
+    const dependencies = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        const rulesVal = normalizedRules.value;
+        // is falsy, a function schema or a yup schema
+        if (!rulesVal || isCallable(rulesVal) || isYupValidator(rulesVal) || Array.isArray(rulesVal)) {
+            return {};
+        }
+        return Object.keys(rulesVal).reduce((acc, rule) => {
+            const deps = extractLocators(rulesVal[rule])
+                .map((dep) => dep.__locatorRef)
+                .reduce((depAcc, depName) => {
+                const depValue = getFromPath(form.values, depName) || form.values[depName];
+                if (depValue !== undefined) {
+                    depAcc[depName] = depValue;
+                }
+                return depAcc;
+            }, {});
+            Object.assign(acc, deps);
+            return acc;
+        }, {});
+    });
+    // Adds a watcher that runs the validation whenever field dependencies change
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)(dependencies, (deps, oldDeps) => {
+        // Skip if no dependencies or if the field wasn't manipulated
+        if (!Object.keys(deps).length) {
+            return;
+        }
+        const shouldValidate = !es6(deps, oldDeps);
+        if (shouldValidate) {
+            meta.validated ? validateWithStateMutation() : validateValidStateOnly();
+        }
+    });
+    return field;
+}
+/**
+ * Normalizes partial field options to include the full options
+ */
+function normalizeOptions(name, opts) {
+    const defaults = () => ({
+        initialValue: undefined,
+        validateOnMount: false,
+        bails: true,
+        rules: '',
+        label: name,
+        validateOnValueUpdate: true,
+        standalone: false,
+    });
+    if (!opts) {
+        return defaults();
+    }
+    // TODO: Deprecate this in next major release
+    const checkedValue = 'valueProp' in opts ? opts.valueProp : opts.checkedValue;
+    return Object.assign(Object.assign(Object.assign({}, defaults()), (opts || {})), { checkedValue });
+}
+/**
+ * Extracts the validation rules from a schema
+ */
+function extractRuleFromSchema(schema, fieldName) {
+    // no schema at all
+    if (!schema) {
+        return undefined;
+    }
+    // there is a key on the schema object for this field
+    return schema[fieldName];
+}
+function useCheckboxField(name, rules, opts) {
+    const form = !(opts === null || opts === void 0 ? void 0 : opts.standalone) ? injectWithSelf(FormContextKey) : undefined;
+    const checkedValue = opts === null || opts === void 0 ? void 0 : opts.checkedValue;
+    const uncheckedValue = opts === null || opts === void 0 ? void 0 : opts.uncheckedValue;
+    function patchCheckboxApi(field) {
+        const handleChange = field.handleChange;
+        const checked = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+            const currentValue = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(field.value);
+            const checkedVal = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(checkedValue);
+            return Array.isArray(currentValue) ? currentValue.includes(checkedVal) : checkedVal === currentValue;
+        });
+        function handleCheckboxChange(e, shouldValidate = true) {
+            var _a, _b;
+            if (checked.value === ((_b = (_a = e) === null || _a === void 0 ? void 0 : _a.target) === null || _b === void 0 ? void 0 : _b.checked)) {
+                return;
+            }
+            let newValue = normalizeEventValue(e);
+            // Single checkbox field without a form to toggle it's value
+            if (!form) {
+                newValue = resolveNextCheckboxValue((0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(field.value), (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(checkedValue), (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(uncheckedValue));
+            }
+            handleChange(newValue, shouldValidate);
+        }
+        (0,vue__WEBPACK_IMPORTED_MODULE_0__.onBeforeUnmount)(() => {
+            // toggles the checkbox value if it was checked
+            if (checked.value) {
+                handleCheckboxChange((0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(checkedValue), false);
+            }
+        });
+        return Object.assign(Object.assign({}, field), { checked,
+            checkedValue,
+            uncheckedValue, handleChange: handleCheckboxChange });
+    }
+    return patchCheckboxApi(_useField(name, rules, opts));
+}
+
+const FieldImpl = (0,vue__WEBPACK_IMPORTED_MODULE_0__.defineComponent)({
+    name: 'Field',
+    inheritAttrs: false,
+    props: {
+        as: {
+            type: [String, Object],
+            default: undefined,
+        },
+        name: {
+            type: String,
+            required: true,
+        },
+        rules: {
+            type: [Object, String, Function],
+            default: undefined,
+        },
+        validateOnMount: {
+            type: Boolean,
+            default: false,
+        },
+        validateOnBlur: {
+            type: Boolean,
+            default: undefined,
+        },
+        validateOnChange: {
+            type: Boolean,
+            default: undefined,
+        },
+        validateOnInput: {
+            type: Boolean,
+            default: undefined,
+        },
+        validateOnModelUpdate: {
+            type: Boolean,
+            default: undefined,
+        },
+        bails: {
+            type: Boolean,
+            default: () => getConfig().bails,
+        },
+        label: {
+            type: String,
+            default: undefined,
+        },
+        uncheckedValue: {
+            type: null,
+            default: undefined,
+        },
+        modelValue: {
+            type: null,
+            default: IS_ABSENT,
+        },
+        modelModifiers: {
+            type: null,
+            default: () => ({}),
+        },
+        'onUpdate:modelValue': {
+            type: null,
+            default: undefined,
+        },
+        standalone: {
+            type: Boolean,
+            default: false,
+        },
+    },
+    setup(props, ctx) {
+        const rules = (0,vue__WEBPACK_IMPORTED_MODULE_0__.toRef)(props, 'rules');
+        const name = (0,vue__WEBPACK_IMPORTED_MODULE_0__.toRef)(props, 'name');
+        const label = (0,vue__WEBPACK_IMPORTED_MODULE_0__.toRef)(props, 'label');
+        const uncheckedValue = (0,vue__WEBPACK_IMPORTED_MODULE_0__.toRef)(props, 'uncheckedValue');
+        const hasModelEvents = isPropPresent(props, 'onUpdate:modelValue');
+        const { errors, value, errorMessage, validate: validateField, handleChange, handleBlur, setTouched, resetField, handleReset, meta, checked, setErrors, } = useField(name, rules, {
+            validateOnMount: props.validateOnMount,
+            bails: props.bails,
+            standalone: props.standalone,
+            type: ctx.attrs.type,
+            initialValue: resolveInitialValue(props, ctx),
+            // Only for checkboxes and radio buttons
+            checkedValue: ctx.attrs.value,
+            uncheckedValue,
+            label,
+            validateOnValueUpdate: false,
+        });
+        // If there is a v-model applied on the component we need to emit the `update:modelValue` whenever the value binding changes
+        const onChangeHandler = hasModelEvents
+            ? function handleChangeWithModel(e, shouldValidate = true) {
+                handleChange(e, shouldValidate);
+                ctx.emit('update:modelValue', value.value);
+            }
+            : handleChange;
+        const handleInput = (e) => {
+            if (!hasCheckedAttr(ctx.attrs.type)) {
+                value.value = normalizeEventValue(e);
+            }
+        };
+        const onInputHandler = hasModelEvents
+            ? function handleInputWithModel(e) {
+                handleInput(e);
+                ctx.emit('update:modelValue', value.value);
+            }
+            : handleInput;
+        const fieldProps = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+            const { validateOnInput, validateOnChange, validateOnBlur, validateOnModelUpdate } = resolveValidationTriggers(props);
+            const baseOnBlur = [handleBlur, ctx.attrs.onBlur, validateOnBlur ? validateField : undefined].filter(Boolean);
+            const baseOnInput = [(e) => onChangeHandler(e, validateOnInput), ctx.attrs.onInput].filter(Boolean);
+            const baseOnChange = [(e) => onChangeHandler(e, validateOnChange), ctx.attrs.onChange].filter(Boolean);
+            const attrs = {
+                name: props.name,
+                onBlur: baseOnBlur,
+                onInput: baseOnInput,
+                onChange: baseOnChange,
+            };
+            attrs['onUpdate:modelValue'] = e => onChangeHandler(e, validateOnModelUpdate);
+            if (hasCheckedAttr(ctx.attrs.type) && checked) {
+                attrs.checked = checked.value;
+            }
+            else {
+                attrs.value = value.value;
+            }
+            const tag = resolveTag(props, ctx);
+            if (shouldHaveValueBinding(tag, ctx.attrs)) {
+                delete attrs.value;
+            }
+            return attrs;
+        });
+        const modelValue = (0,vue__WEBPACK_IMPORTED_MODULE_0__.toRef)(props, 'modelValue');
+        (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)(modelValue, newModelValue => {
+            // Don't attempt to sync absent values
+            if (newModelValue === IS_ABSENT && value.value === undefined) {
+                return;
+            }
+            if (newModelValue !== applyModifiers(value.value, props.modelModifiers)) {
+                value.value = newModelValue === IS_ABSENT ? undefined : newModelValue;
+                validateField();
+            }
+        });
+        function slotProps() {
+            return {
+                field: fieldProps.value,
+                value: value.value,
+                meta,
+                errors: errors.value,
+                errorMessage: errorMessage.value,
+                validate: validateField,
+                resetField,
+                handleChange: onChangeHandler,
+                handleInput: onInputHandler,
+                handleReset,
+                handleBlur,
+                setTouched,
+                setErrors,
+            };
+        }
+        ctx.expose({
+            setErrors,
+            setTouched,
+            reset: resetField,
+            validate: validateField,
+            handleChange,
+        });
+        return () => {
+            const tag = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveDynamicComponent)(resolveTag(props, ctx));
+            const children = normalizeChildren(tag, ctx, slotProps);
+            if (tag) {
+                return (0,vue__WEBPACK_IMPORTED_MODULE_0__.h)(tag, Object.assign(Object.assign({}, ctx.attrs), fieldProps.value), children);
+            }
+            return children;
+        };
+    },
+});
+function resolveTag(props, ctx) {
+    let tag = props.as || '';
+    if (!props.as && !ctx.slots.default) {
+        tag = 'input';
+    }
+    return tag;
+}
+function resolveValidationTriggers(props) {
+    var _a, _b, _c, _d;
+    const { validateOnInput, validateOnChange, validateOnBlur, validateOnModelUpdate } = getConfig();
+    return {
+        validateOnInput: (_a = props.validateOnInput) !== null && _a !== void 0 ? _a : validateOnInput,
+        validateOnChange: (_b = props.validateOnChange) !== null && _b !== void 0 ? _b : validateOnChange,
+        validateOnBlur: (_c = props.validateOnBlur) !== null && _c !== void 0 ? _c : validateOnBlur,
+        validateOnModelUpdate: (_d = props.validateOnModelUpdate) !== null && _d !== void 0 ? _d : validateOnModelUpdate,
+    };
+}
+function applyModifiers(value, modifiers) {
+    if (modifiers.number) {
+        return toNumber(value);
+    }
+    return value;
+}
+function resolveInitialValue(props, ctx) {
+    // Gets the initial value either from `value` prop/attr or `v-model` binding (modelValue)
+    // For checkboxes and radio buttons it will always be the model value not the `value` attribute
+    if (!hasCheckedAttr(ctx.attrs.type)) {
+        return isPropPresent(props, 'modelValue') ? props.modelValue : ctx.attrs.value;
+    }
+    return isPropPresent(props, 'modelValue') ? props.modelValue : undefined;
+}
+const Field = FieldImpl;
+
+let FORM_COUNTER = 0;
+function useForm(opts) {
+    const formId = FORM_COUNTER++;
+    // Prevents fields from double resetting their values, which causes checkboxes to toggle their initial value
+    // TODO: This won't be needed if we centralize all the state inside the `form` for form inputs
+    let RESET_LOCK = false;
+    // A lookup containing fields or field groups
+    const fieldsByPath = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)({});
+    // If the form is currently submitting
+    const isSubmitting = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(false);
+    // The number of times the user tried to submit the form
+    const submitCount = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(0);
+    // dictionary for field arrays to receive various signals like reset
+    const fieldArraysLookup = {};
+    // a private ref for all form values
+    const formValues = (0,vue__WEBPACK_IMPORTED_MODULE_0__.reactive)(klona((0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(opts === null || opts === void 0 ? void 0 : opts.initialValues) || {}));
+    // the source of errors for the form fields
+    const { errorBag, setErrorBag, setFieldErrorBag } = useErrorBag(opts === null || opts === void 0 ? void 0 : opts.initialErrors);
+    // Gets the first error of each field
+    const errors = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        return keysOf(errorBag.value).reduce((acc, key) => {
+            const bag = errorBag.value[key];
+            if (bag && bag.length) {
+                acc[key] = bag[0];
+            }
+            return acc;
+        }, {});
+    });
+    function getFirstFieldAtPath(path) {
+        const fieldOrGroup = fieldsByPath.value[path];
+        return Array.isArray(fieldOrGroup) ? fieldOrGroup[0] : fieldOrGroup;
+    }
+    function fieldExists(path) {
+        return !!fieldsByPath.value[path];
+    }
+    /**
+     * Holds a computed reference to all fields names and labels
+     */
+    const fieldNames = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        return keysOf(fieldsByPath.value).reduce((names, path) => {
+            const field = getFirstFieldAtPath(path);
+            if (field) {
+                names[path] = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(field.label || field.name) || '';
+            }
+            return names;
+        }, {});
+    });
+    const fieldBailsMap = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        return keysOf(fieldsByPath.value).reduce((map, path) => {
+            var _a;
+            const field = getFirstFieldAtPath(path);
+            if (field) {
+                map[path] = (_a = field.bails) !== null && _a !== void 0 ? _a : true;
+            }
+            return map;
+        }, {});
+    });
+    // mutable non-reactive reference to initial errors
+    // we need this to process initial errors then unset them
+    const initialErrors = Object.assign({}, ((opts === null || opts === void 0 ? void 0 : opts.initialErrors) || {}));
+    // initial form values
+    const { initialValues, originalInitialValues, setInitialValues } = useFormInitialValues(fieldsByPath, formValues, opts === null || opts === void 0 ? void 0 : opts.initialValues);
+    // form meta aggregations
+    const meta = useFormMeta(fieldsByPath, formValues, initialValues, errors);
+    const schema = opts === null || opts === void 0 ? void 0 : opts.validationSchema;
+    const formCtx = {
+        formId,
+        fieldsByPath,
+        values: formValues,
+        errorBag,
+        errors,
+        schema,
+        submitCount,
+        meta,
+        isSubmitting,
+        fieldArraysLookup,
+        validateSchema: (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(schema) ? validateSchema : undefined,
+        validate,
+        register: registerField,
+        unregister: unregisterField,
+        setFieldErrorBag,
+        validateField,
+        setFieldValue,
+        setValues,
+        setErrors,
+        setFieldError,
+        setFieldTouched,
+        setTouched,
+        resetForm,
+        handleSubmit,
+        stageInitialValue,
+        unsetInitialValue,
+        setFieldInitialValue,
+    };
+    function isFieldGroup(fieldOrGroup) {
+        return Array.isArray(fieldOrGroup);
+    }
+    function applyFieldMutation(fieldOrGroup, mutation) {
+        if (Array.isArray(fieldOrGroup)) {
+            return fieldOrGroup.forEach(mutation);
+        }
+        return mutation(fieldOrGroup);
+    }
+    function mutateAllFields(mutation) {
+        Object.values(fieldsByPath.value).forEach(field => {
+            if (!field) {
+                return;
+            }
+            // avoid resetting the field values, because they should've been reset already.
+            applyFieldMutation(field, mutation);
+        });
+    }
+    /**
+     * Manually sets an error message on a specific field
+     */
+    function setFieldError(field, message) {
+        setFieldErrorBag(field, message);
+    }
+    /**
+     * Sets errors for the fields specified in the object
+     */
+    function setErrors(fields) {
+        setErrorBag(fields);
+    }
+    /**
+     * Sets a single field value
+     */
+    function setFieldValue(field, value, { force } = { force: false }) {
+        var _a;
+        const fieldInstance = fieldsByPath.value[field];
+        const clonedValue = klona(value);
+        // field wasn't found, create a virtual field as a placeholder
+        if (!fieldInstance) {
+            setInPath(formValues, field, clonedValue);
+            return;
+        }
+        if (isFieldGroup(fieldInstance) && ((_a = fieldInstance[0]) === null || _a === void 0 ? void 0 : _a.type) === 'checkbox' && !Array.isArray(value)) {
+            // Multiple checkboxes, and only one of them got updated
+            const newValue = klona(resolveNextCheckboxValue(getFromPath(formValues, field) || [], value, undefined));
+            setInPath(formValues, field, newValue);
+            return;
+        }
+        let newValue = value;
+        // Single Checkbox: toggles the field value unless the field is being reset then force it
+        if (!isFieldGroup(fieldInstance) && fieldInstance.type === 'checkbox' && !force && !RESET_LOCK) {
+            newValue = klona(resolveNextCheckboxValue(getFromPath(formValues, field), value, (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(fieldInstance.uncheckedValue)));
+        }
+        setInPath(formValues, field, newValue);
+    }
+    /**
+     * Sets multiple fields values
+     */
+    function setValues(fields) {
+        // clean up old values
+        keysOf(formValues).forEach(key => {
+            delete formValues[key];
+        });
+        // set up new values
+        keysOf(fields).forEach(path => {
+            setFieldValue(path, fields[path]);
+        });
+        // regenerate the arrays when the form values change
+        Object.values(fieldArraysLookup).forEach(f => f && f.reset());
+    }
+    /**
+     * Sets the touched meta state on a field
+     */
+    function setFieldTouched(field, isTouched) {
+        const fieldInstance = fieldsByPath.value[field];
+        if (fieldInstance) {
+            applyFieldMutation(fieldInstance, f => f.setTouched(isTouched));
+        }
+    }
+    /**
+     * Sets the touched meta state on multiple fields
+     */
+    function setTouched(fields) {
+        keysOf(fields).forEach(field => {
+            setFieldTouched(field, !!fields[field]);
+        });
+    }
+    /**
+     * Resets all fields
+     */
+    function resetForm(state) {
+        RESET_LOCK = true;
+        // set initial values if provided
+        if (state === null || state === void 0 ? void 0 : state.values) {
+            setInitialValues(state.values);
+            setValues(state === null || state === void 0 ? void 0 : state.values);
+        }
+        else {
+            // clean up the initial values back to the original
+            setInitialValues(originalInitialValues.value);
+            // otherwise clean the current values
+            setValues(originalInitialValues.value);
+        }
+        // avoid resetting the field values, because they should've been reset already.
+        mutateAllFields(f => f.resetField());
+        if (state === null || state === void 0 ? void 0 : state.touched) {
+            setTouched(state.touched);
+        }
+        setErrors((state === null || state === void 0 ? void 0 : state.errors) || {});
+        submitCount.value = (state === null || state === void 0 ? void 0 : state.submitCount) || 0;
+        (0,vue__WEBPACK_IMPORTED_MODULE_0__.nextTick)(() => {
+            RESET_LOCK = false;
+        });
+    }
+    function insertFieldAtPath(field, path) {
+        const rawField = (0,vue__WEBPACK_IMPORTED_MODULE_0__.markRaw)(field);
+        const fieldPath = path;
+        // first field at that path
+        if (!fieldsByPath.value[fieldPath]) {
+            fieldsByPath.value[fieldPath] = rawField;
+            return;
+        }
+        const fieldAtPath = fieldsByPath.value[fieldPath];
+        if (fieldAtPath && !Array.isArray(fieldAtPath)) {
+            fieldsByPath.value[fieldPath] = [fieldAtPath];
+        }
+        // add the new array to that path
+        fieldsByPath.value[fieldPath] = [...fieldsByPath.value[fieldPath], rawField];
+    }
+    function removeFieldFromPath(field, path) {
+        const fieldPath = path;
+        const fieldAtPath = fieldsByPath.value[fieldPath];
+        if (!fieldAtPath) {
+            return;
+        }
+        // same field at path
+        if (!isFieldGroup(fieldAtPath) && field.id === fieldAtPath.id) {
+            delete fieldsByPath.value[fieldPath];
+            return;
+        }
+        if (isFieldGroup(fieldAtPath)) {
+            const idx = fieldAtPath.findIndex(f => f.id === field.id);
+            if (idx === -1) {
+                return;
+            }
+            fieldAtPath.splice(idx, 1);
+            if (fieldAtPath.length === 1) {
+                fieldsByPath.value[fieldPath] = fieldAtPath[0];
+                return;
+            }
+            if (!fieldAtPath.length) {
+                delete fieldsByPath.value[fieldPath];
+            }
+        }
+    }
+    function registerField(field) {
+        const fieldPath = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(field.name);
+        insertFieldAtPath(field, fieldPath);
+        if ((0,vue__WEBPACK_IMPORTED_MODULE_0__.isRef)(field.name)) {
+            // ensures when a field's name was already taken that it preserves its same value
+            // necessary for fields generated by loops
+            (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)(field.name, async (newPath, oldPath) => {
+                // cache the value
+                await (0,vue__WEBPACK_IMPORTED_MODULE_0__.nextTick)();
+                removeFieldFromPath(field, oldPath);
+                insertFieldAtPath(field, newPath);
+                // re-validate if either path had errors before
+                if (errors.value[oldPath] || errors.value[newPath]) {
+                    // clear up both paths errors
+                    setFieldError(oldPath, undefined);
+                    validateField(newPath);
+                }
+                // clean up the old path if no other field is sharing that name
+                // #3325
+                await (0,vue__WEBPACK_IMPORTED_MODULE_0__.nextTick)();
+                if (!fieldExists(oldPath)) {
+                    unsetPath(formValues, oldPath);
+                }
+            });
+        }
+        // if field already had errors (initial errors) that's not user-set, validate it again to ensure state is correct
+        // the difference being that `initialErrors` will contain the error message while other errors (pre-validated schema) won't have them as initial errors
+        // #3342
+        const initialErrorMessage = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(field.errorMessage);
+        if (initialErrorMessage && (initialErrors === null || initialErrors === void 0 ? void 0 : initialErrors[fieldPath]) !== initialErrorMessage) {
+            validateField(fieldPath);
+        }
+        // marks the initial error as "consumed" so it won't be matched later with same non-initial error
+        delete initialErrors[fieldPath];
+    }
+    function unregisterField(field) {
+        const fieldName = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(field.name);
+        removeFieldFromPath(field, fieldName);
+        (0,vue__WEBPACK_IMPORTED_MODULE_0__.nextTick)(() => {
+            // clears a field error on unmounted
+            // we wait till next tick to make sure if the field is completely removed and doesn't have any siblings like checkboxes
+            // #3384
+            if (!fieldExists(fieldName)) {
+                setFieldError(fieldName, undefined);
+                unsetPath(formValues, fieldName);
+            }
+        });
+    }
+    async function validate(opts) {
+        mutateAllFields(f => (f.meta.validated = true));
+        if (formCtx.validateSchema) {
+            return formCtx.validateSchema((opts === null || opts === void 0 ? void 0 : opts.mode) || 'force');
+        }
+        // No schema, each field is responsible to validate itself
+        const validations = await Promise.all(Object.values(fieldsByPath.value).map(field => {
+            const fieldInstance = Array.isArray(field) ? field[0] : field;
+            if (!fieldInstance) {
+                return Promise.resolve({ key: '', valid: true, errors: [] });
+            }
+            return fieldInstance.validate(opts).then((result) => {
+                return {
+                    key: (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(fieldInstance.name),
+                    valid: result.valid,
+                    errors: result.errors,
+                };
+            });
+        }));
+        const results = {};
+        const errors = {};
+        for (const validation of validations) {
+            results[validation.key] = {
+                valid: validation.valid,
+                errors: validation.errors,
+            };
+            if (validation.errors.length) {
+                errors[validation.key] = validation.errors[0];
+            }
+        }
+        return {
+            valid: validations.every(r => r.valid),
+            results,
+            errors,
+        };
+    }
+    async function validateField(field) {
+        const fieldInstance = fieldsByPath.value[field];
+        if (!fieldInstance) {
+            (0,vue__WEBPACK_IMPORTED_MODULE_0__.warn)(`field with name ${field} was not found`);
+            return Promise.resolve({ errors: [], valid: true });
+        }
+        if (Array.isArray(fieldInstance)) {
+            return fieldInstance.map(f => f.validate())[0];
+        }
+        return fieldInstance.validate();
+    }
+    function handleSubmit(fn, onValidationError) {
+        return function submissionHandler(e) {
+            if (e instanceof Event) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            // Touch all fields
+            setTouched(keysOf(fieldsByPath.value).reduce((acc, field) => {
+                acc[field] = true;
+                return acc;
+            }, {}));
+            isSubmitting.value = true;
+            submitCount.value++;
+            return validate()
+                .then(result => {
+                if (result.valid && typeof fn === 'function') {
+                    return fn(klona(formValues), {
+                        evt: e,
+                        setErrors,
+                        setFieldError,
+                        setTouched,
+                        setFieldTouched,
+                        setValues,
+                        setFieldValue,
+                        resetForm,
+                    });
+                }
+                if (!result.valid && typeof onValidationError === 'function') {
+                    onValidationError({
+                        values: klona(formValues),
+                        evt: e,
+                        errors: result.errors,
+                        results: result.results,
+                    });
+                }
+            })
+                .then(returnVal => {
+                isSubmitting.value = false;
+                return returnVal;
+            }, err => {
+                isSubmitting.value = false;
+                // re-throw the err so it doesn't go silent
+                throw err;
+            });
+        };
+    }
+    function setFieldInitialValue(path, value) {
+        setInPath(initialValues.value, path, klona(value));
+    }
+    function unsetInitialValue(path) {
+        unsetPath(initialValues.value, path);
+    }
+    /**
+     * Sneaky function to set initial field values
+     */
+    function stageInitialValue(path, value) {
+        setInPath(formValues, path, value);
+        setFieldInitialValue(path, value);
+    }
+    async function _validateSchema() {
+        const schemaValue = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(schema);
+        if (!schemaValue) {
+            return { valid: true, results: {}, errors: {} };
+        }
+        const formResult = isYupValidator(schemaValue)
+            ? await validateYupSchema(schemaValue, formValues)
+            : await validateObjectSchema(schemaValue, formValues, {
+                names: fieldNames.value,
+                bailsMap: fieldBailsMap.value,
+            });
+        return formResult;
+    }
+    /**
+     * Batches validation runs in 5ms batches
+     */
+    const debouncedSchemaValidation = debounceAsync(_validateSchema, 5);
+    async function validateSchema(mode) {
+        const formResult = await debouncedSchemaValidation();
+        // fields by id lookup
+        const fieldsById = formCtx.fieldsByPath.value || {};
+        // errors fields names, we need it to also check if custom errors are updated
+        const currentErrorsPaths = keysOf(formCtx.errorBag.value);
+        // collect all the keys from the schema and all fields
+        // this ensures we have a complete keymap of all the fields
+        const paths = [
+            ...new Set([...keysOf(formResult.results), ...keysOf(fieldsById), ...currentErrorsPaths]),
+        ];
+        // aggregates the paths into a single result object while applying the results on the fields
+        return paths.reduce((validation, path) => {
+            const field = fieldsById[path];
+            const messages = (formResult.results[path] || { errors: [] }).errors;
+            const fieldResult = {
+                errors: messages,
+                valid: !messages.length,
+            };
+            validation.results[path] = fieldResult;
+            if (!fieldResult.valid) {
+                validation.errors[path] = fieldResult.errors[0];
+            }
+            // field not rendered
+            if (!field) {
+                setFieldError(path, messages);
+                return validation;
+            }
+            // always update the valid flag regardless of the mode
+            applyFieldMutation(field, f => (f.meta.valid = fieldResult.valid));
+            if (mode === 'silent') {
+                return validation;
+            }
+            const wasValidated = Array.isArray(field) ? field.some(f => f.meta.validated) : field.meta.validated;
+            if (mode === 'validated-only' && !wasValidated) {
+                return validation;
+            }
+            applyFieldMutation(field, f => f.setState({ errors: fieldResult.errors }));
+            return validation;
+        }, { valid: formResult.valid, results: {}, errors: {} });
+    }
+    const submitForm = handleSubmit((_, { evt }) => {
+        if (isFormSubmitEvent(evt)) {
+            evt.target.submit();
+        }
+    });
+    // Trigger initial validation
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.onMounted)(() => {
+        if (opts === null || opts === void 0 ? void 0 : opts.initialErrors) {
+            setErrors(opts.initialErrors);
+        }
+        if (opts === null || opts === void 0 ? void 0 : opts.initialTouched) {
+            setTouched(opts.initialTouched);
+        }
+        // if validate on mount was enabled
+        if (opts === null || opts === void 0 ? void 0 : opts.validateOnMount) {
+            validate();
+            return;
+        }
+        // otherwise run initial silent validation through schema if available
+        // the useField should skip their own silent validation if a yup schema is present
+        if (formCtx.validateSchema) {
+            formCtx.validateSchema('silent');
+        }
+    });
+    if ((0,vue__WEBPACK_IMPORTED_MODULE_0__.isRef)(schema)) {
+        (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)(schema, () => {
+            var _a;
+            (_a = formCtx.validateSchema) === null || _a === void 0 ? void 0 : _a.call(formCtx, 'validated-only');
+        });
+    }
+    // Provide injections
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.provide)(FormContextKey, formCtx);
+    if ((true)) {
+        registerFormWithDevTools(formCtx);
+        (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)(() => (Object.assign(Object.assign({ errors: errorBag.value }, meta.value), { values: formValues, isSubmitting: isSubmitting.value, submitCount: submitCount.value })), refreshInspector, {
+            deep: true,
+        });
+    }
+    return {
+        errors,
+        meta,
+        values: formValues,
+        isSubmitting,
+        submitCount,
+        validate,
+        validateField,
+        handleReset: () => resetForm(),
+        resetForm,
+        handleSubmit,
+        submitForm,
+        setFieldError,
+        setErrors,
+        setFieldValue,
+        setValues,
+        setFieldTouched,
+        setTouched,
+    };
+}
+/**
+ * Manages form meta aggregation
+ */
+function useFormMeta(fieldsByPath, currentValues, initialValues, errors) {
+    const MERGE_STRATEGIES = {
+        touched: 'some',
+        pending: 'some',
+        valid: 'every',
+    };
+    const isDirty = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        return !es6(currentValues, (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(initialValues));
+    });
+    function calculateFlags() {
+        const fields = Object.values(fieldsByPath.value).flat(1).filter(Boolean);
+        return keysOf(MERGE_STRATEGIES).reduce((acc, flag) => {
+            const mergeMethod = MERGE_STRATEGIES[flag];
+            acc[flag] = fields[mergeMethod](field => field.meta[flag]);
+            return acc;
+        }, {});
+    }
+    const flags = (0,vue__WEBPACK_IMPORTED_MODULE_0__.reactive)(calculateFlags());
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.watchEffect)(() => {
+        const value = calculateFlags();
+        flags.touched = value.touched;
+        flags.valid = value.valid;
+        flags.pending = value.pending;
+    });
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        return Object.assign(Object.assign({ initialValues: (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(initialValues) }, flags), { valid: flags.valid && !keysOf(errors.value).length, dirty: isDirty.value });
+    });
+}
+/**
+ * Manages the initial values prop
+ */
+function useFormInitialValues(fields, formValues, providedValues) {
+    // these are the mutable initial values as the fields are mounted/unmounted
+    const initialValues = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(klona((0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(providedValues)) || {});
+    // these are the original initial value as provided by the user initially, they don't keep track of conditional fields
+    // this is important because some conditional fields will overwrite the initial values for other fields who had the same name
+    // like array fields, any push/insert operation will overwrite the initial values because they "create new fields"
+    // so these are the values that the reset function should use
+    // these only change when the user explicitly chanegs the initial values or when the user resets them with new values.
+    const originalInitialValues = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)(klona((0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(providedValues)) || {});
+    function setInitialValues(values, updateFields = false) {
+        initialValues.value = klona(values);
+        originalInitialValues.value = klona(values);
+        if (!updateFields) {
+            return;
+        }
+        // update the pristine non-touched fields
+        // those are excluded because it's unlikely you want to change the form values using initial values
+        // we mostly watch them for API population or newly inserted fields
+        // if the user API is taking too much time before user interaction they should consider disabling or hiding their inputs until the values are ready
+        keysOf(fields.value).forEach(fieldPath => {
+            const field = fields.value[fieldPath];
+            const wasTouched = Array.isArray(field) ? field.some(f => f.meta.touched) : field === null || field === void 0 ? void 0 : field.meta.touched;
+            if (!field || wasTouched) {
+                return;
+            }
+            const newValue = getFromPath(initialValues.value, fieldPath);
+            setInPath(formValues, fieldPath, klona(newValue));
+        });
+    }
+    if ((0,vue__WEBPACK_IMPORTED_MODULE_0__.isRef)(providedValues)) {
+        (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)(providedValues, value => {
+            setInitialValues(value, true);
+        }, {
+            deep: true,
+        });
+    }
+    return {
+        initialValues,
+        originalInitialValues,
+        setInitialValues,
+    };
+}
+function useErrorBag(initialErrors) {
+    const errorBag = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)({});
+    function normalizeErrorItem(message) {
+        return Array.isArray(message) ? message : message ? [message] : [];
+    }
+    /**
+     * Manually sets an error message on a specific field
+     */
+    function setFieldErrorBag(field, message) {
+        if (!message) {
+            delete errorBag.value[field];
+            return;
+        }
+        errorBag.value[field] = normalizeErrorItem(message);
+    }
+    /**
+     * Sets errors for the fields specified in the object
+     */
+    function setErrorBag(fields) {
+        errorBag.value = keysOf(fields).reduce((acc, key) => {
+            const message = fields[key];
+            if (message) {
+                acc[key] = normalizeErrorItem(message);
+            }
+            return acc;
+        }, {});
+    }
+    if (initialErrors) {
+        setErrorBag(initialErrors);
+    }
+    return {
+        errorBag,
+        setErrorBag,
+        setFieldErrorBag,
+    };
+}
+
+const FormImpl = (0,vue__WEBPACK_IMPORTED_MODULE_0__.defineComponent)({
+    name: 'Form',
+    inheritAttrs: false,
+    props: {
+        as: {
+            type: String,
+            default: 'form',
+        },
+        validationSchema: {
+            type: Object,
+            default: undefined,
+        },
+        initialValues: {
+            type: Object,
+            default: undefined,
+        },
+        initialErrors: {
+            type: Object,
+            default: undefined,
+        },
+        initialTouched: {
+            type: Object,
+            default: undefined,
+        },
+        validateOnMount: {
+            type: Boolean,
+            default: false,
+        },
+        onSubmit: {
+            type: Function,
+            default: undefined,
+        },
+        onInvalidSubmit: {
+            type: Function,
+            default: undefined,
+        },
+    },
+    setup(props, ctx) {
+        const initialValues = (0,vue__WEBPACK_IMPORTED_MODULE_0__.toRef)(props, 'initialValues');
+        const validationSchema = (0,vue__WEBPACK_IMPORTED_MODULE_0__.toRef)(props, 'validationSchema');
+        const { errors, values, meta, isSubmitting, submitCount, validate, validateField, handleReset, resetForm, handleSubmit, submitForm, setErrors, setFieldError, setFieldValue, setValues, setFieldTouched, setTouched, } = useForm({
+            validationSchema: validationSchema.value ? validationSchema : undefined,
+            initialValues,
+            initialErrors: props.initialErrors,
+            initialTouched: props.initialTouched,
+            validateOnMount: props.validateOnMount,
+        });
+        const onSubmit = props.onSubmit ? handleSubmit(props.onSubmit, props.onInvalidSubmit) : submitForm;
+        function handleFormReset(e) {
+            if (isEvent(e)) {
+                // Prevent default form reset behavior
+                e.preventDefault();
+            }
+            handleReset();
+            if (typeof ctx.attrs.onReset === 'function') {
+                ctx.attrs.onReset();
+            }
+        }
+        function handleScopedSlotSubmit(evt, onSubmit) {
+            const onSuccess = typeof evt === 'function' && !onSubmit ? evt : onSubmit;
+            return handleSubmit(onSuccess, props.onInvalidSubmit)(evt);
+        }
+        function slotProps() {
+            return {
+                meta: meta.value,
+                errors: errors.value,
+                values: values,
+                isSubmitting: isSubmitting.value,
+                submitCount: submitCount.value,
+                validate,
+                validateField,
+                handleSubmit: handleScopedSlotSubmit,
+                handleReset,
+                submitForm,
+                setErrors,
+                setFieldError,
+                setFieldValue,
+                setValues,
+                setFieldTouched,
+                setTouched,
+                resetForm,
+            };
+        }
+        // expose these functions and methods as part of public API
+        ctx.expose({
+            setFieldError,
+            setErrors,
+            setFieldValue,
+            setValues,
+            setFieldTouched,
+            setTouched,
+            resetForm,
+            validate,
+            validateField,
+        });
+        return function renderForm() {
+            // avoid resolving the form component as itself
+            const tag = props.as === 'form' ? props.as : (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveDynamicComponent)(props.as);
+            const children = normalizeChildren(tag, ctx, slotProps);
+            if (!props.as) {
+                return children;
+            }
+            // Attributes to add on a native `form` tag
+            const formAttrs = props.as === 'form'
+                ? {
+                    // Disables native validation as vee-validate will handle it.
+                    novalidate: true,
+                }
+                : {};
+            return (0,vue__WEBPACK_IMPORTED_MODULE_0__.h)(tag, Object.assign(Object.assign(Object.assign({}, formAttrs), ctx.attrs), { onSubmit, onReset: handleFormReset }), children);
+        };
+    },
+});
+const Form = FormImpl;
+
+let FIELD_ARRAY_COUNTER = 0;
+function useFieldArray(arrayPath) {
+    const id = FIELD_ARRAY_COUNTER++;
+    const form = injectWithSelf(FormContextKey, undefined);
+    const fields = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)([]);
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    const noOp = () => { };
+    const noOpApi = {
+        fields: (0,vue__WEBPACK_IMPORTED_MODULE_0__.readonly)(fields),
+        remove: noOp,
+        push: noOp,
+        swap: noOp,
+        insert: noOp,
+        update: noOp,
+        replace: noOp,
+        prepend: noOp,
+    };
+    if (!form) {
+        warn('FieldArray requires being a child of `<Form/>` or `useForm` being called before it. Array fields may not work correctly');
+        return noOpApi;
+    }
+    if (!(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(arrayPath)) {
+        warn('FieldArray requires a field path to be provided, did you forget to pass the `name` prop?');
+        return noOpApi;
+    }
+    let entryCounter = 0;
+    function initFields() {
+        const currentValues = getFromPath(form === null || form === void 0 ? void 0 : form.values, (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(arrayPath), []);
+        fields.value = currentValues.map(createEntry);
+        updateEntryFlags();
+    }
+    initFields();
+    function updateEntryFlags() {
+        const fieldsLength = fields.value.length;
+        for (let i = 0; i < fieldsLength; i++) {
+            const entry = fields.value[i];
+            entry.isFirst = i === 0;
+            entry.isLast = i === fieldsLength - 1;
+        }
+    }
+    function createEntry(value) {
+        const key = entryCounter++;
+        const entry = {
+            key,
+            value: (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+                const currentValues = getFromPath(form === null || form === void 0 ? void 0 : form.values, (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(arrayPath), []);
+                const idx = fields.value.findIndex(e => e.key === key);
+                return idx === -1 ? value : currentValues[idx];
+            }),
+            isFirst: false,
+            isLast: false,
+        };
+        return entry;
+    }
+    function remove(idx) {
+        const pathName = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(arrayPath);
+        const pathValue = getFromPath(form === null || form === void 0 ? void 0 : form.values, pathName);
+        if (!pathValue || !Array.isArray(pathValue)) {
+            return;
+        }
+        const newValue = [...pathValue];
+        newValue.splice(idx, 1);
+        form === null || form === void 0 ? void 0 : form.unsetInitialValue(pathName + `[${idx}]`);
+        form === null || form === void 0 ? void 0 : form.setFieldValue(pathName, newValue);
+        fields.value.splice(idx, 1);
+        updateEntryFlags();
+    }
+    function push(value) {
+        const pathName = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(arrayPath);
+        const pathValue = getFromPath(form === null || form === void 0 ? void 0 : form.values, pathName);
+        const normalizedPathValue = isNullOrUndefined(pathValue) ? [] : pathValue;
+        if (!Array.isArray(normalizedPathValue)) {
+            return;
+        }
+        const newValue = [...normalizedPathValue];
+        newValue.push(value);
+        form === null || form === void 0 ? void 0 : form.stageInitialValue(pathName + `[${newValue.length - 1}]`, value);
+        form === null || form === void 0 ? void 0 : form.setFieldValue(pathName, newValue);
+        fields.value.push(createEntry(value));
+        updateEntryFlags();
+    }
+    function swap(indexA, indexB) {
+        const pathName = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(arrayPath);
+        const pathValue = getFromPath(form === null || form === void 0 ? void 0 : form.values, pathName);
+        if (!Array.isArray(pathValue) || !(indexA in pathValue) || !(indexB in pathValue)) {
+            return;
+        }
+        const newValue = [...pathValue];
+        const newFields = [...fields.value];
+        // the old switcheroo
+        const temp = newValue[indexA];
+        newValue[indexA] = newValue[indexB];
+        newValue[indexB] = temp;
+        const tempEntry = newFields[indexA];
+        newFields[indexA] = newFields[indexB];
+        newFields[indexB] = tempEntry;
+        form === null || form === void 0 ? void 0 : form.setFieldValue(pathName, newValue);
+        fields.value = newFields;
+        updateEntryFlags();
+    }
+    function insert(idx, value) {
+        const pathName = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(arrayPath);
+        const pathValue = getFromPath(form === null || form === void 0 ? void 0 : form.values, pathName);
+        if (!Array.isArray(pathValue) || pathValue.length < idx) {
+            return;
+        }
+        const newValue = [...pathValue];
+        const newFields = [...fields.value];
+        newValue.splice(idx, 0, value);
+        newFields.splice(idx, 0, createEntry(value));
+        form === null || form === void 0 ? void 0 : form.setFieldValue(pathName, newValue);
+        fields.value = newFields;
+        updateEntryFlags();
+    }
+    function replace(arr) {
+        const pathName = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(arrayPath);
+        form === null || form === void 0 ? void 0 : form.setFieldValue(pathName, arr);
+        initFields();
+    }
+    function update(idx, value) {
+        const pathName = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(arrayPath);
+        const pathValue = getFromPath(form === null || form === void 0 ? void 0 : form.values, pathName);
+        if (!Array.isArray(pathValue) || pathValue.length - 1 < idx) {
+            return;
+        }
+        form === null || form === void 0 ? void 0 : form.setFieldValue(`${pathName}[${idx}]`, value);
+    }
+    function prepend(value) {
+        const pathName = (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(arrayPath);
+        const pathValue = getFromPath(form === null || form === void 0 ? void 0 : form.values, pathName);
+        const normalizedPathValue = isNullOrUndefined(pathValue) ? [] : pathValue;
+        if (!Array.isArray(normalizedPathValue)) {
+            return;
+        }
+        const newValue = [value, ...normalizedPathValue];
+        form === null || form === void 0 ? void 0 : form.stageInitialValue(pathName + `[${newValue.length - 1}]`, value);
+        form === null || form === void 0 ? void 0 : form.setFieldValue(pathName, newValue);
+        fields.value.unshift(createEntry(value));
+        updateEntryFlags();
+    }
+    form.fieldArraysLookup[id] = {
+        reset: initFields,
+    };
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.onBeforeUnmount)(() => {
+        delete form.fieldArraysLookup[id];
+    });
+    return {
+        fields: (0,vue__WEBPACK_IMPORTED_MODULE_0__.readonly)(fields),
+        remove,
+        push,
+        swap,
+        insert,
+        update,
+        replace,
+        prepend,
+    };
+}
+
+const FieldArrayImpl = (0,vue__WEBPACK_IMPORTED_MODULE_0__.defineComponent)({
+    name: 'FieldArray',
+    inheritAttrs: false,
+    props: {
+        name: {
+            type: String,
+            required: true,
+        },
+    },
+    setup(props, ctx) {
+        const { push, remove, swap, insert, replace, update, prepend, fields } = useFieldArray((0,vue__WEBPACK_IMPORTED_MODULE_0__.toRef)(props, 'name'));
+        function slotProps() {
+            return {
+                fields: fields.value,
+                push,
+                remove,
+                swap,
+                insert,
+                update,
+                replace,
+                prepend,
+            };
+        }
+        ctx.expose({
+            push,
+            remove,
+            swap,
+            insert,
+            update,
+            replace,
+            prepend,
+        });
+        return () => {
+            const children = normalizeChildren(undefined, ctx, slotProps);
+            return children;
+        };
+    },
+});
+const FieldArray = FieldArrayImpl;
+
+const ErrorMessageImpl = (0,vue__WEBPACK_IMPORTED_MODULE_0__.defineComponent)({
+    name: 'ErrorMessage',
+    props: {
+        as: {
+            type: String,
+            default: undefined,
+        },
+        name: {
+            type: String,
+            required: true,
+        },
+    },
+    setup(props, ctx) {
+        const form = (0,vue__WEBPACK_IMPORTED_MODULE_0__.inject)(FormContextKey, undefined);
+        const message = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+            return form === null || form === void 0 ? void 0 : form.errors.value[props.name];
+        });
+        function slotProps() {
+            return {
+                message: message.value,
+            };
+        }
+        return () => {
+            // Renders nothing if there are no messages
+            if (!message.value) {
+                return undefined;
+            }
+            const tag = (props.as ? (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveDynamicComponent)(props.as) : props.as);
+            const children = normalizeChildren(tag, ctx, slotProps);
+            const attrs = Object.assign({ role: 'alert' }, ctx.attrs);
+            // If no tag was specified and there are children
+            // render the slot as is without wrapping it
+            if (!tag && (Array.isArray(children) || !children) && (children === null || children === void 0 ? void 0 : children.length)) {
+                return children;
+            }
+            // If no children in slot
+            // render whatever specified and fallback to a <span> with the message in it's contents
+            if ((Array.isArray(children) || !children) && !(children === null || children === void 0 ? void 0 : children.length)) {
+                return (0,vue__WEBPACK_IMPORTED_MODULE_0__.h)(tag || 'span', attrs, message.value);
+            }
+            return (0,vue__WEBPACK_IMPORTED_MODULE_0__.h)(tag, attrs, children);
+        };
+    },
+});
+const ErrorMessage = ErrorMessageImpl;
+
+function useResetForm() {
+    const form = injectWithSelf(FormContextKey);
+    if (!form) {
+        warn('No vee-validate <Form /> or `useForm` was detected in the component tree');
+    }
+    return function resetForm(state) {
+        if (!form) {
+            return;
+        }
+        return form.resetForm(state);
+    };
+}
+
+/**
+ * If a field is dirty or not
+ */
+function useIsFieldDirty(path) {
+    const form = injectWithSelf(FormContextKey);
+    let field = path ? undefined : (0,vue__WEBPACK_IMPORTED_MODULE_0__.inject)(FieldContextKey);
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        if (path) {
+            field = normalizeField(form === null || form === void 0 ? void 0 : form.fieldsByPath.value[(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path)]);
+        }
+        if (!field) {
+            warn(`field with name ${(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path)} was not found`);
+            return false;
+        }
+        return field.meta.dirty;
+    });
+}
+
+/**
+ * If a field is touched or not
+ */
+function useIsFieldTouched(path) {
+    const form = injectWithSelf(FormContextKey);
+    let field = path ? undefined : (0,vue__WEBPACK_IMPORTED_MODULE_0__.inject)(FieldContextKey);
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        if (path) {
+            field = normalizeField(form === null || form === void 0 ? void 0 : form.fieldsByPath.value[(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path)]);
+        }
+        if (!field) {
+            warn(`field with name ${(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path)} was not found`);
+            return false;
+        }
+        return field.meta.touched;
+    });
+}
+
+/**
+ * If a field is validated and is valid
+ */
+function useIsFieldValid(path) {
+    const form = injectWithSelf(FormContextKey);
+    let field = path ? undefined : (0,vue__WEBPACK_IMPORTED_MODULE_0__.inject)(FieldContextKey);
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        if (path) {
+            field = normalizeField(form === null || form === void 0 ? void 0 : form.fieldsByPath.value[(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path)]);
+        }
+        if (!field) {
+            warn(`field with name ${(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path)} was not found`);
+            return false;
+        }
+        return field.meta.valid;
+    });
+}
+
+/**
+ * If the form is submitting or not
+ */
+function useIsSubmitting() {
+    const form = injectWithSelf(FormContextKey);
+    if (!form) {
+        warn('No vee-validate <Form /> or `useForm` was detected in the component tree');
+    }
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        var _a;
+        return (_a = form === null || form === void 0 ? void 0 : form.isSubmitting.value) !== null && _a !== void 0 ? _a : false;
+    });
+}
+
+/**
+ * Validates a single field
+ */
+function useValidateField(path) {
+    const form = injectWithSelf(FormContextKey);
+    let field = path ? undefined : (0,vue__WEBPACK_IMPORTED_MODULE_0__.inject)(FieldContextKey);
+    return function validateField() {
+        if (path) {
+            field = normalizeField(form === null || form === void 0 ? void 0 : form.fieldsByPath.value[(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path)]);
+        }
+        if (!field) {
+            warn(`field with name ${(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path)} was not found`);
+            return Promise.resolve({
+                errors: [],
+                valid: true,
+            });
+        }
+        return field.validate();
+    };
+}
+
+/**
+ * If the form is dirty or not
+ */
+function useIsFormDirty() {
+    const form = injectWithSelf(FormContextKey);
+    if (!form) {
+        warn('No vee-validate <Form /> or `useForm` was detected in the component tree');
+    }
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        var _a;
+        return (_a = form === null || form === void 0 ? void 0 : form.meta.value.dirty) !== null && _a !== void 0 ? _a : false;
+    });
+}
+
+/**
+ * If the form is touched or not
+ */
+function useIsFormTouched() {
+    const form = injectWithSelf(FormContextKey);
+    if (!form) {
+        warn('No vee-validate <Form /> or `useForm` was detected in the component tree');
+    }
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        var _a;
+        return (_a = form === null || form === void 0 ? void 0 : form.meta.value.touched) !== null && _a !== void 0 ? _a : false;
+    });
+}
+
+/**
+ * If the form has been validated and is valid
+ */
+function useIsFormValid() {
+    const form = injectWithSelf(FormContextKey);
+    if (!form) {
+        warn('No vee-validate <Form /> or `useForm` was detected in the component tree');
+    }
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        var _a;
+        return (_a = form === null || form === void 0 ? void 0 : form.meta.value.valid) !== null && _a !== void 0 ? _a : false;
+    });
+}
+
+/**
+ * Validate multiple fields
+ */
+function useValidateForm() {
+    const form = injectWithSelf(FormContextKey);
+    if (!form) {
+        warn('No vee-validate <Form /> or `useForm` was detected in the component tree');
+    }
+    return function validateField() {
+        if (!form) {
+            return Promise.resolve({ results: {}, errors: {}, valid: true });
+        }
+        return form.validate();
+    };
+}
+
+/**
+ * The number of form's submission count
+ */
+function useSubmitCount() {
+    const form = injectWithSelf(FormContextKey);
+    if (!form) {
+        warn('No vee-validate <Form /> or `useForm` was detected in the component tree');
+    }
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        var _a;
+        return (_a = form === null || form === void 0 ? void 0 : form.submitCount.value) !== null && _a !== void 0 ? _a : 0;
+    });
+}
+
+/**
+ * Gives access to a field's current value
+ */
+function useFieldValue(path) {
+    const form = injectWithSelf(FormContextKey);
+    // We don't want to use self injected context as it doesn't make sense
+    const field = path ? undefined : (0,vue__WEBPACK_IMPORTED_MODULE_0__.inject)(FieldContextKey);
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        if (path) {
+            return getFromPath(form === null || form === void 0 ? void 0 : form.values, (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path));
+        }
+        return (0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(field === null || field === void 0 ? void 0 : field.value);
+    });
+}
+
+/**
+ * Gives access to a form's values
+ */
+function useFormValues() {
+    const form = injectWithSelf(FormContextKey);
+    if (!form) {
+        warn('No vee-validate <Form /> or `useForm` was detected in the component tree');
+    }
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        return (form === null || form === void 0 ? void 0 : form.values) || {};
+    });
+}
+
+/**
+ * Gives access to all form errors
+ */
+function useFormErrors() {
+    const form = injectWithSelf(FormContextKey);
+    if (!form) {
+        warn('No vee-validate <Form /> or `useForm` was detected in the component tree');
+    }
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        return ((form === null || form === void 0 ? void 0 : form.errors.value) || {});
+    });
+}
+
+/**
+ * Gives access to a single field error
+ */
+function useFieldError(path) {
+    const form = injectWithSelf(FormContextKey);
+    // We don't want to use self injected context as it doesn't make sense
+    const field = path ? undefined : (0,vue__WEBPACK_IMPORTED_MODULE_0__.inject)(FieldContextKey);
+    return (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(() => {
+        if (path) {
+            return form === null || form === void 0 ? void 0 : form.errors.value[(0,vue__WEBPACK_IMPORTED_MODULE_0__.unref)(path)];
+        }
+        return field === null || field === void 0 ? void 0 : field.errorMessage.value;
+    });
+}
+
+function useSubmitForm(cb) {
+    const form = injectWithSelf(FormContextKey);
+    if (!form) {
+        warn('No vee-validate <Form /> or `useForm` was detected in the component tree');
+    }
+    const onSubmit = form ? form.handleSubmit(cb) : undefined;
+    return function submitForm(e) {
+        if (!onSubmit) {
+            return;
+        }
+        return onSubmit(e);
+    };
+}
+
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-axios/dist/vue-axios.esm.min.js":
 /*!**********************************************************!*\
   !*** ./node_modules/vue-axios/dist/vue-axios.esm.min.js ***!
@@ -27838,13 +36898,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _FirstStep_vue_vue_type_template_id_64171eee__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./FirstStep.vue?vue&type=template&id=64171eee */ "./resources/js/FirstStep.vue?vue&type=template&id=64171eee");
 /* harmony import */ var _FirstStep_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./FirstStep.vue?vue&type=script&lang=js */ "./resources/js/FirstStep.vue?vue&type=script&lang=js");
-/* harmony import */ var D_xampp_8_htdocs_vedx_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+/* harmony import */ var _FirstStep_vue_vue_type_style_index_0_id_64171eee_lang_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./FirstStep.vue?vue&type=style&index=0&id=64171eee&lang=css */ "./resources/js/FirstStep.vue?vue&type=style&index=0&id=64171eee&lang=css");
+/* harmony import */ var D_xampp_8_htdocs_vedx_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
 
 
 
 
 ;
-const __exports__ = /*#__PURE__*/(0,D_xampp_8_htdocs_vedx_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_FirstStep_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_FirstStep_vue_vue_type_template_id_64171eee__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"resources/js/FirstStep.vue"]])
+
+
+const __exports__ = /*#__PURE__*/(0,D_xampp_8_htdocs_vedx_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_3__["default"])(_FirstStep_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_FirstStep_vue_vue_type_template_id_64171eee__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"resources/js/FirstStep.vue"]])
 /* hot reload */
 if (false) {}
 
@@ -27991,6 +37054,19 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _style_loader_dist_cjs_js_css_loader_dist_cjs_js_clonedRuleSet_8_use_1_vue_loader_dist_stylePostLoader_js_postcss_loader_dist_cjs_js_clonedRuleSet_8_use_2_default_css_vue_type_style_index_0_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../style-loader/dist/cjs.js!../../../css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!../../../vue-loader/dist/stylePostLoader.js!../../../postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./default.css?vue&type=style&index=0&lang=css */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/@vueform/multiselect/themes/default.css?vue&type=style&index=0&lang=css");
+
+
+/***/ }),
+
+/***/ "./resources/js/FirstStep.vue?vue&type=style&index=0&id=64171eee&lang=css":
+/*!********************************************************************************!*\
+  !*** ./resources/js/FirstStep.vue?vue&type=style&index=0&id=64171eee&lang=css ***!
+  \********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_8_use_1_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_8_use_2_node_modules_vue_loader_dist_index_js_ruleSet_0_use_0_FirstStep_vue_vue_type_style_index_0_id_64171eee_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../node_modules/style-loader/dist/cjs.js!../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!../../node_modules/vue-loader/dist/stylePostLoader.js!../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!../../node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./FirstStep.vue?vue&type=style&index=0&id=64171eee&lang=css */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[0]!./resources/js/FirstStep.vue?vue&type=style&index=0&id=64171eee&lang=css");
 
 
 /***/ }),
@@ -28920,6 +37996,6386 @@ function genPropsAccessExp(name) {
 
 /***/ }),
 
+/***/ "./node_modules/yup/es/Condition.js":
+/*!******************************************!*\
+  !*** ./node_modules/yup/es/Condition.js ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var lodash_has__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash/has */ "./node_modules/lodash/has.js");
+/* harmony import */ var lodash_has__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash_has__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _util_isSchema__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./util/isSchema */ "./node_modules/yup/es/util/isSchema.js");
+
+
+
+class Condition {
+  constructor(refs, options) {
+    this.fn = void 0;
+    this.refs = refs;
+    this.refs = refs;
+
+    if (typeof options === 'function') {
+      this.fn = options;
+      return;
+    }
+
+    if (!lodash_has__WEBPACK_IMPORTED_MODULE_0___default()(options, 'is')) throw new TypeError('`is:` is required for `when()` conditions');
+    if (!options.then && !options.otherwise) throw new TypeError('either `then:` or `otherwise:` is required for `when()` conditions');
+    let {
+      is,
+      then,
+      otherwise
+    } = options;
+    let check = typeof is === 'function' ? is : (...values) => values.every(value => value === is);
+
+    this.fn = function (...args) {
+      let options = args.pop();
+      let schema = args.pop();
+      let branch = check(...args) ? then : otherwise;
+      if (!branch) return undefined;
+      if (typeof branch === 'function') return branch(schema);
+      return schema.concat(branch.resolve(options));
+    };
+  }
+
+  resolve(base, options) {
+    let values = this.refs.map(ref => ref.getValue(options == null ? void 0 : options.value, options == null ? void 0 : options.parent, options == null ? void 0 : options.context));
+    let schema = this.fn.apply(base, values.concat(base, options));
+    if (schema === undefined || schema === base) return base;
+    if (!(0,_util_isSchema__WEBPACK_IMPORTED_MODULE_1__["default"])(schema)) throw new TypeError('conditions must return a schema object');
+    return schema.resolve(options);
+  }
+
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Condition);
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/Lazy.js":
+/*!*************************************!*\
+  !*** ./node_modules/yup/es/Lazy.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "create": () => (/* binding */ create),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _util_isSchema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./util/isSchema */ "./node_modules/yup/es/util/isSchema.js");
+
+function create(builder) {
+  return new Lazy(builder);
+}
+
+class Lazy {
+  constructor(builder) {
+    this.type = 'lazy';
+    this.__isYupSchema__ = true;
+    this.__inputType = void 0;
+    this.__outputType = void 0;
+
+    this._resolve = (value, options = {}) => {
+      let schema = this.builder(value, options);
+      if (!(0,_util_isSchema__WEBPACK_IMPORTED_MODULE_0__["default"])(schema)) throw new TypeError('lazy() functions must return a valid schema');
+      return schema.resolve(options);
+    };
+
+    this.builder = builder;
+  }
+
+  resolve(options) {
+    return this._resolve(options.value, options);
+  }
+
+  cast(value, options) {
+    return this._resolve(value, options).cast(value, options);
+  }
+
+  validate(value, options, maybeCb) {
+    // @ts-expect-error missing public callback on type
+    return this._resolve(value, options).validate(value, options, maybeCb);
+  }
+
+  validateSync(value, options) {
+    return this._resolve(value, options).validateSync(value, options);
+  }
+
+  validateAt(path, value, options) {
+    return this._resolve(value, options).validateAt(path, value, options);
+  }
+
+  validateSyncAt(path, value, options) {
+    return this._resolve(value, options).validateSyncAt(path, value, options);
+  }
+
+  describe() {
+    return null;
+  }
+
+  isValid(value, options) {
+    return this._resolve(value, options).isValid(value, options);
+  }
+
+  isValidSync(value, options) {
+    return this._resolve(value, options).isValidSync(value, options);
+  }
+
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Lazy);
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/Reference.js":
+/*!******************************************!*\
+  !*** ./node_modules/yup/es/Reference.js ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "create": () => (/* binding */ create),
+/* harmony export */   "default": () => (/* binding */ Reference)
+/* harmony export */ });
+/* harmony import */ var property_expr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! property-expr */ "./node_modules/property-expr/index.js");
+/* harmony import */ var property_expr__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(property_expr__WEBPACK_IMPORTED_MODULE_0__);
+
+const prefixes = {
+  context: '$',
+  value: '.'
+};
+function create(key, options) {
+  return new Reference(key, options);
+}
+class Reference {
+  constructor(key, options = {}) {
+    this.key = void 0;
+    this.isContext = void 0;
+    this.isValue = void 0;
+    this.isSibling = void 0;
+    this.path = void 0;
+    this.getter = void 0;
+    this.map = void 0;
+    if (typeof key !== 'string') throw new TypeError('ref must be a string, got: ' + key);
+    this.key = key.trim();
+    if (key === '') throw new TypeError('ref must be a non-empty string');
+    this.isContext = this.key[0] === prefixes.context;
+    this.isValue = this.key[0] === prefixes.value;
+    this.isSibling = !this.isContext && !this.isValue;
+    let prefix = this.isContext ? prefixes.context : this.isValue ? prefixes.value : '';
+    this.path = this.key.slice(prefix.length);
+    this.getter = this.path && (0,property_expr__WEBPACK_IMPORTED_MODULE_0__.getter)(this.path, true);
+    this.map = options.map;
+  }
+
+  getValue(value, parent, context) {
+    let result = this.isContext ? context : this.isValue ? value : parent;
+    if (this.getter) result = this.getter(result || {});
+    if (this.map) result = this.map(result);
+    return result;
+  }
+  /**
+   *
+   * @param {*} value
+   * @param {Object} options
+   * @param {Object=} options.context
+   * @param {Object=} options.parent
+   */
+
+
+  cast(value, options) {
+    return this.getValue(value, options == null ? void 0 : options.parent, options == null ? void 0 : options.context);
+  }
+
+  resolve() {
+    return this;
+  }
+
+  describe() {
+    return {
+      type: 'ref',
+      key: this.key
+    };
+  }
+
+  toString() {
+    return `Ref(${this.key})`;
+  }
+
+  static isRef(value) {
+    return value && value.__isYupRef;
+  }
+
+} // @ts-ignore
+
+Reference.prototype.__isYupRef = true;
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/ValidationError.js":
+/*!************************************************!*\
+  !*** ./node_modules/yup/es/ValidationError.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ ValidationError)
+/* harmony export */ });
+/* harmony import */ var _util_printValue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./util/printValue */ "./node_modules/yup/es/util/printValue.js");
+/* harmony import */ var _util_toArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./util/toArray */ "./node_modules/yup/es/util/toArray.js");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+let strReg = /\$\{\s*(\w+)\s*\}/g;
+class ValidationError extends Error {
+  static formatError(message, params) {
+    const path = params.label || params.path || 'this';
+    if (path !== params.path) params = _extends({}, params, {
+      path
+    });
+    if (typeof message === 'string') return message.replace(strReg, (_, key) => (0,_util_printValue__WEBPACK_IMPORTED_MODULE_0__["default"])(params[key]));
+    if (typeof message === 'function') return message(params);
+    return message;
+  }
+
+  static isError(err) {
+    return err && err.name === 'ValidationError';
+  }
+
+  constructor(errorOrErrors, value, field, type) {
+    super();
+    this.value = void 0;
+    this.path = void 0;
+    this.type = void 0;
+    this.errors = void 0;
+    this.params = void 0;
+    this.inner = void 0;
+    this.name = 'ValidationError';
+    this.value = value;
+    this.path = field;
+    this.type = type;
+    this.errors = [];
+    this.inner = [];
+    (0,_util_toArray__WEBPACK_IMPORTED_MODULE_1__["default"])(errorOrErrors).forEach(err => {
+      if (ValidationError.isError(err)) {
+        this.errors.push(...err.errors);
+        this.inner = this.inner.concat(err.inner.length ? err.inner : err);
+      } else {
+        this.errors.push(err);
+      }
+    });
+    this.message = this.errors.length > 1 ? `${this.errors.length} errors occurred` : this.errors[0];
+    if (Error.captureStackTrace) Error.captureStackTrace(this, ValidationError);
+  }
+
+}
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/array.js":
+/*!**************************************!*\
+  !*** ./node_modules/yup/es/array.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "create": () => (/* binding */ create),
+/* harmony export */   "default": () => (/* binding */ ArraySchema)
+/* harmony export */ });
+/* harmony import */ var _util_isAbsent__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./util/isAbsent */ "./node_modules/yup/es/util/isAbsent.js");
+/* harmony import */ var _util_isSchema__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./util/isSchema */ "./node_modules/yup/es/util/isSchema.js");
+/* harmony import */ var _util_printValue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./util/printValue */ "./node_modules/yup/es/util/printValue.js");
+/* harmony import */ var _locale__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./locale */ "./node_modules/yup/es/locale.js");
+/* harmony import */ var _util_runTests__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./util/runTests */ "./node_modules/yup/es/util/runTests.js");
+/* harmony import */ var _ValidationError__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./ValidationError */ "./node_modules/yup/es/ValidationError.js");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./schema */ "./node_modules/yup/es/schema.js");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+
+
+
+
+
+function create(type) {
+  return new ArraySchema(type);
+}
+class ArraySchema extends _schema__WEBPACK_IMPORTED_MODULE_6__["default"] {
+  constructor(type) {
+    super({
+      type: 'array'
+    }); // `undefined` specifically means uninitialized, as opposed to
+    // "no subtype"
+
+    this.innerType = void 0;
+    this.innerType = type;
+    this.withMutation(() => {
+      this.transform(function (values) {
+        if (typeof values === 'string') try {
+          values = JSON.parse(values);
+        } catch (err) {
+          values = null;
+        }
+        return this.isType(values) ? values : null;
+      });
+    });
+  }
+
+  _typeCheck(v) {
+    return Array.isArray(v);
+  }
+
+  get _subType() {
+    return this.innerType;
+  }
+
+  _cast(_value, _opts) {
+    const value = super._cast(_value, _opts); //should ignore nulls here
+
+
+    if (!this._typeCheck(value) || !this.innerType) return value;
+    let isChanged = false;
+    const castArray = value.map((v, idx) => {
+      const castElement = this.innerType.cast(v, _extends({}, _opts, {
+        path: `${_opts.path || ''}[${idx}]`
+      }));
+
+      if (castElement !== v) {
+        isChanged = true;
+      }
+
+      return castElement;
+    });
+    return isChanged ? castArray : value;
+  }
+
+  _validate(_value, options = {}, callback) {
+    var _options$abortEarly, _options$recursive;
+
+    let errors = [];
+    let sync = options.sync;
+    let path = options.path;
+    let innerType = this.innerType;
+    let endEarly = (_options$abortEarly = options.abortEarly) != null ? _options$abortEarly : this.spec.abortEarly;
+    let recursive = (_options$recursive = options.recursive) != null ? _options$recursive : this.spec.recursive;
+    let originalValue = options.originalValue != null ? options.originalValue : _value;
+
+    super._validate(_value, options, (err, value) => {
+      if (err) {
+        if (!_ValidationError__WEBPACK_IMPORTED_MODULE_5__["default"].isError(err) || endEarly) {
+          return void callback(err, value);
+        }
+
+        errors.push(err);
+      }
+
+      if (!recursive || !innerType || !this._typeCheck(value)) {
+        callback(errors[0] || null, value);
+        return;
+      }
+
+      originalValue = originalValue || value; // #950 Ensure that sparse array empty slots are validated
+
+      let tests = new Array(value.length);
+
+      for (let idx = 0; idx < value.length; idx++) {
+        let item = value[idx];
+        let path = `${options.path || ''}[${idx}]`; // object._validate note for isStrict explanation
+
+        let innerOptions = _extends({}, options, {
+          path,
+          strict: true,
+          parent: value,
+          index: idx,
+          originalValue: originalValue[idx]
+        });
+
+        tests[idx] = (_, cb) => innerType.validate(item, innerOptions, cb);
+      }
+
+      (0,_util_runTests__WEBPACK_IMPORTED_MODULE_4__["default"])({
+        sync,
+        path,
+        value,
+        errors,
+        endEarly,
+        tests
+      }, callback);
+    });
+  }
+
+  clone(spec) {
+    const next = super.clone(spec);
+    next.innerType = this.innerType;
+    return next;
+  }
+
+  concat(schema) {
+    let next = super.concat(schema);
+    next.innerType = this.innerType;
+    if (schema.innerType) next.innerType = next.innerType ? // @ts-expect-error Lazy doesn't have concat()
+    next.innerType.concat(schema.innerType) : schema.innerType;
+    return next;
+  }
+
+  of(schema) {
+    // FIXME: this should return a new instance of array without the default to be
+    let next = this.clone();
+    if (!(0,_util_isSchema__WEBPACK_IMPORTED_MODULE_1__["default"])(schema)) throw new TypeError('`array.of()` sub-schema must be a valid yup schema not: ' + (0,_util_printValue__WEBPACK_IMPORTED_MODULE_2__["default"])(schema)); // FIXME(ts):
+
+    next.innerType = schema;
+    return next;
+  }
+
+  length(length, message = _locale__WEBPACK_IMPORTED_MODULE_3__.array.length) {
+    return this.test({
+      message,
+      name: 'length',
+      exclusive: true,
+      params: {
+        length
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_0__["default"])(value) || value.length === this.resolve(length);
+      }
+
+    });
+  }
+
+  min(min, message) {
+    message = message || _locale__WEBPACK_IMPORTED_MODULE_3__.array.min;
+    return this.test({
+      message,
+      name: 'min',
+      exclusive: true,
+      params: {
+        min
+      },
+
+      // FIXME(ts): Array<typeof T>
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_0__["default"])(value) || value.length >= this.resolve(min);
+      }
+
+    });
+  }
+
+  max(max, message) {
+    message = message || _locale__WEBPACK_IMPORTED_MODULE_3__.array.max;
+    return this.test({
+      message,
+      name: 'max',
+      exclusive: true,
+      params: {
+        max
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_0__["default"])(value) || value.length <= this.resolve(max);
+      }
+
+    });
+  }
+
+  ensure() {
+    return this.default(() => []).transform((val, original) => {
+      // We don't want to return `null` for nullable schema
+      if (this._typeCheck(val)) return val;
+      return original == null ? [] : [].concat(original);
+    });
+  }
+
+  compact(rejector) {
+    let reject = !rejector ? v => !!v : (v, i, a) => !rejector(v, i, a);
+    return this.transform(values => values != null ? values.filter(reject) : values);
+  }
+
+  describe() {
+    let base = super.describe();
+    if (this.innerType) base.innerType = this.innerType.describe();
+    return base;
+  }
+
+  nullable(isNullable = true) {
+    return super.nullable(isNullable);
+  }
+
+  defined() {
+    return super.defined();
+  }
+
+  required(msg) {
+    return super.required(msg);
+  }
+
+}
+create.prototype = ArraySchema.prototype; //
+// Interfaces
+//
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/boolean.js":
+/*!****************************************!*\
+  !*** ./node_modules/yup/es/boolean.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "create": () => (/* binding */ create),
+/* harmony export */   "default": () => (/* binding */ BooleanSchema)
+/* harmony export */ });
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./schema */ "./node_modules/yup/es/schema.js");
+/* harmony import */ var _locale__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./locale */ "./node_modules/yup/es/locale.js");
+/* harmony import */ var _util_isAbsent__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./util/isAbsent */ "./node_modules/yup/es/util/isAbsent.js");
+
+
+
+function create() {
+  return new BooleanSchema();
+}
+class BooleanSchema extends _schema__WEBPACK_IMPORTED_MODULE_0__["default"] {
+  constructor() {
+    super({
+      type: 'boolean'
+    });
+    this.withMutation(() => {
+      this.transform(function (value) {
+        if (!this.isType(value)) {
+          if (/^(true|1)$/i.test(String(value))) return true;
+          if (/^(false|0)$/i.test(String(value))) return false;
+        }
+
+        return value;
+      });
+    });
+  }
+
+  _typeCheck(v) {
+    if (v instanceof Boolean) v = v.valueOf();
+    return typeof v === 'boolean';
+  }
+
+  isTrue(message = _locale__WEBPACK_IMPORTED_MODULE_1__.boolean.isValue) {
+    return this.test({
+      message,
+      name: 'is-value',
+      exclusive: true,
+      params: {
+        value: 'true'
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_2__["default"])(value) || value === true;
+      }
+
+    });
+  }
+
+  isFalse(message = _locale__WEBPACK_IMPORTED_MODULE_1__.boolean.isValue) {
+    return this.test({
+      message,
+      name: 'is-value',
+      exclusive: true,
+      params: {
+        value: 'false'
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_2__["default"])(value) || value === false;
+      }
+
+    });
+  }
+
+}
+create.prototype = BooleanSchema.prototype;
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/date.js":
+/*!*************************************!*\
+  !*** ./node_modules/yup/es/date.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "create": () => (/* binding */ create),
+/* harmony export */   "default": () => (/* binding */ DateSchema)
+/* harmony export */ });
+/* harmony import */ var _util_isodate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./util/isodate */ "./node_modules/yup/es/util/isodate.js");
+/* harmony import */ var _locale__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./locale */ "./node_modules/yup/es/locale.js");
+/* harmony import */ var _util_isAbsent__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./util/isAbsent */ "./node_modules/yup/es/util/isAbsent.js");
+/* harmony import */ var _Reference__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Reference */ "./node_modules/yup/es/Reference.js");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./schema */ "./node_modules/yup/es/schema.js");
+// @ts-ignore
+
+
+
+
+
+let invalidDate = new Date('');
+
+let isDate = obj => Object.prototype.toString.call(obj) === '[object Date]';
+
+function create() {
+  return new DateSchema();
+}
+class DateSchema extends _schema__WEBPACK_IMPORTED_MODULE_4__["default"] {
+  constructor() {
+    super({
+      type: 'date'
+    });
+    this.withMutation(() => {
+      this.transform(function (value) {
+        if (this.isType(value)) return value;
+        value = (0,_util_isodate__WEBPACK_IMPORTED_MODULE_0__["default"])(value); // 0 is a valid timestamp equivalent to 1970-01-01T00:00:00Z(unix epoch) or before.
+
+        return !isNaN(value) ? new Date(value) : invalidDate;
+      });
+    });
+  }
+
+  _typeCheck(v) {
+    return isDate(v) && !isNaN(v.getTime());
+  }
+
+  prepareParam(ref, name) {
+    let param;
+
+    if (!_Reference__WEBPACK_IMPORTED_MODULE_3__["default"].isRef(ref)) {
+      let cast = this.cast(ref);
+      if (!this._typeCheck(cast)) throw new TypeError(`\`${name}\` must be a Date or a value that can be \`cast()\` to a Date`);
+      param = cast;
+    } else {
+      param = ref;
+    }
+
+    return param;
+  }
+
+  min(min, message = _locale__WEBPACK_IMPORTED_MODULE_1__.date.min) {
+    let limit = this.prepareParam(min, 'min');
+    return this.test({
+      message,
+      name: 'min',
+      exclusive: true,
+      params: {
+        min
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_2__["default"])(value) || value >= this.resolve(limit);
+      }
+
+    });
+  }
+
+  max(max, message = _locale__WEBPACK_IMPORTED_MODULE_1__.date.max) {
+    let limit = this.prepareParam(max, 'max');
+    return this.test({
+      message,
+      name: 'max',
+      exclusive: true,
+      params: {
+        max
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_2__["default"])(value) || value <= this.resolve(limit);
+      }
+
+    });
+  }
+
+}
+DateSchema.INVALID_DATE = invalidDate;
+create.prototype = DateSchema.prototype;
+create.INVALID_DATE = invalidDate;
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/index.js":
+/*!**************************************!*\
+  !*** ./node_modules/yup/es/index.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ArraySchema": () => (/* reexport safe */ _array__WEBPACK_IMPORTED_MODULE_6__["default"]),
+/* harmony export */   "BaseSchema": () => (/* reexport safe */ _schema__WEBPACK_IMPORTED_MODULE_13__["default"]),
+/* harmony export */   "BooleanSchema": () => (/* reexport safe */ _boolean__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "DateSchema": () => (/* reexport safe */ _date__WEBPACK_IMPORTED_MODULE_4__["default"]),
+/* harmony export */   "MixedSchema": () => (/* reexport safe */ _mixed__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "NumberSchema": () => (/* reexport safe */ _number__WEBPACK_IMPORTED_MODULE_3__["default"]),
+/* harmony export */   "ObjectSchema": () => (/* reexport safe */ _object__WEBPACK_IMPORTED_MODULE_5__["default"]),
+/* harmony export */   "StringSchema": () => (/* reexport safe */ _string__WEBPACK_IMPORTED_MODULE_2__["default"]),
+/* harmony export */   "ValidationError": () => (/* reexport safe */ _ValidationError__WEBPACK_IMPORTED_MODULE_9__["default"]),
+/* harmony export */   "addMethod": () => (/* binding */ addMethod),
+/* harmony export */   "array": () => (/* reexport safe */ _array__WEBPACK_IMPORTED_MODULE_6__.create),
+/* harmony export */   "bool": () => (/* reexport safe */ _boolean__WEBPACK_IMPORTED_MODULE_1__.create),
+/* harmony export */   "boolean": () => (/* reexport safe */ _boolean__WEBPACK_IMPORTED_MODULE_1__.create),
+/* harmony export */   "date": () => (/* reexport safe */ _date__WEBPACK_IMPORTED_MODULE_4__.create),
+/* harmony export */   "isSchema": () => (/* reexport safe */ _util_isSchema__WEBPACK_IMPORTED_MODULE_11__["default"]),
+/* harmony export */   "lazy": () => (/* reexport safe */ _Lazy__WEBPACK_IMPORTED_MODULE_8__.create),
+/* harmony export */   "mixed": () => (/* reexport safe */ _mixed__WEBPACK_IMPORTED_MODULE_0__.create),
+/* harmony export */   "number": () => (/* reexport safe */ _number__WEBPACK_IMPORTED_MODULE_3__.create),
+/* harmony export */   "object": () => (/* reexport safe */ _object__WEBPACK_IMPORTED_MODULE_5__.create),
+/* harmony export */   "reach": () => (/* reexport safe */ _util_reach__WEBPACK_IMPORTED_MODULE_10__["default"]),
+/* harmony export */   "ref": () => (/* reexport safe */ _Reference__WEBPACK_IMPORTED_MODULE_7__.create),
+/* harmony export */   "setLocale": () => (/* reexport safe */ _setLocale__WEBPACK_IMPORTED_MODULE_12__["default"]),
+/* harmony export */   "string": () => (/* reexport safe */ _string__WEBPACK_IMPORTED_MODULE_2__.create)
+/* harmony export */ });
+/* harmony import */ var _mixed__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./mixed */ "./node_modules/yup/es/mixed.js");
+/* harmony import */ var _boolean__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./boolean */ "./node_modules/yup/es/boolean.js");
+/* harmony import */ var _string__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./string */ "./node_modules/yup/es/string.js");
+/* harmony import */ var _number__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./number */ "./node_modules/yup/es/number.js");
+/* harmony import */ var _date__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./date */ "./node_modules/yup/es/date.js");
+/* harmony import */ var _object__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./object */ "./node_modules/yup/es/object.js");
+/* harmony import */ var _array__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./array */ "./node_modules/yup/es/array.js");
+/* harmony import */ var _Reference__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./Reference */ "./node_modules/yup/es/Reference.js");
+/* harmony import */ var _Lazy__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./Lazy */ "./node_modules/yup/es/Lazy.js");
+/* harmony import */ var _ValidationError__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./ValidationError */ "./node_modules/yup/es/ValidationError.js");
+/* harmony import */ var _util_reach__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./util/reach */ "./node_modules/yup/es/util/reach.js");
+/* harmony import */ var _util_isSchema__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./util/isSchema */ "./node_modules/yup/es/util/isSchema.js");
+/* harmony import */ var _setLocale__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./setLocale */ "./node_modules/yup/es/setLocale.js");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./schema */ "./node_modules/yup/es/schema.js");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function addMethod(schemaType, name, fn) {
+  if (!schemaType || !(0,_util_isSchema__WEBPACK_IMPORTED_MODULE_11__["default"])(schemaType.prototype)) throw new TypeError('You must provide a yup schema constructor function');
+  if (typeof name !== 'string') throw new TypeError('A Method name must be provided');
+  if (typeof fn !== 'function') throw new TypeError('Method function must be provided');
+  schemaType.prototype[name] = fn;
+}
+
+
+
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/locale.js":
+/*!***************************************!*\
+  !*** ./node_modules/yup/es/locale.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "array": () => (/* binding */ array),
+/* harmony export */   "boolean": () => (/* binding */ boolean),
+/* harmony export */   "date": () => (/* binding */ date),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   "mixed": () => (/* binding */ mixed),
+/* harmony export */   "number": () => (/* binding */ number),
+/* harmony export */   "object": () => (/* binding */ object),
+/* harmony export */   "string": () => (/* binding */ string)
+/* harmony export */ });
+/* harmony import */ var _util_printValue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./util/printValue */ "./node_modules/yup/es/util/printValue.js");
+
+let mixed = {
+  default: '${path} is invalid',
+  required: '${path} is a required field',
+  oneOf: '${path} must be one of the following values: ${values}',
+  notOneOf: '${path} must not be one of the following values: ${values}',
+  notType: ({
+    path,
+    type,
+    value,
+    originalValue
+  }) => {
+    let isCast = originalValue != null && originalValue !== value;
+    let msg = `${path} must be a \`${type}\` type, ` + `but the final value was: \`${(0,_util_printValue__WEBPACK_IMPORTED_MODULE_0__["default"])(value, true)}\`` + (isCast ? ` (cast from the value \`${(0,_util_printValue__WEBPACK_IMPORTED_MODULE_0__["default"])(originalValue, true)}\`).` : '.');
+
+    if (value === null) {
+      msg += `\n If "null" is intended as an empty value be sure to mark the schema as \`.nullable()\``;
+    }
+
+    return msg;
+  },
+  defined: '${path} must be defined'
+};
+let string = {
+  length: '${path} must be exactly ${length} characters',
+  min: '${path} must be at least ${min} characters',
+  max: '${path} must be at most ${max} characters',
+  matches: '${path} must match the following: "${regex}"',
+  email: '${path} must be a valid email',
+  url: '${path} must be a valid URL',
+  uuid: '${path} must be a valid UUID',
+  trim: '${path} must be a trimmed string',
+  lowercase: '${path} must be a lowercase string',
+  uppercase: '${path} must be a upper case string'
+};
+let number = {
+  min: '${path} must be greater than or equal to ${min}',
+  max: '${path} must be less than or equal to ${max}',
+  lessThan: '${path} must be less than ${less}',
+  moreThan: '${path} must be greater than ${more}',
+  positive: '${path} must be a positive number',
+  negative: '${path} must be a negative number',
+  integer: '${path} must be an integer'
+};
+let date = {
+  min: '${path} field must be later than ${min}',
+  max: '${path} field must be at earlier than ${max}'
+};
+let boolean = {
+  isValue: '${path} field must be ${value}'
+};
+let object = {
+  noUnknown: '${path} field has unspecified keys: ${unknown}'
+};
+let array = {
+  min: '${path} field must have at least ${min} items',
+  max: '${path} field must have less than or equal to ${max} items',
+  length: '${path} must have ${length} items'
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Object.assign(Object.create(null), {
+  mixed,
+  string,
+  number,
+  date,
+  object,
+  array,
+  boolean
+}));
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/mixed.js":
+/*!**************************************!*\
+  !*** ./node_modules/yup/es/mixed.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "create": () => (/* binding */ create),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./schema */ "./node_modules/yup/es/schema.js");
+
+const Mixed = _schema__WEBPACK_IMPORTED_MODULE_0__["default"];
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Mixed);
+function create() {
+  return new Mixed();
+} // XXX: this is using the Base schema so that `addMethod(mixed)` works as a base class
+
+create.prototype = Mixed.prototype;
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/number.js":
+/*!***************************************!*\
+  !*** ./node_modules/yup/es/number.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "create": () => (/* binding */ create),
+/* harmony export */   "default": () => (/* binding */ NumberSchema)
+/* harmony export */ });
+/* harmony import */ var _locale__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./locale */ "./node_modules/yup/es/locale.js");
+/* harmony import */ var _util_isAbsent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./util/isAbsent */ "./node_modules/yup/es/util/isAbsent.js");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./schema */ "./node_modules/yup/es/schema.js");
+
+
+
+
+let isNaN = value => value != +value;
+
+function create() {
+  return new NumberSchema();
+}
+class NumberSchema extends _schema__WEBPACK_IMPORTED_MODULE_2__["default"] {
+  constructor() {
+    super({
+      type: 'number'
+    });
+    this.withMutation(() => {
+      this.transform(function (value) {
+        let parsed = value;
+
+        if (typeof parsed === 'string') {
+          parsed = parsed.replace(/\s/g, '');
+          if (parsed === '') return NaN; // don't use parseFloat to avoid positives on alpha-numeric strings
+
+          parsed = +parsed;
+        }
+
+        if (this.isType(parsed)) return parsed;
+        return parseFloat(parsed);
+      });
+    });
+  }
+
+  _typeCheck(value) {
+    if (value instanceof Number) value = value.valueOf();
+    return typeof value === 'number' && !isNaN(value);
+  }
+
+  min(min, message = _locale__WEBPACK_IMPORTED_MODULE_0__.number.min) {
+    return this.test({
+      message,
+      name: 'min',
+      exclusive: true,
+      params: {
+        min
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) || value >= this.resolve(min);
+      }
+
+    });
+  }
+
+  max(max, message = _locale__WEBPACK_IMPORTED_MODULE_0__.number.max) {
+    return this.test({
+      message,
+      name: 'max',
+      exclusive: true,
+      params: {
+        max
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) || value <= this.resolve(max);
+      }
+
+    });
+  }
+
+  lessThan(less, message = _locale__WEBPACK_IMPORTED_MODULE_0__.number.lessThan) {
+    return this.test({
+      message,
+      name: 'max',
+      exclusive: true,
+      params: {
+        less
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) || value < this.resolve(less);
+      }
+
+    });
+  }
+
+  moreThan(more, message = _locale__WEBPACK_IMPORTED_MODULE_0__.number.moreThan) {
+    return this.test({
+      message,
+      name: 'min',
+      exclusive: true,
+      params: {
+        more
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) || value > this.resolve(more);
+      }
+
+    });
+  }
+
+  positive(msg = _locale__WEBPACK_IMPORTED_MODULE_0__.number.positive) {
+    return this.moreThan(0, msg);
+  }
+
+  negative(msg = _locale__WEBPACK_IMPORTED_MODULE_0__.number.negative) {
+    return this.lessThan(0, msg);
+  }
+
+  integer(message = _locale__WEBPACK_IMPORTED_MODULE_0__.number.integer) {
+    return this.test({
+      name: 'integer',
+      message,
+      test: val => (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(val) || Number.isInteger(val)
+    });
+  }
+
+  truncate() {
+    return this.transform(value => !(0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) ? value | 0 : value);
+  }
+
+  round(method) {
+    var _method;
+
+    let avail = ['ceil', 'floor', 'round', 'trunc'];
+    method = ((_method = method) == null ? void 0 : _method.toLowerCase()) || 'round'; // this exists for symemtry with the new Math.trunc
+
+    if (method === 'trunc') return this.truncate();
+    if (avail.indexOf(method.toLowerCase()) === -1) throw new TypeError('Only valid options for round() are: ' + avail.join(', '));
+    return this.transform(value => !(0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) ? Math[method](value) : value);
+  }
+
+}
+create.prototype = NumberSchema.prototype; //
+// Number Interfaces
+//
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/object.js":
+/*!***************************************!*\
+  !*** ./node_modules/yup/es/object.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "create": () => (/* binding */ create),
+/* harmony export */   "default": () => (/* binding */ ObjectSchema)
+/* harmony export */ });
+/* harmony import */ var lodash_has__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash/has */ "./node_modules/lodash/has.js");
+/* harmony import */ var lodash_has__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash_has__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var lodash_snakeCase__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lodash/snakeCase */ "./node_modules/lodash/snakeCase.js");
+/* harmony import */ var lodash_snakeCase__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash_snakeCase__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var lodash_camelCase__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! lodash/camelCase */ "./node_modules/lodash/camelCase.js");
+/* harmony import */ var lodash_camelCase__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(lodash_camelCase__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var lodash_mapKeys__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! lodash/mapKeys */ "./node_modules/lodash/mapKeys.js");
+/* harmony import */ var lodash_mapKeys__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(lodash_mapKeys__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var lodash_mapValues__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! lodash/mapValues */ "./node_modules/lodash/mapValues.js");
+/* harmony import */ var lodash_mapValues__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(lodash_mapValues__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var property_expr__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! property-expr */ "./node_modules/property-expr/index.js");
+/* harmony import */ var property_expr__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(property_expr__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _locale__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./locale */ "./node_modules/yup/es/locale.js");
+/* harmony import */ var _util_sortFields__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./util/sortFields */ "./node_modules/yup/es/util/sortFields.js");
+/* harmony import */ var _util_sortByKeyOrder__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./util/sortByKeyOrder */ "./node_modules/yup/es/util/sortByKeyOrder.js");
+/* harmony import */ var _util_runTests__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./util/runTests */ "./node_modules/yup/es/util/runTests.js");
+/* harmony import */ var _ValidationError__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./ValidationError */ "./node_modules/yup/es/ValidationError.js");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./schema */ "./node_modules/yup/es/schema.js");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let isObject = obj => Object.prototype.toString.call(obj) === '[object Object]';
+
+function unknown(ctx, value) {
+  let known = Object.keys(ctx.fields);
+  return Object.keys(value).filter(key => known.indexOf(key) === -1);
+}
+
+const defaultSort = (0,_util_sortByKeyOrder__WEBPACK_IMPORTED_MODULE_8__["default"])([]);
+class ObjectSchema extends _schema__WEBPACK_IMPORTED_MODULE_11__["default"] {
+  constructor(spec) {
+    super({
+      type: 'object'
+    });
+    this.fields = Object.create(null);
+    this._sortErrors = defaultSort;
+    this._nodes = [];
+    this._excludedEdges = [];
+    this.withMutation(() => {
+      this.transform(function coerce(value) {
+        if (typeof value === 'string') {
+          try {
+            value = JSON.parse(value);
+          } catch (err) {
+            value = null;
+          }
+        }
+
+        if (this.isType(value)) return value;
+        return null;
+      });
+
+      if (spec) {
+        this.shape(spec);
+      }
+    });
+  }
+
+  _typeCheck(value) {
+    return isObject(value) || typeof value === 'function';
+  }
+
+  _cast(_value, options = {}) {
+    var _options$stripUnknown;
+
+    let value = super._cast(_value, options); //should ignore nulls here
+
+
+    if (value === undefined) return this.getDefault();
+    if (!this._typeCheck(value)) return value;
+    let fields = this.fields;
+    let strip = (_options$stripUnknown = options.stripUnknown) != null ? _options$stripUnknown : this.spec.noUnknown;
+
+    let props = this._nodes.concat(Object.keys(value).filter(v => this._nodes.indexOf(v) === -1));
+
+    let intermediateValue = {}; // is filled during the transform below
+
+    let innerOptions = _extends({}, options, {
+      parent: intermediateValue,
+      __validating: options.__validating || false
+    });
+
+    let isChanged = false;
+
+    for (const prop of props) {
+      let field = fields[prop];
+      let exists = lodash_has__WEBPACK_IMPORTED_MODULE_0___default()(value, prop);
+
+      if (field) {
+        let fieldValue;
+        let inputValue = value[prop]; // safe to mutate since this is fired in sequence
+
+        innerOptions.path = (options.path ? `${options.path}.` : '') + prop; // innerOptions.value = value[prop];
+
+        field = field.resolve({
+          value: inputValue,
+          context: options.context,
+          parent: intermediateValue
+        });
+        let fieldSpec = 'spec' in field ? field.spec : undefined;
+        let strict = fieldSpec == null ? void 0 : fieldSpec.strict;
+
+        if (fieldSpec == null ? void 0 : fieldSpec.strip) {
+          isChanged = isChanged || prop in value;
+          continue;
+        }
+
+        fieldValue = !options.__validating || !strict ? // TODO: use _cast, this is double resolving
+        field.cast(value[prop], innerOptions) : value[prop];
+
+        if (fieldValue !== undefined) {
+          intermediateValue[prop] = fieldValue;
+        }
+      } else if (exists && !strip) {
+        intermediateValue[prop] = value[prop];
+      }
+
+      if (intermediateValue[prop] !== value[prop]) {
+        isChanged = true;
+      }
+    }
+
+    return isChanged ? intermediateValue : value;
+  }
+
+  _validate(_value, opts = {}, callback) {
+    let errors = [];
+    let {
+      sync,
+      from = [],
+      originalValue = _value,
+      abortEarly = this.spec.abortEarly,
+      recursive = this.spec.recursive
+    } = opts;
+    from = [{
+      schema: this,
+      value: originalValue
+    }, ...from]; // this flag is needed for handling `strict` correctly in the context of
+    // validation vs just casting. e.g strict() on a field is only used when validating
+
+    opts.__validating = true;
+    opts.originalValue = originalValue;
+    opts.from = from;
+
+    super._validate(_value, opts, (err, value) => {
+      if (err) {
+        if (!_ValidationError__WEBPACK_IMPORTED_MODULE_10__["default"].isError(err) || abortEarly) {
+          return void callback(err, value);
+        }
+
+        errors.push(err);
+      }
+
+      if (!recursive || !isObject(value)) {
+        callback(errors[0] || null, value);
+        return;
+      }
+
+      originalValue = originalValue || value;
+
+      let tests = this._nodes.map(key => (_, cb) => {
+        let path = key.indexOf('.') === -1 ? (opts.path ? `${opts.path}.` : '') + key : `${opts.path || ''}["${key}"]`;
+        let field = this.fields[key];
+
+        if (field && 'validate' in field) {
+          field.validate(value[key], _extends({}, opts, {
+            // @ts-ignore
+            path,
+            from,
+            // inner fields are always strict:
+            // 1. this isn't strict so the casting will also have cast inner values
+            // 2. this is strict in which case the nested values weren't cast either
+            strict: true,
+            parent: value,
+            originalValue: originalValue[key]
+          }), cb);
+          return;
+        }
+
+        cb(null);
+      });
+
+      (0,_util_runTests__WEBPACK_IMPORTED_MODULE_9__["default"])({
+        sync,
+        tests,
+        value,
+        errors,
+        endEarly: abortEarly,
+        sort: this._sortErrors,
+        path: opts.path
+      }, callback);
+    });
+  }
+
+  clone(spec) {
+    const next = super.clone(spec);
+    next.fields = _extends({}, this.fields);
+    next._nodes = this._nodes;
+    next._excludedEdges = this._excludedEdges;
+    next._sortErrors = this._sortErrors;
+    return next;
+  }
+
+  concat(schema) {
+    let next = super.concat(schema);
+    let nextFields = next.fields;
+
+    for (let [field, schemaOrRef] of Object.entries(this.fields)) {
+      const target = nextFields[field];
+
+      if (target === undefined) {
+        nextFields[field] = schemaOrRef;
+      } else if (target instanceof _schema__WEBPACK_IMPORTED_MODULE_11__["default"] && schemaOrRef instanceof _schema__WEBPACK_IMPORTED_MODULE_11__["default"]) {
+        nextFields[field] = schemaOrRef.concat(target);
+      }
+    }
+
+    return next.withMutation(() => next.shape(nextFields, this._excludedEdges));
+  }
+
+  getDefaultFromShape() {
+    let dft = {};
+
+    this._nodes.forEach(key => {
+      const field = this.fields[key];
+      dft[key] = 'default' in field ? field.getDefault() : undefined;
+    });
+
+    return dft;
+  }
+
+  _getDefault() {
+    if ('default' in this.spec) {
+      return super._getDefault();
+    } // if there is no default set invent one
+
+
+    if (!this._nodes.length) {
+      return undefined;
+    }
+
+    return this.getDefaultFromShape();
+  }
+
+  shape(additions, excludes = []) {
+    let next = this.clone();
+    let fields = Object.assign(next.fields, additions);
+    next.fields = fields;
+    next._sortErrors = (0,_util_sortByKeyOrder__WEBPACK_IMPORTED_MODULE_8__["default"])(Object.keys(fields));
+
+    if (excludes.length) {
+      // this is a convenience for when users only supply a single pair
+      if (!Array.isArray(excludes[0])) excludes = [excludes];
+      next._excludedEdges = [...next._excludedEdges, ...excludes];
+    }
+
+    next._nodes = (0,_util_sortFields__WEBPACK_IMPORTED_MODULE_7__["default"])(fields, next._excludedEdges);
+    return next;
+  }
+
+  pick(keys) {
+    const picked = {};
+
+    for (const key of keys) {
+      if (this.fields[key]) picked[key] = this.fields[key];
+    }
+
+    return this.clone().withMutation(next => {
+      next.fields = {};
+      return next.shape(picked);
+    });
+  }
+
+  omit(keys) {
+    const next = this.clone();
+    const fields = next.fields;
+    next.fields = {};
+
+    for (const key of keys) {
+      delete fields[key];
+    }
+
+    return next.withMutation(() => next.shape(fields));
+  }
+
+  from(from, to, alias) {
+    let fromGetter = (0,property_expr__WEBPACK_IMPORTED_MODULE_5__.getter)(from, true);
+    return this.transform(obj => {
+      if (obj == null) return obj;
+      let newObj = obj;
+
+      if (lodash_has__WEBPACK_IMPORTED_MODULE_0___default()(obj, from)) {
+        newObj = _extends({}, obj);
+        if (!alias) delete newObj[from];
+        newObj[to] = fromGetter(obj);
+      }
+
+      return newObj;
+    });
+  }
+
+  noUnknown(noAllow = true, message = _locale__WEBPACK_IMPORTED_MODULE_6__.object.noUnknown) {
+    if (typeof noAllow === 'string') {
+      message = noAllow;
+      noAllow = true;
+    }
+
+    let next = this.test({
+      name: 'noUnknown',
+      exclusive: true,
+      message: message,
+
+      test(value) {
+        if (value == null) return true;
+        const unknownKeys = unknown(this.schema, value);
+        return !noAllow || unknownKeys.length === 0 || this.createError({
+          params: {
+            unknown: unknownKeys.join(', ')
+          }
+        });
+      }
+
+    });
+    next.spec.noUnknown = noAllow;
+    return next;
+  }
+
+  unknown(allow = true, message = _locale__WEBPACK_IMPORTED_MODULE_6__.object.noUnknown) {
+    return this.noUnknown(!allow, message);
+  }
+
+  transformKeys(fn) {
+    return this.transform(obj => obj && lodash_mapKeys__WEBPACK_IMPORTED_MODULE_3___default()(obj, (_, key) => fn(key)));
+  }
+
+  camelCase() {
+    return this.transformKeys((lodash_camelCase__WEBPACK_IMPORTED_MODULE_2___default()));
+  }
+
+  snakeCase() {
+    return this.transformKeys((lodash_snakeCase__WEBPACK_IMPORTED_MODULE_1___default()));
+  }
+
+  constantCase() {
+    return this.transformKeys(key => lodash_snakeCase__WEBPACK_IMPORTED_MODULE_1___default()(key).toUpperCase());
+  }
+
+  describe() {
+    let base = super.describe();
+    base.fields = lodash_mapValues__WEBPACK_IMPORTED_MODULE_4___default()(this.fields, value => value.describe());
+    return base;
+  }
+
+}
+function create(spec) {
+  return new ObjectSchema(spec);
+}
+create.prototype = ObjectSchema.prototype;
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/schema.js":
+/*!***************************************!*\
+  !*** ./node_modules/yup/es/schema.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ BaseSchema)
+/* harmony export */ });
+/* harmony import */ var nanoclone__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! nanoclone */ "./node_modules/nanoclone/src/index.js");
+/* harmony import */ var _locale__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./locale */ "./node_modules/yup/es/locale.js");
+/* harmony import */ var _Condition__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Condition */ "./node_modules/yup/es/Condition.js");
+/* harmony import */ var _util_runTests__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./util/runTests */ "./node_modules/yup/es/util/runTests.js");
+/* harmony import */ var _util_createValidation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./util/createValidation */ "./node_modules/yup/es/util/createValidation.js");
+/* harmony import */ var _util_printValue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./util/printValue */ "./node_modules/yup/es/util/printValue.js");
+/* harmony import */ var _Reference__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./Reference */ "./node_modules/yup/es/Reference.js");
+/* harmony import */ var _util_reach__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./util/reach */ "./node_modules/yup/es/util/reach.js");
+/* harmony import */ var _ValidationError__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./ValidationError */ "./node_modules/yup/es/ValidationError.js");
+/* harmony import */ var _util_ReferenceSet__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./util/ReferenceSet */ "./node_modules/yup/es/util/ReferenceSet.js");
+/* harmony import */ var _util_toArray__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./util/toArray */ "./node_modules/yup/es/util/toArray.js");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+// @ts-ignore
+
+
+
+
+
+
+
+
+
+
+ // const UNSET = 'unset' as const;
+
+class BaseSchema {
+  constructor(options) {
+    this.deps = [];
+    this.tests = void 0;
+    this.transforms = void 0;
+    this.conditions = [];
+    this._mutate = void 0;
+    this._typeError = void 0;
+    this._whitelist = new _util_ReferenceSet__WEBPACK_IMPORTED_MODULE_9__["default"]();
+    this._blacklist = new _util_ReferenceSet__WEBPACK_IMPORTED_MODULE_9__["default"]();
+    this.exclusiveTests = Object.create(null);
+    this.spec = void 0;
+    this.tests = [];
+    this.transforms = [];
+    this.withMutation(() => {
+      this.typeError(_locale__WEBPACK_IMPORTED_MODULE_1__.mixed.notType);
+    });
+    this.type = (options == null ? void 0 : options.type) || 'mixed';
+    this.spec = _extends({
+      strip: false,
+      strict: false,
+      abortEarly: true,
+      recursive: true,
+      nullable: false,
+      presence: 'optional'
+    }, options == null ? void 0 : options.spec);
+  } // TODO: remove
+
+
+  get _type() {
+    return this.type;
+  }
+
+  _typeCheck(_value) {
+    return true;
+  }
+
+  clone(spec) {
+    if (this._mutate) {
+      if (spec) Object.assign(this.spec, spec);
+      return this;
+    } // if the nested value is a schema we can skip cloning, since
+    // they are already immutable
+
+
+    const next = Object.create(Object.getPrototypeOf(this)); // @ts-expect-error this is readonly
+
+    next.type = this.type;
+    next._typeError = this._typeError;
+    next._whitelistError = this._whitelistError;
+    next._blacklistError = this._blacklistError;
+    next._whitelist = this._whitelist.clone();
+    next._blacklist = this._blacklist.clone();
+    next.exclusiveTests = _extends({}, this.exclusiveTests); // @ts-expect-error this is readonly
+
+    next.deps = [...this.deps];
+    next.conditions = [...this.conditions];
+    next.tests = [...this.tests];
+    next.transforms = [...this.transforms];
+    next.spec = (0,nanoclone__WEBPACK_IMPORTED_MODULE_0__["default"])(_extends({}, this.spec, spec));
+    return next;
+  }
+
+  label(label) {
+    let next = this.clone();
+    next.spec.label = label;
+    return next;
+  }
+
+  meta(...args) {
+    if (args.length === 0) return this.spec.meta;
+    let next = this.clone();
+    next.spec.meta = Object.assign(next.spec.meta || {}, args[0]);
+    return next;
+  } // withContext<TContext extends AnyObject>(): BaseSchema<
+  //   TCast,
+  //   TContext,
+  //   TOutput
+  // > {
+  //   return this as any;
+  // }
+
+
+  withMutation(fn) {
+    let before = this._mutate;
+    this._mutate = true;
+    let result = fn(this);
+    this._mutate = before;
+    return result;
+  }
+
+  concat(schema) {
+    if (!schema || schema === this) return this;
+    if (schema.type !== this.type && this.type !== 'mixed') throw new TypeError(`You cannot \`concat()\` schema's of different types: ${this.type} and ${schema.type}`);
+    let base = this;
+    let combined = schema.clone();
+
+    const mergedSpec = _extends({}, base.spec, combined.spec); // if (combined.spec.nullable === UNSET)
+    //   mergedSpec.nullable = base.spec.nullable;
+    // if (combined.spec.presence === UNSET)
+    //   mergedSpec.presence = base.spec.presence;
+
+
+    combined.spec = mergedSpec;
+    combined._typeError || (combined._typeError = base._typeError);
+    combined._whitelistError || (combined._whitelistError = base._whitelistError);
+    combined._blacklistError || (combined._blacklistError = base._blacklistError); // manually merge the blacklist/whitelist (the other `schema` takes
+    // precedence in case of conflicts)
+
+    combined._whitelist = base._whitelist.merge(schema._whitelist, schema._blacklist);
+    combined._blacklist = base._blacklist.merge(schema._blacklist, schema._whitelist); // start with the current tests
+
+    combined.tests = base.tests;
+    combined.exclusiveTests = base.exclusiveTests; // manually add the new tests to ensure
+    // the deduping logic is consistent
+
+    combined.withMutation(next => {
+      schema.tests.forEach(fn => {
+        next.test(fn.OPTIONS);
+      });
+    });
+    combined.transforms = [...base.transforms, ...combined.transforms];
+    return combined;
+  }
+
+  isType(v) {
+    if (this.spec.nullable && v === null) return true;
+    return this._typeCheck(v);
+  }
+
+  resolve(options) {
+    let schema = this;
+
+    if (schema.conditions.length) {
+      let conditions = schema.conditions;
+      schema = schema.clone();
+      schema.conditions = [];
+      schema = conditions.reduce((schema, condition) => condition.resolve(schema, options), schema);
+      schema = schema.resolve(options);
+    }
+
+    return schema;
+  }
+  /**
+   *
+   * @param {*} value
+   * @param {Object} options
+   * @param {*=} options.parent
+   * @param {*=} options.context
+   */
+
+
+  cast(value, options = {}) {
+    let resolvedSchema = this.resolve(_extends({
+      value
+    }, options));
+
+    let result = resolvedSchema._cast(value, options);
+
+    if (value !== undefined && options.assert !== false && resolvedSchema.isType(result) !== true) {
+      let formattedValue = (0,_util_printValue__WEBPACK_IMPORTED_MODULE_5__["default"])(value);
+      let formattedResult = (0,_util_printValue__WEBPACK_IMPORTED_MODULE_5__["default"])(result);
+      throw new TypeError(`The value of ${options.path || 'field'} could not be cast to a value ` + `that satisfies the schema type: "${resolvedSchema._type}". \n\n` + `attempted value: ${formattedValue} \n` + (formattedResult !== formattedValue ? `result of cast: ${formattedResult}` : ''));
+    }
+
+    return result;
+  }
+
+  _cast(rawValue, _options) {
+    let value = rawValue === undefined ? rawValue : this.transforms.reduce((value, fn) => fn.call(this, value, rawValue, this), rawValue);
+
+    if (value === undefined) {
+      value = this.getDefault();
+    }
+
+    return value;
+  }
+
+  _validate(_value, options = {}, cb) {
+    let {
+      sync,
+      path,
+      from = [],
+      originalValue = _value,
+      strict = this.spec.strict,
+      abortEarly = this.spec.abortEarly
+    } = options;
+    let value = _value;
+
+    if (!strict) {
+      // this._validating = true;
+      value = this._cast(value, _extends({
+        assert: false
+      }, options)); // this._validating = false;
+    } // value is cast, we can check if it meets type requirements
+
+
+    let args = {
+      value,
+      path,
+      options,
+      originalValue,
+      schema: this,
+      label: this.spec.label,
+      sync,
+      from
+    };
+    let initialTests = [];
+    if (this._typeError) initialTests.push(this._typeError);
+    let finalTests = [];
+    if (this._whitelistError) finalTests.push(this._whitelistError);
+    if (this._blacklistError) finalTests.push(this._blacklistError);
+    (0,_util_runTests__WEBPACK_IMPORTED_MODULE_3__["default"])({
+      args,
+      value,
+      path,
+      sync,
+      tests: initialTests,
+      endEarly: abortEarly
+    }, err => {
+      if (err) return void cb(err, value);
+      (0,_util_runTests__WEBPACK_IMPORTED_MODULE_3__["default"])({
+        tests: this.tests.concat(finalTests),
+        args,
+        path,
+        sync,
+        value,
+        endEarly: abortEarly
+      }, cb);
+    });
+  }
+
+  validate(value, options, maybeCb) {
+    let schema = this.resolve(_extends({}, options, {
+      value
+    })); // callback case is for nested validations
+
+    return typeof maybeCb === 'function' ? schema._validate(value, options, maybeCb) : new Promise((resolve, reject) => schema._validate(value, options, (err, value) => {
+      if (err) reject(err);else resolve(value);
+    }));
+  }
+
+  validateSync(value, options) {
+    let schema = this.resolve(_extends({}, options, {
+      value
+    }));
+    let result;
+
+    schema._validate(value, _extends({}, options, {
+      sync: true
+    }), (err, value) => {
+      if (err) throw err;
+      result = value;
+    });
+
+    return result;
+  }
+
+  isValid(value, options) {
+    return this.validate(value, options).then(() => true, err => {
+      if (_ValidationError__WEBPACK_IMPORTED_MODULE_8__["default"].isError(err)) return false;
+      throw err;
+    });
+  }
+
+  isValidSync(value, options) {
+    try {
+      this.validateSync(value, options);
+      return true;
+    } catch (err) {
+      if (_ValidationError__WEBPACK_IMPORTED_MODULE_8__["default"].isError(err)) return false;
+      throw err;
+    }
+  }
+
+  _getDefault() {
+    let defaultValue = this.spec.default;
+
+    if (defaultValue == null) {
+      return defaultValue;
+    }
+
+    return typeof defaultValue === 'function' ? defaultValue.call(this) : (0,nanoclone__WEBPACK_IMPORTED_MODULE_0__["default"])(defaultValue);
+  }
+
+  getDefault(options) {
+    let schema = this.resolve(options || {});
+    return schema._getDefault();
+  }
+
+  default(def) {
+    if (arguments.length === 0) {
+      return this._getDefault();
+    }
+
+    let next = this.clone({
+      default: def
+    });
+    return next;
+  }
+
+  strict(isStrict = true) {
+    let next = this.clone();
+    next.spec.strict = isStrict;
+    return next;
+  }
+
+  _isPresent(value) {
+    return value != null;
+  }
+
+  defined(message = _locale__WEBPACK_IMPORTED_MODULE_1__.mixed.defined) {
+    return this.test({
+      message,
+      name: 'defined',
+      exclusive: true,
+
+      test(value) {
+        return value !== undefined;
+      }
+
+    });
+  }
+
+  required(message = _locale__WEBPACK_IMPORTED_MODULE_1__.mixed.required) {
+    return this.clone({
+      presence: 'required'
+    }).withMutation(s => s.test({
+      message,
+      name: 'required',
+      exclusive: true,
+
+      test(value) {
+        return this.schema._isPresent(value);
+      }
+
+    }));
+  }
+
+  notRequired() {
+    let next = this.clone({
+      presence: 'optional'
+    });
+    next.tests = next.tests.filter(test => test.OPTIONS.name !== 'required');
+    return next;
+  }
+
+  nullable(isNullable = true) {
+    let next = this.clone({
+      nullable: isNullable !== false
+    });
+    return next;
+  }
+
+  transform(fn) {
+    let next = this.clone();
+    next.transforms.push(fn);
+    return next;
+  }
+  /**
+   * Adds a test function to the schema's queue of tests.
+   * tests can be exclusive or non-exclusive.
+   *
+   * - exclusive tests, will replace any existing tests of the same name.
+   * - non-exclusive: can be stacked
+   *
+   * If a non-exclusive test is added to a schema with an exclusive test of the same name
+   * the exclusive test is removed and further tests of the same name will be stacked.
+   *
+   * If an exclusive test is added to a schema with non-exclusive tests of the same name
+   * the previous tests are removed and further tests of the same name will replace each other.
+   */
+
+
+  test(...args) {
+    let opts;
+
+    if (args.length === 1) {
+      if (typeof args[0] === 'function') {
+        opts = {
+          test: args[0]
+        };
+      } else {
+        opts = args[0];
+      }
+    } else if (args.length === 2) {
+      opts = {
+        name: args[0],
+        test: args[1]
+      };
+    } else {
+      opts = {
+        name: args[0],
+        message: args[1],
+        test: args[2]
+      };
+    }
+
+    if (opts.message === undefined) opts.message = _locale__WEBPACK_IMPORTED_MODULE_1__.mixed["default"];
+    if (typeof opts.test !== 'function') throw new TypeError('`test` is a required parameters');
+    let next = this.clone();
+    let validate = (0,_util_createValidation__WEBPACK_IMPORTED_MODULE_4__["default"])(opts);
+    let isExclusive = opts.exclusive || opts.name && next.exclusiveTests[opts.name] === true;
+
+    if (opts.exclusive) {
+      if (!opts.name) throw new TypeError('Exclusive tests must provide a unique `name` identifying the test');
+    }
+
+    if (opts.name) next.exclusiveTests[opts.name] = !!opts.exclusive;
+    next.tests = next.tests.filter(fn => {
+      if (fn.OPTIONS.name === opts.name) {
+        if (isExclusive) return false;
+        if (fn.OPTIONS.test === validate.OPTIONS.test) return false;
+      }
+
+      return true;
+    });
+    next.tests.push(validate);
+    return next;
+  }
+
+  when(keys, options) {
+    if (!Array.isArray(keys) && typeof keys !== 'string') {
+      options = keys;
+      keys = '.';
+    }
+
+    let next = this.clone();
+    let deps = (0,_util_toArray__WEBPACK_IMPORTED_MODULE_10__["default"])(keys).map(key => new _Reference__WEBPACK_IMPORTED_MODULE_6__["default"](key));
+    deps.forEach(dep => {
+      // @ts-ignore
+      if (dep.isSibling) next.deps.push(dep.key);
+    });
+    next.conditions.push(new _Condition__WEBPACK_IMPORTED_MODULE_2__["default"](deps, options));
+    return next;
+  }
+
+  typeError(message) {
+    let next = this.clone();
+    next._typeError = (0,_util_createValidation__WEBPACK_IMPORTED_MODULE_4__["default"])({
+      message,
+      name: 'typeError',
+
+      test(value) {
+        if (value !== undefined && !this.schema.isType(value)) return this.createError({
+          params: {
+            type: this.schema._type
+          }
+        });
+        return true;
+      }
+
+    });
+    return next;
+  }
+
+  oneOf(enums, message = _locale__WEBPACK_IMPORTED_MODULE_1__.mixed.oneOf) {
+    let next = this.clone();
+    enums.forEach(val => {
+      next._whitelist.add(val);
+
+      next._blacklist.delete(val);
+    });
+    next._whitelistError = (0,_util_createValidation__WEBPACK_IMPORTED_MODULE_4__["default"])({
+      message,
+      name: 'oneOf',
+
+      test(value) {
+        if (value === undefined) return true;
+        let valids = this.schema._whitelist;
+        let resolved = valids.resolveAll(this.resolve);
+        return resolved.includes(value) ? true : this.createError({
+          params: {
+            values: valids.toArray().join(', '),
+            resolved
+          }
+        });
+      }
+
+    });
+    return next;
+  }
+
+  notOneOf(enums, message = _locale__WEBPACK_IMPORTED_MODULE_1__.mixed.notOneOf) {
+    let next = this.clone();
+    enums.forEach(val => {
+      next._blacklist.add(val);
+
+      next._whitelist.delete(val);
+    });
+    next._blacklistError = (0,_util_createValidation__WEBPACK_IMPORTED_MODULE_4__["default"])({
+      message,
+      name: 'notOneOf',
+
+      test(value) {
+        let invalids = this.schema._blacklist;
+        let resolved = invalids.resolveAll(this.resolve);
+        if (resolved.includes(value)) return this.createError({
+          params: {
+            values: invalids.toArray().join(', '),
+            resolved
+          }
+        });
+        return true;
+      }
+
+    });
+    return next;
+  }
+
+  strip(strip = true) {
+    let next = this.clone();
+    next.spec.strip = strip;
+    return next;
+  }
+
+  describe() {
+    const next = this.clone();
+    const {
+      label,
+      meta
+    } = next.spec;
+    const description = {
+      meta,
+      label,
+      type: next.type,
+      oneOf: next._whitelist.describe(),
+      notOneOf: next._blacklist.describe(),
+      tests: next.tests.map(fn => ({
+        name: fn.OPTIONS.name,
+        params: fn.OPTIONS.params
+      })).filter((n, idx, list) => list.findIndex(c => c.name === n.name) === idx)
+    };
+    return description;
+  }
+
+} // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
+// @ts-expect-error
+BaseSchema.prototype.__isYupSchema__ = true;
+
+for (const method of ['validate', 'validateSync']) BaseSchema.prototype[`${method}At`] = function (path, value, options = {}) {
+  const {
+    parent,
+    parentPath,
+    schema
+  } = (0,_util_reach__WEBPACK_IMPORTED_MODULE_7__.getIn)(this, path, value, options.context);
+  return schema[method](parent && parent[parentPath], _extends({}, options, {
+    parent,
+    path
+  }));
+};
+
+for (const alias of ['equals', 'is']) BaseSchema.prototype[alias] = BaseSchema.prototype.oneOf;
+
+for (const alias of ['not', 'nope']) BaseSchema.prototype[alias] = BaseSchema.prototype.notOneOf;
+
+BaseSchema.prototype.optional = BaseSchema.prototype.notRequired;
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/setLocale.js":
+/*!******************************************!*\
+  !*** ./node_modules/yup/es/setLocale.js ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ setLocale)
+/* harmony export */ });
+/* harmony import */ var _locale__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./locale */ "./node_modules/yup/es/locale.js");
+
+function setLocale(custom) {
+  Object.keys(custom).forEach(type => {
+    // @ts-ignore
+    Object.keys(custom[type]).forEach(method => {
+      // @ts-ignore
+      _locale__WEBPACK_IMPORTED_MODULE_0__["default"][type][method] = custom[type][method];
+    });
+  });
+}
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/string.js":
+/*!***************************************!*\
+  !*** ./node_modules/yup/es/string.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "create": () => (/* binding */ create),
+/* harmony export */   "default": () => (/* binding */ StringSchema)
+/* harmony export */ });
+/* harmony import */ var _locale__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./locale */ "./node_modules/yup/es/locale.js");
+/* harmony import */ var _util_isAbsent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./util/isAbsent */ "./node_modules/yup/es/util/isAbsent.js");
+/* harmony import */ var _schema__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./schema */ "./node_modules/yup/es/schema.js");
+
+
+ // eslint-disable-next-line
+
+let rEmail = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i; // eslint-disable-next-line
+
+let rUrl = /^((https?|ftp):)?\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i; // eslint-disable-next-line
+
+let rUUID = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
+
+let isTrimmed = value => (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) || value === value.trim();
+
+let objStringTag = {}.toString();
+function create() {
+  return new StringSchema();
+}
+class StringSchema extends _schema__WEBPACK_IMPORTED_MODULE_2__["default"] {
+  constructor() {
+    super({
+      type: 'string'
+    });
+    this.withMutation(() => {
+      this.transform(function (value) {
+        if (this.isType(value)) return value;
+        if (Array.isArray(value)) return value;
+        const strValue = value != null && value.toString ? value.toString() : value;
+        if (strValue === objStringTag) return value;
+        return strValue;
+      });
+    });
+  }
+
+  _typeCheck(value) {
+    if (value instanceof String) value = value.valueOf();
+    return typeof value === 'string';
+  }
+
+  _isPresent(value) {
+    return super._isPresent(value) && !!value.length;
+  }
+
+  length(length, message = _locale__WEBPACK_IMPORTED_MODULE_0__.string.length) {
+    return this.test({
+      message,
+      name: 'length',
+      exclusive: true,
+      params: {
+        length
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) || value.length === this.resolve(length);
+      }
+
+    });
+  }
+
+  min(min, message = _locale__WEBPACK_IMPORTED_MODULE_0__.string.min) {
+    return this.test({
+      message,
+      name: 'min',
+      exclusive: true,
+      params: {
+        min
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) || value.length >= this.resolve(min);
+      }
+
+    });
+  }
+
+  max(max, message = _locale__WEBPACK_IMPORTED_MODULE_0__.string.max) {
+    return this.test({
+      name: 'max',
+      exclusive: true,
+      message,
+      params: {
+        max
+      },
+
+      test(value) {
+        return (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) || value.length <= this.resolve(max);
+      }
+
+    });
+  }
+
+  matches(regex, options) {
+    let excludeEmptyString = false;
+    let message;
+    let name;
+
+    if (options) {
+      if (typeof options === 'object') {
+        ({
+          excludeEmptyString = false,
+          message,
+          name
+        } = options);
+      } else {
+        message = options;
+      }
+    }
+
+    return this.test({
+      name: name || 'matches',
+      message: message || _locale__WEBPACK_IMPORTED_MODULE_0__.string.matches,
+      params: {
+        regex
+      },
+      test: value => (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) || value === '' && excludeEmptyString || value.search(regex) !== -1
+    });
+  }
+
+  email(message = _locale__WEBPACK_IMPORTED_MODULE_0__.string.email) {
+    return this.matches(rEmail, {
+      name: 'email',
+      message,
+      excludeEmptyString: true
+    });
+  }
+
+  url(message = _locale__WEBPACK_IMPORTED_MODULE_0__.string.url) {
+    return this.matches(rUrl, {
+      name: 'url',
+      message,
+      excludeEmptyString: true
+    });
+  }
+
+  uuid(message = _locale__WEBPACK_IMPORTED_MODULE_0__.string.uuid) {
+    return this.matches(rUUID, {
+      name: 'uuid',
+      message,
+      excludeEmptyString: false
+    });
+  } //-- transforms --
+
+
+  ensure() {
+    return this.default('').transform(val => val === null ? '' : val);
+  }
+
+  trim(message = _locale__WEBPACK_IMPORTED_MODULE_0__.string.trim) {
+    return this.transform(val => val != null ? val.trim() : val).test({
+      message,
+      name: 'trim',
+      test: isTrimmed
+    });
+  }
+
+  lowercase(message = _locale__WEBPACK_IMPORTED_MODULE_0__.string.lowercase) {
+    return this.transform(value => !(0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) ? value.toLowerCase() : value).test({
+      message,
+      name: 'string_case',
+      exclusive: true,
+      test: value => (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) || value === value.toLowerCase()
+    });
+  }
+
+  uppercase(message = _locale__WEBPACK_IMPORTED_MODULE_0__.string.uppercase) {
+    return this.transform(value => !(0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) ? value.toUpperCase() : value).test({
+      message,
+      name: 'string_case',
+      exclusive: true,
+      test: value => (0,_util_isAbsent__WEBPACK_IMPORTED_MODULE_1__["default"])(value) || value === value.toUpperCase()
+    });
+  }
+
+}
+create.prototype = StringSchema.prototype; //
+// String Interfaces
+//
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/util/ReferenceSet.js":
+/*!**************************************************!*\
+  !*** ./node_modules/yup/es/util/ReferenceSet.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ ReferenceSet)
+/* harmony export */ });
+/* harmony import */ var _Reference__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../Reference */ "./node_modules/yup/es/Reference.js");
+
+class ReferenceSet {
+  constructor() {
+    this.list = void 0;
+    this.refs = void 0;
+    this.list = new Set();
+    this.refs = new Map();
+  }
+
+  get size() {
+    return this.list.size + this.refs.size;
+  }
+
+  describe() {
+    const description = [];
+
+    for (const item of this.list) description.push(item);
+
+    for (const [, ref] of this.refs) description.push(ref.describe());
+
+    return description;
+  }
+
+  toArray() {
+    return Array.from(this.list).concat(Array.from(this.refs.values()));
+  }
+
+  resolveAll(resolve) {
+    return this.toArray().reduce((acc, e) => acc.concat(_Reference__WEBPACK_IMPORTED_MODULE_0__["default"].isRef(e) ? resolve(e) : e), []);
+  }
+
+  add(value) {
+    _Reference__WEBPACK_IMPORTED_MODULE_0__["default"].isRef(value) ? this.refs.set(value.key, value) : this.list.add(value);
+  }
+
+  delete(value) {
+    _Reference__WEBPACK_IMPORTED_MODULE_0__["default"].isRef(value) ? this.refs.delete(value.key) : this.list.delete(value);
+  }
+
+  clone() {
+    const next = new ReferenceSet();
+    next.list = new Set(this.list);
+    next.refs = new Map(this.refs);
+    return next;
+  }
+
+  merge(newItems, removeItems) {
+    const next = this.clone();
+    newItems.list.forEach(value => next.add(value));
+    newItems.refs.forEach(value => next.add(value));
+    removeItems.list.forEach(value => next.delete(value));
+    removeItems.refs.forEach(value => next.delete(value));
+    return next;
+  }
+
+}
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/util/createValidation.js":
+/*!******************************************************!*\
+  !*** ./node_modules/yup/es/util/createValidation.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ createValidation)
+/* harmony export */ });
+/* harmony import */ var lodash_mapValues__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash/mapValues */ "./node_modules/lodash/mapValues.js");
+/* harmony import */ var lodash_mapValues__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash_mapValues__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ValidationError__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../ValidationError */ "./node_modules/yup/es/ValidationError.js");
+/* harmony import */ var _Reference__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../Reference */ "./node_modules/yup/es/Reference.js");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
+
+
+
+function createValidation(config) {
+  function validate(_ref, cb) {
+    let {
+      value,
+      path = '',
+      label,
+      options,
+      originalValue,
+      sync
+    } = _ref,
+        rest = _objectWithoutPropertiesLoose(_ref, ["value", "path", "label", "options", "originalValue", "sync"]);
+
+    const {
+      name,
+      test,
+      params,
+      message
+    } = config;
+    let {
+      parent,
+      context
+    } = options;
+
+    function resolve(item) {
+      return _Reference__WEBPACK_IMPORTED_MODULE_2__["default"].isRef(item) ? item.getValue(value, parent, context) : item;
+    }
+
+    function createError(overrides = {}) {
+      const nextParams = lodash_mapValues__WEBPACK_IMPORTED_MODULE_0___default()(_extends({
+        value,
+        originalValue,
+        label,
+        path: overrides.path || path
+      }, params, overrides.params), resolve);
+      const error = new _ValidationError__WEBPACK_IMPORTED_MODULE_1__["default"](_ValidationError__WEBPACK_IMPORTED_MODULE_1__["default"].formatError(overrides.message || message, nextParams), value, nextParams.path, overrides.type || name);
+      error.params = nextParams;
+      return error;
+    }
+
+    let ctx = _extends({
+      path,
+      parent,
+      type: name,
+      createError,
+      resolve,
+      options,
+      originalValue
+    }, rest);
+
+    if (!sync) {
+      try {
+        Promise.resolve(test.call(ctx, value, ctx)).then(validOrError => {
+          if (_ValidationError__WEBPACK_IMPORTED_MODULE_1__["default"].isError(validOrError)) cb(validOrError);else if (!validOrError) cb(createError());else cb(null, validOrError);
+        }).catch(cb);
+      } catch (err) {
+        cb(err);
+      }
+
+      return;
+    }
+
+    let result;
+
+    try {
+      var _ref2;
+
+      result = test.call(ctx, value, ctx);
+
+      if (typeof ((_ref2 = result) == null ? void 0 : _ref2.then) === 'function') {
+        throw new Error(`Validation test of type: "${ctx.type}" returned a Promise during a synchronous validate. ` + `This test will finish after the validate call has returned`);
+      }
+    } catch (err) {
+      cb(err);
+      return;
+    }
+
+    if (_ValidationError__WEBPACK_IMPORTED_MODULE_1__["default"].isError(result)) cb(result);else if (!result) cb(createError());else cb(null, result);
+  }
+
+  validate.OPTIONS = config;
+  return validate;
+}
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/util/isAbsent.js":
+/*!**********************************************!*\
+  !*** ./node_modules/yup/es/util/isAbsent.js ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+const isAbsent = value => value == null;
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (isAbsent);
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/util/isSchema.js":
+/*!**********************************************!*\
+  !*** ./node_modules/yup/es/util/isSchema.js ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+const isSchema = obj => obj && obj.__isYupSchema__;
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (isSchema);
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/util/isodate.js":
+/*!*********************************************!*\
+  !*** ./node_modules/yup/es/util/isodate.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ parseIsoDate)
+/* harmony export */ });
+/* eslint-disable */
+
+/**
+ *
+ * Date.parse with progressive enhancement for ISO 8601 <https://github.com/csnover/js-iso8601>
+ * NON-CONFORMANT EDITION.
+ * © 2011 Colin Snover <http://zetafleet.com>
+ * Released under MIT license.
+ */
+//              1 YYYY                 2 MM        3 DD              4 HH     5 mm        6 ss            7 msec         8 Z 9 ±    10 tzHH    11 tzmm
+var isoReg = /^(\d{4}|[+\-]\d{6})(?:-?(\d{2})(?:-?(\d{2}))?)?(?:[ T]?(\d{2}):?(\d{2})(?::?(\d{2})(?:[,\.](\d{1,}))?)?(?:(Z)|([+\-])(\d{2})(?::?(\d{2}))?)?)?$/;
+function parseIsoDate(date) {
+  var numericKeys = [1, 4, 5, 6, 7, 10, 11],
+      minutesOffset = 0,
+      timestamp,
+      struct;
+
+  if (struct = isoReg.exec(date)) {
+    // avoid NaN timestamps caused by “undefined” values being passed to Date.UTC
+    for (var i = 0, k; k = numericKeys[i]; ++i) struct[k] = +struct[k] || 0; // allow undefined days and months
+
+
+    struct[2] = (+struct[2] || 1) - 1;
+    struct[3] = +struct[3] || 1; // allow arbitrary sub-second precision beyond milliseconds
+
+    struct[7] = struct[7] ? String(struct[7]).substr(0, 3) : 0; // timestamps without timezone identifiers should be considered local time
+
+    if ((struct[8] === undefined || struct[8] === '') && (struct[9] === undefined || struct[9] === '')) timestamp = +new Date(struct[1], struct[2], struct[3], struct[4], struct[5], struct[6], struct[7]);else {
+      if (struct[8] !== 'Z' && struct[9] !== undefined) {
+        minutesOffset = struct[10] * 60 + struct[11];
+        if (struct[9] === '+') minutesOffset = 0 - minutesOffset;
+      }
+
+      timestamp = Date.UTC(struct[1], struct[2], struct[3], struct[4], struct[5] + minutesOffset, struct[6], struct[7]);
+    }
+  } else timestamp = Date.parse ? Date.parse(date) : NaN;
+
+  return timestamp;
+}
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/util/printValue.js":
+/*!************************************************!*\
+  !*** ./node_modules/yup/es/util/printValue.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ printValue)
+/* harmony export */ });
+const toString = Object.prototype.toString;
+const errorToString = Error.prototype.toString;
+const regExpToString = RegExp.prototype.toString;
+const symbolToString = typeof Symbol !== 'undefined' ? Symbol.prototype.toString : () => '';
+const SYMBOL_REGEXP = /^Symbol\((.*)\)(.*)$/;
+
+function printNumber(val) {
+  if (val != +val) return 'NaN';
+  const isNegativeZero = val === 0 && 1 / val < 0;
+  return isNegativeZero ? '-0' : '' + val;
+}
+
+function printSimpleValue(val, quoteStrings = false) {
+  if (val == null || val === true || val === false) return '' + val;
+  const typeOf = typeof val;
+  if (typeOf === 'number') return printNumber(val);
+  if (typeOf === 'string') return quoteStrings ? `"${val}"` : val;
+  if (typeOf === 'function') return '[Function ' + (val.name || 'anonymous') + ']';
+  if (typeOf === 'symbol') return symbolToString.call(val).replace(SYMBOL_REGEXP, 'Symbol($1)');
+  const tag = toString.call(val).slice(8, -1);
+  if (tag === 'Date') return isNaN(val.getTime()) ? '' + val : val.toISOString(val);
+  if (tag === 'Error' || val instanceof Error) return '[' + errorToString.call(val) + ']';
+  if (tag === 'RegExp') return regExpToString.call(val);
+  return null;
+}
+
+function printValue(value, quoteStrings) {
+  let result = printSimpleValue(value, quoteStrings);
+  if (result !== null) return result;
+  return JSON.stringify(value, function (key, value) {
+    let result = printSimpleValue(this[key], quoteStrings);
+    if (result !== null) return result;
+    return value;
+  }, 2);
+}
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/util/reach.js":
+/*!*******************************************!*\
+  !*** ./node_modules/yup/es/util/reach.js ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   "getIn": () => (/* binding */ getIn)
+/* harmony export */ });
+/* harmony import */ var property_expr__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! property-expr */ "./node_modules/property-expr/index.js");
+/* harmony import */ var property_expr__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(property_expr__WEBPACK_IMPORTED_MODULE_0__);
+
+
+let trim = part => part.substr(0, part.length - 1).substr(1);
+
+function getIn(schema, path, value, context = value) {
+  let parent, lastPart, lastPartDebug; // root path: ''
+
+  if (!path) return {
+    parent,
+    parentPath: path,
+    schema
+  };
+  (0,property_expr__WEBPACK_IMPORTED_MODULE_0__.forEach)(path, (_part, isBracket, isArray) => {
+    let part = isBracket ? trim(_part) : _part;
+    schema = schema.resolve({
+      context,
+      parent,
+      value
+    });
+
+    if (schema.innerType) {
+      let idx = isArray ? parseInt(part, 10) : 0;
+
+      if (value && idx >= value.length) {
+        throw new Error(`Yup.reach cannot resolve an array item at index: ${_part}, in the path: ${path}. ` + `because there is no value at that index. `);
+      }
+
+      parent = value;
+      value = value && value[idx];
+      schema = schema.innerType;
+    } // sometimes the array index part of a path doesn't exist: "nested.arr.child"
+    // in these cases the current part is the next schema and should be processed
+    // in this iteration. For cases where the index signature is included this
+    // check will fail and we'll handle the `child` part on the next iteration like normal
+
+
+    if (!isArray) {
+      if (!schema.fields || !schema.fields[part]) throw new Error(`The schema does not contain the path: ${path}. ` + `(failed at: ${lastPartDebug} which is a type: "${schema._type}")`);
+      parent = value;
+      value = value && value[part];
+      schema = schema.fields[part];
+    }
+
+    lastPart = part;
+    lastPartDebug = isBracket ? '[' + _part + ']' : '.' + _part;
+  });
+  return {
+    schema,
+    parent,
+    parentPath: lastPart
+  };
+}
+
+const reach = (obj, path, value, context) => getIn(obj, path, value, context).schema;
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (reach);
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/util/runTests.js":
+/*!**********************************************!*\
+  !*** ./node_modules/yup/es/util/runTests.js ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ runTests)
+/* harmony export */ });
+/* harmony import */ var _ValidationError__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../ValidationError */ "./node_modules/yup/es/ValidationError.js");
+
+
+const once = cb => {
+  let fired = false;
+  return (...args) => {
+    if (fired) return;
+    fired = true;
+    cb(...args);
+  };
+};
+
+function runTests(options, cb) {
+  let {
+    endEarly,
+    tests,
+    args,
+    value,
+    errors,
+    sort,
+    path
+  } = options;
+  let callback = once(cb);
+  let count = tests.length;
+  const nestedErrors = [];
+  errors = errors ? errors : [];
+  if (!count) return errors.length ? callback(new _ValidationError__WEBPACK_IMPORTED_MODULE_0__["default"](errors, value, path)) : callback(null, value);
+
+  for (let i = 0; i < tests.length; i++) {
+    const test = tests[i];
+    test(args, function finishTestRun(err) {
+      if (err) {
+        // always return early for non validation errors
+        if (!_ValidationError__WEBPACK_IMPORTED_MODULE_0__["default"].isError(err)) {
+          return callback(err, value);
+        }
+
+        if (endEarly) {
+          err.value = value;
+          return callback(err, value);
+        }
+
+        nestedErrors.push(err);
+      }
+
+      if (--count <= 0) {
+        if (nestedErrors.length) {
+          if (sort) nestedErrors.sort(sort); //show parent errors after the nested ones: name.first, name
+
+          if (errors.length) nestedErrors.push(...errors);
+          errors = nestedErrors;
+        }
+
+        if (errors.length) {
+          callback(new _ValidationError__WEBPACK_IMPORTED_MODULE_0__["default"](errors, value, path), value);
+          return;
+        }
+
+        callback(null, value);
+      }
+    });
+  }
+}
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/util/sortByKeyOrder.js":
+/*!****************************************************!*\
+  !*** ./node_modules/yup/es/util/sortByKeyOrder.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ sortByKeyOrder)
+/* harmony export */ });
+function findIndex(arr, err) {
+  let idx = Infinity;
+  arr.some((key, ii) => {
+    var _err$path;
+
+    if (((_err$path = err.path) == null ? void 0 : _err$path.indexOf(key)) !== -1) {
+      idx = ii;
+      return true;
+    }
+  });
+  return idx;
+}
+
+function sortByKeyOrder(keys) {
+  return (a, b) => {
+    return findIndex(keys, a) - findIndex(keys, b);
+  };
+}
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/util/sortFields.js":
+/*!************************************************!*\
+  !*** ./node_modules/yup/es/util/sortFields.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ sortFields)
+/* harmony export */ });
+/* harmony import */ var lodash_has__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash/has */ "./node_modules/lodash/has.js");
+/* harmony import */ var lodash_has__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash_has__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var toposort__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! toposort */ "./node_modules/toposort/index.js");
+/* harmony import */ var toposort__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(toposort__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var property_expr__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! property-expr */ "./node_modules/property-expr/index.js");
+/* harmony import */ var property_expr__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(property_expr__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _Reference__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../Reference */ "./node_modules/yup/es/Reference.js");
+/* harmony import */ var _isSchema__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./isSchema */ "./node_modules/yup/es/util/isSchema.js");
+ // @ts-expect-error
+
+
+
+
+
+function sortFields(fields, excludedEdges = []) {
+  let edges = [];
+  let nodes = new Set();
+  let excludes = new Set(excludedEdges.map(([a, b]) => `${a}-${b}`));
+
+  function addNode(depPath, key) {
+    let node = (0,property_expr__WEBPACK_IMPORTED_MODULE_2__.split)(depPath)[0];
+    nodes.add(node);
+    if (!excludes.has(`${key}-${node}`)) edges.push([key, node]);
+  }
+
+  for (const key in fields) if (lodash_has__WEBPACK_IMPORTED_MODULE_0___default()(fields, key)) {
+    let value = fields[key];
+    nodes.add(key);
+    if (_Reference__WEBPACK_IMPORTED_MODULE_3__["default"].isRef(value) && value.isSibling) addNode(value.path, key);else if ((0,_isSchema__WEBPACK_IMPORTED_MODULE_4__["default"])(value) && 'deps' in value) value.deps.forEach(path => addNode(path, key));
+  }
+
+  return toposort__WEBPACK_IMPORTED_MODULE_1___default().array(Array.from(nodes), edges).reverse();
+}
+
+/***/ }),
+
+/***/ "./node_modules/yup/es/util/toArray.js":
+/*!*********************************************!*\
+  !*** ./node_modules/yup/es/util/toArray.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ toArray)
+/* harmony export */ });
+function toArray(value) {
+  return value == null ? [] : [].concat(value);
+}
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/ParseError.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/ParseError.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ ParseError)
+/* harmony export */ });
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
+
+function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+// https://stackoverflow.com/a/46971044/970769
+// "Breaking changes in Typescript 2.1"
+// "Extending built-ins like Error, Array, and Map may no longer work."
+// "As a recommendation, you can manually adjust the prototype immediately after any super(...) calls."
+// https://github.com/Microsoft/TypeScript-wiki/blob/main/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+var ParseError = /*#__PURE__*/function (_Error) {
+  _inherits(ParseError, _Error);
+
+  var _super = _createSuper(ParseError);
+
+  function ParseError(code) {
+    var _this;
+
+    _classCallCheck(this, ParseError);
+
+    _this = _super.call(this, code); // Set the prototype explicitly.
+    // Any subclass of FooError will have to manually set the prototype as well.
+
+    Object.setPrototypeOf(_assertThisInitialized(_this), ParseError.prototype);
+    _this.name = _this.constructor.name;
+    return _this;
+  }
+
+  return _createClass(ParseError);
+}( /*#__PURE__*/_wrapNativeSuper(Error));
+
+
+//# sourceMappingURL=ParseError.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/PhoneNumber.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/PhoneNumber.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ PhoneNumber)
+/* harmony export */ });
+/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./metadata.js */ "./node_modules/libphonenumber-js/es6/metadata.js");
+/* harmony import */ var _isPossibleNumber_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./isPossibleNumber_.js */ "./node_modules/libphonenumber-js/es6/isPossibleNumber_.js");
+/* harmony import */ var _validate_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./validate_.js */ "./node_modules/libphonenumber-js/es6/validate_.js");
+/* harmony import */ var _helpers_getNumberType_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./helpers/getNumberType.js */ "./node_modules/libphonenumber-js/es6/helpers/getNumberType.js");
+/* harmony import */ var _format_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./format_.js */ "./node_modules/libphonenumber-js/es6/format_.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+
+
+
+
+
+
+var USE_NON_GEOGRAPHIC_COUNTRY_CODE = false;
+
+var PhoneNumber = /*#__PURE__*/function () {
+  function PhoneNumber(countryCallingCode, nationalNumber, metadata) {
+    _classCallCheck(this, PhoneNumber);
+
+    if (!countryCallingCode) {
+      throw new TypeError('`country` or `countryCallingCode` not passed');
+    }
+
+    if (!nationalNumber) {
+      throw new TypeError('`nationalNumber` not passed');
+    }
+
+    if (!metadata) {
+      throw new TypeError('`metadata` not passed');
+    }
+
+    var _metadata = new _metadata_js__WEBPACK_IMPORTED_MODULE_0__["default"](metadata); // If country code is passed then derive `countryCallingCode` from it.
+    // Also store the country code as `.country`.
+
+
+    if (isCountryCode(countryCallingCode)) {
+      this.country = countryCallingCode;
+
+      _metadata.country(countryCallingCode);
+
+      countryCallingCode = _metadata.countryCallingCode();
+    } else {
+      /* istanbul ignore if */
+      if (USE_NON_GEOGRAPHIC_COUNTRY_CODE) {
+        if (_metadata.isNonGeographicCallingCode(countryCallingCode)) {
+          this.country = '001';
+        }
+      }
+    }
+
+    this.countryCallingCode = countryCallingCode;
+    this.nationalNumber = nationalNumber;
+    this.number = '+' + this.countryCallingCode + this.nationalNumber;
+    this.metadata = metadata;
+  }
+
+  _createClass(PhoneNumber, [{
+    key: "setExt",
+    value: function setExt(ext) {
+      this.ext = ext;
+    }
+  }, {
+    key: "isPossible",
+    value: function isPossible() {
+      return (0,_isPossibleNumber_js__WEBPACK_IMPORTED_MODULE_1__["default"])(this, {
+        v2: true
+      }, this.metadata);
+    }
+  }, {
+    key: "isValid",
+    value: function isValid() {
+      return (0,_validate_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, {
+        v2: true
+      }, this.metadata);
+    }
+  }, {
+    key: "isNonGeographic",
+    value: function isNonGeographic() {
+      var metadata = new _metadata_js__WEBPACK_IMPORTED_MODULE_0__["default"](this.metadata);
+      return metadata.isNonGeographicCallingCode(this.countryCallingCode);
+    }
+  }, {
+    key: "isEqual",
+    value: function isEqual(phoneNumber) {
+      return this.number === phoneNumber.number && this.ext === phoneNumber.ext;
+    } // // Is just an alias for `this.isValid() && this.country === country`.
+    // // https://github.com/googlei18n/libphonenumber/blob/master/FAQ.md#when-should-i-use-isvalidnumberforregion
+    // isValidForRegion(country) {
+    // 	return isValidNumberForRegion(this, country, { v2: true }, this.metadata)
+    // }
+
+  }, {
+    key: "getType",
+    value: function getType() {
+      return (0,_helpers_getNumberType_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, {
+        v2: true
+      }, this.metadata);
+    }
+  }, {
+    key: "format",
+    value: function format(_format, options) {
+      return (0,_format_js__WEBPACK_IMPORTED_MODULE_4__["default"])(this, _format, options ? _objectSpread(_objectSpread({}, options), {}, {
+        v2: true
+      }) : {
+        v2: true
+      }, this.metadata);
+    }
+  }, {
+    key: "formatNational",
+    value: function formatNational(options) {
+      return this.format('NATIONAL', options);
+    }
+  }, {
+    key: "formatInternational",
+    value: function formatInternational(options) {
+      return this.format('INTERNATIONAL', options);
+    }
+  }, {
+    key: "getURI",
+    value: function getURI(options) {
+      return this.format('RFC3966', options);
+    }
+  }]);
+
+  return PhoneNumber;
+}();
+
+
+
+var isCountryCode = function isCountryCode(value) {
+  return /^[A-Z]{2}$/.test(value);
+};
+//# sourceMappingURL=PhoneNumber.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/constants.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/constants.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "MAX_LENGTH_COUNTRY_CODE": () => (/* binding */ MAX_LENGTH_COUNTRY_CODE),
+/* harmony export */   "MAX_LENGTH_FOR_NSN": () => (/* binding */ MAX_LENGTH_FOR_NSN),
+/* harmony export */   "MIN_LENGTH_FOR_NSN": () => (/* binding */ MIN_LENGTH_FOR_NSN),
+/* harmony export */   "PLUS_CHARS": () => (/* binding */ PLUS_CHARS),
+/* harmony export */   "VALID_DIGITS": () => (/* binding */ VALID_DIGITS),
+/* harmony export */   "VALID_PUNCTUATION": () => (/* binding */ VALID_PUNCTUATION),
+/* harmony export */   "WHITESPACE": () => (/* binding */ WHITESPACE)
+/* harmony export */ });
+// The minimum length of the national significant number.
+var MIN_LENGTH_FOR_NSN = 2; // The ITU says the maximum length should be 15,
+// but one can find longer numbers in Germany.
+
+var MAX_LENGTH_FOR_NSN = 17; // The maximum length of the country calling code.
+
+var MAX_LENGTH_COUNTRY_CODE = 3; // Digits accepted in phone numbers
+// (ascii, fullwidth, arabic-indic, and eastern arabic digits).
+
+var VALID_DIGITS = "0-9\uFF10-\uFF19\u0660-\u0669\u06F0-\u06F9"; // `DASHES` will be right after the opening square bracket of the "character class"
+
+var DASHES = "-\u2010-\u2015\u2212\u30FC\uFF0D";
+var SLASHES = "\uFF0F/";
+var DOTS = "\uFF0E.";
+var WHITESPACE = " \xA0\xAD\u200B\u2060\u3000";
+var BRACKETS = "()\uFF08\uFF09\uFF3B\uFF3D\\[\\]"; // export const OPENING_BRACKETS = '(\uFF08\uFF3B\\\['
+
+var TILDES = "~\u2053\u223C\uFF5E"; // Regular expression of acceptable punctuation found in phone numbers. This
+// excludes punctuation found as a leading character only. This consists of dash
+// characters, white space characters, full stops, slashes, square brackets,
+// parentheses and tildes. Full-width variants are also present.
+
+var VALID_PUNCTUATION = "".concat(DASHES).concat(SLASHES).concat(DOTS).concat(WHITESPACE).concat(BRACKETS).concat(TILDES);
+var PLUS_CHARS = "+\uFF0B"; // const LEADING_PLUS_CHARS_PATTERN = new RegExp('^[' + PLUS_CHARS + ']+')
+//# sourceMappingURL=constants.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/format_.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/format_.js ***!
+  \*******************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ formatNumber)
+/* harmony export */ });
+/* harmony import */ var _helpers_matchesEntirely_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./helpers/matchesEntirely.js */ "./node_modules/libphonenumber-js/es6/helpers/matchesEntirely.js");
+/* harmony import */ var _helpers_formatNationalNumberUsingFormat_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helpers/formatNationalNumberUsingFormat.js */ "./node_modules/libphonenumber-js/es6/helpers/formatNationalNumberUsingFormat.js");
+/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./metadata.js */ "./node_modules/libphonenumber-js/es6/metadata.js");
+/* harmony import */ var _helpers_getIddPrefix_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./helpers/getIddPrefix.js */ "./node_modules/libphonenumber-js/es6/helpers/getIddPrefix.js");
+/* harmony import */ var _helpers_RFC3966_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helpers/RFC3966.js */ "./node_modules/libphonenumber-js/es6/helpers/RFC3966.js");
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+// This is a port of Google Android `libphonenumber`'s
+// `phonenumberutil.js` of December 31th, 2018.
+//
+// https://github.com/googlei18n/libphonenumber/commits/master/javascript/i18n/phonenumbers/phonenumberutil.js
+
+
+
+
+
+var DEFAULT_OPTIONS = {
+  formatExtension: function formatExtension(formattedNumber, extension, metadata) {
+    return "".concat(formattedNumber).concat(metadata.ext()).concat(extension);
+  }
+}; // Formats a phone number
+//
+// Example use cases:
+//
+// ```js
+// formatNumber('8005553535', 'RU', 'INTERNATIONAL')
+// formatNumber('8005553535', 'RU', 'INTERNATIONAL', metadata)
+// formatNumber({ phone: '8005553535', country: 'RU' }, 'INTERNATIONAL')
+// formatNumber({ phone: '8005553535', country: 'RU' }, 'INTERNATIONAL', metadata)
+// formatNumber('+78005553535', 'NATIONAL')
+// formatNumber('+78005553535', 'NATIONAL', metadata)
+// ```
+//
+
+function formatNumber(input, format, options, metadata) {
+  // Apply default options.
+  if (options) {
+    options = _objectSpread(_objectSpread({}, DEFAULT_OPTIONS), options);
+  } else {
+    options = DEFAULT_OPTIONS;
+  }
+
+  metadata = new _metadata_js__WEBPACK_IMPORTED_MODULE_0__["default"](metadata);
+
+  if (input.country && input.country !== '001') {
+    // Validate `input.country`.
+    if (!metadata.hasCountry(input.country)) {
+      throw new Error("Unknown country: ".concat(input.country));
+    }
+
+    metadata.country(input.country);
+  } else if (input.countryCallingCode) {
+    metadata.selectNumberingPlan(input.countryCallingCode);
+  } else return input.phone || '';
+
+  var countryCallingCode = metadata.countryCallingCode();
+  var nationalNumber = options.v2 ? input.nationalNumber : input.phone; // This variable should have been declared inside `case`s
+  // but Babel has a bug and it says "duplicate variable declaration".
+
+  var number;
+
+  switch (format) {
+    case 'NATIONAL':
+      // Legacy argument support.
+      // (`{ country: ..., phone: '' }`)
+      if (!nationalNumber) {
+        return '';
+      }
+
+      number = formatNationalNumber(nationalNumber, input.carrierCode, 'NATIONAL', metadata, options);
+      return addExtension(number, input.ext, metadata, options.formatExtension);
+
+    case 'INTERNATIONAL':
+      // Legacy argument support.
+      // (`{ country: ..., phone: '' }`)
+      if (!nationalNumber) {
+        return "+".concat(countryCallingCode);
+      }
+
+      number = formatNationalNumber(nationalNumber, null, 'INTERNATIONAL', metadata, options);
+      number = "+".concat(countryCallingCode, " ").concat(number);
+      return addExtension(number, input.ext, metadata, options.formatExtension);
+
+    case 'E.164':
+      // `E.164` doesn't define "phone number extensions".
+      return "+".concat(countryCallingCode).concat(nationalNumber);
+
+    case 'RFC3966':
+      return (0,_helpers_RFC3966_js__WEBPACK_IMPORTED_MODULE_1__.formatRFC3966)({
+        number: "+".concat(countryCallingCode).concat(nationalNumber),
+        ext: input.ext
+      });
+    // For reference, here's Google's IDD formatter:
+    // https://github.com/google/libphonenumber/blob/32719cf74e68796788d1ca45abc85dcdc63ba5b9/java/libphonenumber/src/com/google/i18n/phonenumbers/PhoneNumberUtil.java#L1546
+    // Not saying that this IDD formatter replicates it 1:1, but it seems to work.
+    // Who would even need to format phone numbers in IDD format anyway?
+
+    case 'IDD':
+      if (!options.fromCountry) {
+        return; // throw new Error('`fromCountry` option not passed for IDD-prefixed formatting.')
+      }
+
+      var formattedNumber = formatIDD(nationalNumber, input.carrierCode, countryCallingCode, options.fromCountry, metadata);
+      return addExtension(formattedNumber, input.ext, metadata, options.formatExtension);
+
+    default:
+      throw new Error("Unknown \"format\" argument passed to \"formatNumber()\": \"".concat(format, "\""));
+  }
+}
+
+function formatNationalNumber(number, carrierCode, formatAs, metadata, options) {
+  var format = chooseFormatForNumber(metadata.formats(), number);
+
+  if (!format) {
+    return number;
+  }
+
+  return (0,_helpers_formatNationalNumberUsingFormat_js__WEBPACK_IMPORTED_MODULE_2__["default"])(number, format, {
+    useInternationalFormat: formatAs === 'INTERNATIONAL',
+    withNationalPrefix: format.nationalPrefixIsOptionalWhenFormattingInNationalFormat() && options && options.nationalPrefix === false ? false : true,
+    carrierCode: carrierCode,
+    metadata: metadata
+  });
+}
+
+function chooseFormatForNumber(availableFormats, nationalNnumber) {
+  for (var _iterator = _createForOfIteratorHelperLoose(availableFormats), _step; !(_step = _iterator()).done;) {
+    var format = _step.value;
+
+    // Validate leading digits.
+    // The test case for "else path" could be found by searching for
+    // "format.leadingDigitsPatterns().length === 0".
+    if (format.leadingDigitsPatterns().length > 0) {
+      // The last leading_digits_pattern is used here, as it is the most detailed
+      var lastLeadingDigitsPattern = format.leadingDigitsPatterns()[format.leadingDigitsPatterns().length - 1]; // If leading digits don't match then move on to the next phone number format
+
+      if (nationalNnumber.search(lastLeadingDigitsPattern) !== 0) {
+        continue;
+      }
+    } // Check that the national number matches the phone number format regular expression
+
+
+    if ((0,_helpers_matchesEntirely_js__WEBPACK_IMPORTED_MODULE_3__["default"])(nationalNnumber, format.pattern())) {
+      return format;
+    }
+  }
+}
+
+function addExtension(formattedNumber, ext, metadata, formatExtension) {
+  return ext ? formatExtension(formattedNumber, ext, metadata) : formattedNumber;
+}
+
+function formatIDD(nationalNumber, carrierCode, countryCallingCode, fromCountry, metadata) {
+  var fromCountryCallingCode = (0,_metadata_js__WEBPACK_IMPORTED_MODULE_0__.getCountryCallingCode)(fromCountry, metadata.metadata); // When calling within the same country calling code.
+
+  if (fromCountryCallingCode === countryCallingCode) {
+    var formattedNumber = formatNationalNumber(nationalNumber, carrierCode, 'NATIONAL', metadata); // For NANPA regions, return the national format for these regions
+    // but prefix it with the country calling code.
+
+    if (countryCallingCode === '1') {
+      return countryCallingCode + ' ' + formattedNumber;
+    } // If regions share a country calling code, the country calling code need
+    // not be dialled. This also applies when dialling within a region, so this
+    // if clause covers both these cases. Technically this is the case for
+    // dialling from La Reunion to other overseas departments of France (French
+    // Guiana, Martinique, Guadeloupe), but not vice versa - so we don't cover
+    // this edge case for now and for those cases return the version including
+    // country calling code. Details here:
+    // http://www.petitfute.com/voyage/225-info-pratiques-reunion
+    //
+
+
+    return formattedNumber;
+  }
+
+  var iddPrefix = (0,_helpers_getIddPrefix_js__WEBPACK_IMPORTED_MODULE_4__["default"])(fromCountry, undefined, metadata.metadata);
+
+  if (iddPrefix) {
+    return "".concat(iddPrefix, " ").concat(countryCallingCode, " ").concat(formatNationalNumber(nationalNumber, null, 'INTERNATIONAL', metadata));
+  }
+}
+//# sourceMappingURL=format_.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/RFC3966.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/RFC3966.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "formatRFC3966": () => (/* binding */ formatRFC3966),
+/* harmony export */   "parseRFC3966": () => (/* binding */ parseRFC3966)
+/* harmony export */ });
+/* harmony import */ var _isViablePhoneNumber_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./isViablePhoneNumber.js */ "./node_modules/libphonenumber-js/es6/helpers/isViablePhoneNumber.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+ // https://www.ietf.org/rfc/rfc3966.txt
+
+/**
+ * @param  {string} text - Phone URI (RFC 3966).
+ * @return {object} `{ ?number, ?ext }`.
+ */
+
+function parseRFC3966(text) {
+  var number;
+  var ext; // Replace "tel:" with "tel=" for parsing convenience.
+
+  text = text.replace(/^tel:/, 'tel=');
+
+  for (var _iterator = _createForOfIteratorHelperLoose(text.split(';')), _step; !(_step = _iterator()).done;) {
+    var part = _step.value;
+
+    var _part$split = part.split('='),
+        _part$split2 = _slicedToArray(_part$split, 2),
+        name = _part$split2[0],
+        value = _part$split2[1];
+
+    switch (name) {
+      case 'tel':
+        number = value;
+        break;
+
+      case 'ext':
+        ext = value;
+        break;
+
+      case 'phone-context':
+        // Only "country contexts" are supported.
+        // "Domain contexts" are ignored.
+        if (value[0] === '+') {
+          number = value + number;
+        }
+
+        break;
+    }
+  } // If the phone number is not viable, then abort.
+
+
+  if (!(0,_isViablePhoneNumber_js__WEBPACK_IMPORTED_MODULE_0__["default"])(number)) {
+    return {};
+  }
+
+  var result = {
+    number: number
+  };
+
+  if (ext) {
+    result.ext = ext;
+  }
+
+  return result;
+}
+/**
+ * @param  {object} - `{ ?number, ?extension }`.
+ * @return {string} Phone URI (RFC 3966).
+ */
+
+function formatRFC3966(_ref) {
+  var number = _ref.number,
+      ext = _ref.ext;
+
+  if (!number) {
+    return '';
+  }
+
+  if (number[0] !== '+') {
+    throw new Error("\"formatRFC3966()\" expects \"number\" to be in E.164 format.");
+  }
+
+  return "tel:".concat(number).concat(ext ? ';ext=' + ext : '');
+}
+//# sourceMappingURL=RFC3966.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/applyInternationalSeparatorStyle.js":
+/*!****************************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/applyInternationalSeparatorStyle.js ***!
+  \****************************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ applyInternationalSeparatorStyle)
+/* harmony export */ });
+/* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants.js */ "./node_modules/libphonenumber-js/es6/constants.js");
+ // Removes brackets and replaces dashes with spaces.
+//
+// E.g. "(999) 111-22-33" -> "999 111 22 33"
+//
+// For some reason Google's metadata contains `<intlFormat/>`s with brackets and dashes.
+// Meanwhile, there's no single opinion about using punctuation in international phone numbers.
+//
+// For example, Google's `<intlFormat/>` for USA is `+1 213-373-4253`.
+// And here's a quote from WikiPedia's "North American Numbering Plan" page:
+// https://en.wikipedia.org/wiki/North_American_Numbering_Plan
+//
+// "The country calling code for all countries participating in the NANP is 1.
+// In international format, an NANP number should be listed as +1 301 555 01 00,
+// where 301 is an area code (Maryland)."
+//
+// I personally prefer the international format without any punctuation.
+// For example, brackets are remnants of the old age, meaning that the
+// phone number part in brackets (so called "area code") can be omitted
+// if dialing within the same "area".
+// And hyphens were clearly introduced for splitting local numbers into memorizable groups.
+// For example, remembering "5553535" is difficult but "555-35-35" is much simpler.
+// Imagine a man taking a bus from home to work and seeing an ad with a phone number.
+// He has a couple of seconds to memorize that number until it passes by.
+// If it were spaces instead of hyphens the man wouldn't necessarily get it,
+// but with hyphens instead of spaces the grouping is more explicit.
+// I personally think that hyphens introduce visual clutter,
+// so I prefer replacing them with spaces in international numbers.
+// In the modern age all output is done on displays where spaces are clearly distinguishable
+// so hyphens can be safely replaced with spaces without losing any legibility.
+//
+
+function applyInternationalSeparatorStyle(formattedNumber) {
+  return formattedNumber.replace(new RegExp("[".concat(_constants_js__WEBPACK_IMPORTED_MODULE_0__.VALID_PUNCTUATION, "]+"), 'g'), ' ').trim();
+}
+//# sourceMappingURL=applyInternationalSeparatorStyle.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/checkNumberLength.js":
+/*!*************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/checkNumberLength.js ***!
+  \*************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "checkNumberLengthForType": () => (/* binding */ checkNumberLengthForType),
+/* harmony export */   "default": () => (/* binding */ checkNumberLength)
+/* harmony export */ });
+/* harmony import */ var _mergeArrays_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./mergeArrays.js */ "./node_modules/libphonenumber-js/es6/helpers/mergeArrays.js");
+
+function checkNumberLength(nationalNumber, metadata) {
+  return checkNumberLengthForType(nationalNumber, undefined, metadata);
+} // Checks whether a number is possible for the country based on its length.
+// Should only be called for the "new" metadata which has "possible lengths".
+
+function checkNumberLengthForType(nationalNumber, type, metadata) {
+  var type_info = metadata.type(type); // There should always be "<possiblePengths/>" set for every type element.
+  // This is declared in the XML schema.
+  // For size efficiency, where a sub-description (e.g. fixed-line)
+  // has the same "<possiblePengths/>" as the "general description", this is missing,
+  // so we fall back to the "general description". Where no numbers of the type
+  // exist at all, there is one possible length (-1) which is guaranteed
+  // not to match the length of any real phone number.
+
+  var possible_lengths = type_info && type_info.possibleLengths() || metadata.possibleLengths(); // let local_lengths    = type_info && type.possibleLengthsLocal() || metadata.possibleLengthsLocal()
+  // Metadata before version `1.0.18` didn't contain `possible_lengths`.
+
+  if (!possible_lengths) {
+    return 'IS_POSSIBLE';
+  }
+
+  if (type === 'FIXED_LINE_OR_MOBILE') {
+    // No such country in metadata.
+
+    /* istanbul ignore next */
+    if (!metadata.type('FIXED_LINE')) {
+      // The rare case has been encountered where no fixedLine data is available
+      // (true for some non-geographic entities), so we just check mobile.
+      return checkNumberLengthForType(nationalNumber, 'MOBILE', metadata);
+    }
+
+    var mobile_type = metadata.type('MOBILE');
+
+    if (mobile_type) {
+      // Merge the mobile data in if there was any. "Concat" creates a new
+      // array, it doesn't edit possible_lengths in place, so we don't need a copy.
+      // Note that when adding the possible lengths from mobile, we have
+      // to again check they aren't empty since if they are this indicates
+      // they are the same as the general desc and should be obtained from there.
+      possible_lengths = (0,_mergeArrays_js__WEBPACK_IMPORTED_MODULE_0__["default"])(possible_lengths, mobile_type.possibleLengths()); // The current list is sorted; we need to merge in the new list and
+      // re-sort (duplicates are okay). Sorting isn't so expensive because
+      // the lists are very small.
+      // if (local_lengths) {
+      // 	local_lengths = mergeArrays(local_lengths, mobile_type.possibleLengthsLocal())
+      // } else {
+      // 	local_lengths = mobile_type.possibleLengthsLocal()
+      // }
+    }
+  } // If the type doesn't exist then return 'INVALID_LENGTH'.
+  else if (type && !type_info) {
+    return 'INVALID_LENGTH';
+  }
+
+  var actual_length = nationalNumber.length; // In `libphonenumber-js` all "local-only" formats are dropped for simplicity.
+  // // This is safe because there is never an overlap beween the possible lengths
+  // // and the local-only lengths; this is checked at build time.
+  // if (local_lengths && local_lengths.indexOf(nationalNumber.length) >= 0)
+  // {
+  // 	return 'IS_POSSIBLE_LOCAL_ONLY'
+  // }
+
+  var minimum_length = possible_lengths[0];
+
+  if (minimum_length === actual_length) {
+    return 'IS_POSSIBLE';
+  }
+
+  if (minimum_length > actual_length) {
+    return 'TOO_SHORT';
+  }
+
+  if (possible_lengths[possible_lengths.length - 1] < actual_length) {
+    return 'TOO_LONG';
+  } // We skip the first element since we've already checked it.
+
+
+  return possible_lengths.indexOf(actual_length, 1) >= 0 ? 'IS_POSSIBLE' : 'INVALID_LENGTH';
+}
+//# sourceMappingURL=checkNumberLength.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/extension/createExtensionPattern.js":
+/*!****************************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/extension/createExtensionPattern.js ***!
+  \****************************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ createExtensionPattern)
+/* harmony export */ });
+/* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../constants.js */ "./node_modules/libphonenumber-js/es6/constants.js");
+ // The RFC 3966 format for extensions.
+
+var RFC3966_EXTN_PREFIX = ';ext=';
+/**
+ * Helper method for constructing regular expressions for parsing. Creates
+ * an expression that captures up to max_length digits.
+ * @return {string} RegEx pattern to capture extension digits.
+ */
+
+var getExtensionDigitsPattern = function getExtensionDigitsPattern(maxLength) {
+  return "([".concat(_constants_js__WEBPACK_IMPORTED_MODULE_0__.VALID_DIGITS, "]{1,").concat(maxLength, "})");
+};
+/**
+ * Helper initialiser method to create the regular-expression pattern to match
+ * extensions.
+ * Copy-pasted from Google's `libphonenumber`:
+ * https://github.com/google/libphonenumber/blob/55b2646ec9393f4d3d6661b9c82ef9e258e8b829/javascript/i18n/phonenumbers/phonenumberutil.js#L759-L766
+ * @return {string} RegEx pattern to capture extensions.
+ */
+
+
+function createExtensionPattern(purpose) {
+  // We cap the maximum length of an extension based on the ambiguity of the way
+  // the extension is prefixed. As per ITU, the officially allowed length for
+  // extensions is actually 40, but we don't support this since we haven't seen real
+  // examples and this introduces many false interpretations as the extension labels
+  // are not standardized.
+
+  /** @type {string} */
+  var extLimitAfterExplicitLabel = '20';
+  /** @type {string} */
+
+  var extLimitAfterLikelyLabel = '15';
+  /** @type {string} */
+
+  var extLimitAfterAmbiguousChar = '9';
+  /** @type {string} */
+
+  var extLimitWhenNotSure = '6';
+  /** @type {string} */
+
+  var possibleSeparatorsBetweenNumberAndExtLabel = "[ \xA0\\t,]*"; // Optional full stop (.) or colon, followed by zero or more spaces/tabs/commas.
+
+  /** @type {string} */
+
+  var possibleCharsAfterExtLabel = "[:\\.\uFF0E]?[ \xA0\\t,-]*";
+  /** @type {string} */
+
+  var optionalExtnSuffix = "#?"; // Here the extension is called out in more explicit way, i.e mentioning it obvious
+  // patterns like "ext.".
+
+  /** @type {string} */
+
+  var explicitExtLabels = "(?:e?xt(?:ensi(?:o\u0301?|\xF3))?n?|\uFF45?\uFF58\uFF54\uFF4E?|\u0434\u043E\u0431|anexo)"; // One-character symbols that can be used to indicate an extension, and less
+  // commonly used or more ambiguous extension labels.
+
+  /** @type {string} */
+
+  var ambiguousExtLabels = "(?:[x\uFF58#\uFF03~\uFF5E]|int|\uFF49\uFF4E\uFF54)"; // When extension is not separated clearly.
+
+  /** @type {string} */
+
+  var ambiguousSeparator = "[- ]+"; // This is the same as possibleSeparatorsBetweenNumberAndExtLabel, but not matching
+  // comma as extension label may have it.
+
+  /** @type {string} */
+
+  var possibleSeparatorsNumberExtLabelNoComma = "[ \xA0\\t]*"; // ",," is commonly used for auto dialling the extension when connected. First
+  // comma is matched through possibleSeparatorsBetweenNumberAndExtLabel, so we do
+  // not repeat it here. Semi-colon works in Iphone and Android also to pop up a
+  // button with the extension number following.
+
+  /** @type {string} */
+
+  var autoDiallingAndExtLabelsFound = "(?:,{2}|;)";
+  /** @type {string} */
+
+  var rfcExtn = RFC3966_EXTN_PREFIX + getExtensionDigitsPattern(extLimitAfterExplicitLabel);
+  /** @type {string} */
+
+  var explicitExtn = possibleSeparatorsBetweenNumberAndExtLabel + explicitExtLabels + possibleCharsAfterExtLabel + getExtensionDigitsPattern(extLimitAfterExplicitLabel) + optionalExtnSuffix;
+  /** @type {string} */
+
+  var ambiguousExtn = possibleSeparatorsBetweenNumberAndExtLabel + ambiguousExtLabels + possibleCharsAfterExtLabel + getExtensionDigitsPattern(extLimitAfterAmbiguousChar) + optionalExtnSuffix;
+  /** @type {string} */
+
+  var americanStyleExtnWithSuffix = ambiguousSeparator + getExtensionDigitsPattern(extLimitWhenNotSure) + "#";
+  /** @type {string} */
+
+  var autoDiallingExtn = possibleSeparatorsNumberExtLabelNoComma + autoDiallingAndExtLabelsFound + possibleCharsAfterExtLabel + getExtensionDigitsPattern(extLimitAfterLikelyLabel) + optionalExtnSuffix;
+  /** @type {string} */
+
+  var onlyCommasExtn = possibleSeparatorsNumberExtLabelNoComma + "(?:,)+" + possibleCharsAfterExtLabel + getExtensionDigitsPattern(extLimitAfterAmbiguousChar) + optionalExtnSuffix; // The first regular expression covers RFC 3966 format, where the extension is added
+  // using ";ext=". The second more generic where extension is mentioned with explicit
+  // labels like "ext:". In both the above cases we allow more numbers in extension than
+  // any other extension labels. The third one captures when single character extension
+  // labels or less commonly used labels are used. In such cases we capture fewer
+  // extension digits in order to reduce the chance of falsely interpreting two
+  // numbers beside each other as a number + extension. The fourth one covers the
+  // special case of American numbers where the extension is written with a hash
+  // at the end, such as "- 503#". The fifth one is exclusively for extension
+  // autodialling formats which are used when dialling and in this case we accept longer
+  // extensions. The last one is more liberal on the number of commas that acts as
+  // extension labels, so we have a strict cap on the number of digits in such extensions.
+
+  return rfcExtn + "|" + explicitExtn + "|" + ambiguousExtn + "|" + americanStyleExtnWithSuffix + "|" + autoDiallingExtn + "|" + onlyCommasExtn;
+}
+//# sourceMappingURL=createExtensionPattern.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/extension/extractExtension.js":
+/*!**********************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/extension/extractExtension.js ***!
+  \**********************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ extractExtension)
+/* harmony export */ });
+/* harmony import */ var _createExtensionPattern_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./createExtensionPattern.js */ "./node_modules/libphonenumber-js/es6/helpers/extension/createExtensionPattern.js");
+ // Regexp of all known extension prefixes used by different regions followed by
+// 1 or more valid digits, for use when parsing.
+
+var EXTN_PATTERN = new RegExp('(?:' + (0,_createExtensionPattern_js__WEBPACK_IMPORTED_MODULE_0__["default"])() + ')$', 'i'); // Strips any extension (as in, the part of the number dialled after the call is
+// connected, usually indicated with extn, ext, x or similar) from the end of
+// the number, and returns it.
+
+function extractExtension(number) {
+  var start = number.search(EXTN_PATTERN);
+
+  if (start < 0) {
+    return {};
+  } // If we find a potential extension, and the number preceding this is a viable
+  // number, we assume it is an extension.
+
+
+  var numberWithoutExtension = number.slice(0, start);
+  var matches = number.match(EXTN_PATTERN);
+  var i = 1;
+
+  while (i < matches.length) {
+    if (matches[i]) {
+      return {
+        number: numberWithoutExtension,
+        ext: matches[i]
+      };
+    }
+
+    i++;
+  }
+}
+//# sourceMappingURL=extractExtension.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/extractCountryCallingCode.js":
+/*!*********************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/extractCountryCallingCode.js ***!
+  \*********************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ extractCountryCallingCode)
+/* harmony export */ });
+/* harmony import */ var _stripIddPrefix_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./stripIddPrefix.js */ "./node_modules/libphonenumber-js/es6/helpers/stripIddPrefix.js");
+/* harmony import */ var _extractCountryCallingCodeFromInternationalNumberWithoutPlusSign_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./extractCountryCallingCodeFromInternationalNumberWithoutPlusSign.js */ "./node_modules/libphonenumber-js/es6/helpers/extractCountryCallingCodeFromInternationalNumberWithoutPlusSign.js");
+/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../metadata.js */ "./node_modules/libphonenumber-js/es6/metadata.js");
+/* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../constants.js */ "./node_modules/libphonenumber-js/es6/constants.js");
+
+
+
+
+/**
+ * Converts a phone number digits (possibly with a `+`)
+ * into a calling code and the rest phone number digits.
+ * The "rest phone number digits" could include
+ * a national prefix, carrier code, and national
+ * (significant) number.
+ * @param  {string} number — Phone number digits (possibly with a `+`).
+ * @param  {string} [country] — Default country.
+ * @param  {string} [callingCode] — Default calling code (some phone numbering plans are non-geographic).
+ * @param  {object} metadata
+ * @return {object} `{ countryCallingCode: string?, number: string }`
+ * @example
+ * // Returns `{ countryCallingCode: "1", number: "2133734253" }`.
+ * extractCountryCallingCode('2133734253', 'US', null, metadata)
+ * extractCountryCallingCode('2133734253', null, '1', metadata)
+ * extractCountryCallingCode('+12133734253', null, null, metadata)
+ * extractCountryCallingCode('+12133734253', 'RU', null, metadata)
+ */
+
+function extractCountryCallingCode(number, country, callingCode, metadata) {
+  if (!number) {
+    return {};
+  } // If this is not an international phone number,
+  // then either extract an "IDD" prefix, or extract a
+  // country calling code from a number by autocorrecting it
+  // by prepending a leading `+` in cases when it starts
+  // with the country calling code.
+  // https://wikitravel.org/en/International_dialling_prefix
+  // https://github.com/catamphetamine/libphonenumber-js/issues/376
+
+
+  if (number[0] !== '+') {
+    // Convert an "out-of-country" dialing phone number
+    // to a proper international phone number.
+    var numberWithoutIDD = (0,_stripIddPrefix_js__WEBPACK_IMPORTED_MODULE_0__["default"])(number, country, callingCode, metadata); // If an IDD prefix was stripped then
+    // convert the number to international one
+    // for subsequent parsing.
+
+    if (numberWithoutIDD && numberWithoutIDD !== number) {
+      number = '+' + numberWithoutIDD;
+    } else {
+      // Check to see if the number starts with the country calling code
+      // for the default country. If so, we remove the country calling code,
+      // and do some checks on the validity of the number before and after.
+      // https://github.com/catamphetamine/libphonenumber-js/issues/376
+      if (country || callingCode) {
+        var _extractCountryCallin = (0,_extractCountryCallingCodeFromInternationalNumberWithoutPlusSign_js__WEBPACK_IMPORTED_MODULE_1__["default"])(number, country, callingCode, metadata),
+            countryCallingCode = _extractCountryCallin.countryCallingCode,
+            shorterNumber = _extractCountryCallin.number;
+
+        if (countryCallingCode) {
+          return {
+            countryCallingCode: countryCallingCode,
+            number: shorterNumber
+          };
+        }
+      }
+
+      return {
+        number: number
+      };
+    }
+  } // Fast abortion: country codes do not begin with a '0'
+
+
+  if (number[1] === '0') {
+    return {};
+  }
+
+  metadata = new _metadata_js__WEBPACK_IMPORTED_MODULE_2__["default"](metadata); // The thing with country phone codes
+  // is that they are orthogonal to each other
+  // i.e. there's no such country phone code A
+  // for which country phone code B exists
+  // where B starts with A.
+  // Therefore, while scanning digits,
+  // if a valid country code is found,
+  // that means that it is the country code.
+  //
+
+  var i = 2;
+
+  while (i - 1 <= _constants_js__WEBPACK_IMPORTED_MODULE_3__.MAX_LENGTH_COUNTRY_CODE && i <= number.length) {
+    var _countryCallingCode = number.slice(1, i);
+
+    if (metadata.hasCallingCode(_countryCallingCode)) {
+      metadata.selectNumberingPlan(_countryCallingCode);
+      return {
+        countryCallingCode: _countryCallingCode,
+        number: number.slice(i)
+      };
+    }
+
+    i++;
+  }
+
+  return {};
+}
+//# sourceMappingURL=extractCountryCallingCode.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/extractCountryCallingCodeFromInternationalNumberWithoutPlusSign.js":
+/*!***********************************************************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/extractCountryCallingCodeFromInternationalNumberWithoutPlusSign.js ***!
+  \***********************************************************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ extractCountryCallingCodeFromInternationalNumberWithoutPlusSign)
+/* harmony export */ });
+/* harmony import */ var _getCountryCallingCode_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../getCountryCallingCode.js */ "./node_modules/libphonenumber-js/es6/metadata.js");
+/* harmony import */ var _matchesEntirely_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./matchesEntirely.js */ "./node_modules/libphonenumber-js/es6/helpers/matchesEntirely.js");
+/* harmony import */ var _extractNationalNumber_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./extractNationalNumber.js */ "./node_modules/libphonenumber-js/es6/helpers/extractNationalNumber.js");
+/* harmony import */ var _checkNumberLength_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./checkNumberLength.js */ "./node_modules/libphonenumber-js/es6/helpers/checkNumberLength.js");
+
+
+
+
+
+/**
+ * Sometimes some people incorrectly input international phone numbers
+ * without the leading `+`. This function corrects such input.
+ * @param  {string} number — Phone number digits.
+ * @param  {string?} country
+ * @param  {string?} callingCode
+ * @param  {object} metadata
+ * @return {object} `{ countryCallingCode: string?, number: string }`.
+ */
+
+function extractCountryCallingCodeFromInternationalNumberWithoutPlusSign(number, country, callingCode, metadata) {
+  var countryCallingCode = country ? (0,_getCountryCallingCode_js__WEBPACK_IMPORTED_MODULE_0__.getCountryCallingCode)(country, metadata) : callingCode;
+
+  if (number.indexOf(countryCallingCode) === 0) {
+    metadata = new _getCountryCallingCode_js__WEBPACK_IMPORTED_MODULE_0__["default"](metadata);
+    metadata.selectNumberingPlan(country, callingCode);
+    var possibleShorterNumber = number.slice(countryCallingCode.length);
+
+    var _extractNationalNumbe = (0,_extractNationalNumber_js__WEBPACK_IMPORTED_MODULE_1__["default"])(possibleShorterNumber, metadata),
+        possibleShorterNationalNumber = _extractNationalNumbe.nationalNumber;
+
+    var _extractNationalNumbe2 = (0,_extractNationalNumber_js__WEBPACK_IMPORTED_MODULE_1__["default"])(number, metadata),
+        nationalNumber = _extractNationalNumbe2.nationalNumber; // If the number was not valid before but is valid now,
+    // or if it was too long before, we consider the number
+    // with the country calling code stripped to be a better result
+    // and keep that instead.
+    // For example, in Germany (+49), `49` is a valid area code,
+    // so if a number starts with `49`, it could be both a valid
+    // national German number or an international number without
+    // a leading `+`.
+
+
+    if (!(0,_matchesEntirely_js__WEBPACK_IMPORTED_MODULE_2__["default"])(nationalNumber, metadata.nationalNumberPattern()) && (0,_matchesEntirely_js__WEBPACK_IMPORTED_MODULE_2__["default"])(possibleShorterNationalNumber, metadata.nationalNumberPattern()) || (0,_checkNumberLength_js__WEBPACK_IMPORTED_MODULE_3__["default"])(nationalNumber, metadata) === 'TOO_LONG') {
+      return {
+        countryCallingCode: countryCallingCode,
+        number: possibleShorterNumber
+      };
+    }
+  }
+
+  return {
+    number: number
+  };
+}
+//# sourceMappingURL=extractCountryCallingCodeFromInternationalNumberWithoutPlusSign.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/extractNationalNumber.js":
+/*!*****************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/extractNationalNumber.js ***!
+  \*****************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ extractNationalNumber)
+/* harmony export */ });
+/* harmony import */ var _extractNationalNumberFromPossiblyIncompleteNumber_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./extractNationalNumberFromPossiblyIncompleteNumber.js */ "./node_modules/libphonenumber-js/es6/helpers/extractNationalNumberFromPossiblyIncompleteNumber.js");
+/* harmony import */ var _matchesEntirely_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./matchesEntirely.js */ "./node_modules/libphonenumber-js/es6/helpers/matchesEntirely.js");
+/* harmony import */ var _checkNumberLength_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./checkNumberLength.js */ "./node_modules/libphonenumber-js/es6/helpers/checkNumberLength.js");
+
+
+
+/**
+ * Strips national prefix and carrier code from a complete phone number.
+ * The difference from the non-"FromCompleteNumber" function is that
+ * it won't extract national prefix if the resultant number is too short
+ * to be a complete number for the selected phone numbering plan.
+ * @param  {string} number — Complete phone number digits.
+ * @param  {Metadata} metadata — Metadata with a phone numbering plan selected.
+ * @return {object} `{ nationalNumber: string, carrierCode: string? }`.
+ */
+
+function extractNationalNumber(number, metadata) {
+  // Parsing national prefixes and carrier codes
+  // is only required for local phone numbers
+  // but some people don't understand that
+  // and sometimes write international phone numbers
+  // with national prefixes (or maybe even carrier codes).
+  // http://ucken.blogspot.ru/2016/03/trunk-prefixes-in-skype4b.html
+  // Google's original library forgives such mistakes
+  // and so does this library, because it has been requested:
+  // https://github.com/catamphetamine/libphonenumber-js/issues/127
+  var _extractNationalNumbe = (0,_extractNationalNumberFromPossiblyIncompleteNumber_js__WEBPACK_IMPORTED_MODULE_0__["default"])(number, metadata),
+      carrierCode = _extractNationalNumbe.carrierCode,
+      nationalNumber = _extractNationalNumbe.nationalNumber;
+
+  if (nationalNumber !== number) {
+    if (!shouldHaveExtractedNationalPrefix(number, nationalNumber, metadata)) {
+      // Don't strip the national prefix.
+      return {
+        nationalNumber: number
+      };
+    } // Check the national (significant) number length after extracting national prefix and carrier code.
+    // Legacy generated metadata (before `1.0.18`) didn't support the "possible lengths" feature.
+
+
+    if (metadata.possibleLengths()) {
+      // The number remaining after stripping the national prefix and carrier code
+      // should be long enough to have a possible length for the country.
+      // Otherwise, don't strip the national prefix and carrier code,
+      // since the original number could be a valid number.
+      // This check has been copy-pasted "as is" from Google's original library:
+      // https://github.com/google/libphonenumber/blob/876268eb1ad6cdc1b7b5bef17fc5e43052702d57/java/libphonenumber/src/com/google/i18n/phonenumbers/PhoneNumberUtil.java#L3236-L3250
+      // It doesn't check for the "possibility" of the original `number`.
+      // I guess it's fine not checking that one. It works as is anyway.
+      if (!isPossibleIncompleteNationalNumber(nationalNumber, metadata)) {
+        // Don't strip the national prefix.
+        return {
+          nationalNumber: number
+        };
+      }
+    }
+  }
+
+  return {
+    nationalNumber: nationalNumber,
+    carrierCode: carrierCode
+  };
+} // In some countries, the same digit could be a national prefix
+// or a leading digit of a valid phone number.
+// For example, in Russia, national prefix is `8`,
+// and also `800 555 35 35` is a valid number
+// in which `8` is not a national prefix, but the first digit
+// of a national (significant) number.
+// Same's with Belarus:
+// `82004910060` is a valid national (significant) number,
+// but `2004910060` is not.
+// To support such cases (to prevent the code from always stripping
+// national prefix), a condition is imposed: a national prefix
+// is not extracted when the original number is "viable" and the
+// resultant number is not, a "viable" national number being the one
+// that matches `national_number_pattern`.
+
+function shouldHaveExtractedNationalPrefix(nationalNumberBefore, nationalNumberAfter, metadata) {
+  // The equivalent in Google's code is:
+  // https://github.com/google/libphonenumber/blob/e326fa1fc4283bb05eb35cb3c15c18f98a31af33/java/libphonenumber/src/com/google/i18n/phonenumbers/PhoneNumberUtil.java#L2969-L3004
+  if ((0,_matchesEntirely_js__WEBPACK_IMPORTED_MODULE_1__["default"])(nationalNumberBefore, metadata.nationalNumberPattern()) && !(0,_matchesEntirely_js__WEBPACK_IMPORTED_MODULE_1__["default"])(nationalNumberAfter, metadata.nationalNumberPattern())) {
+    return false;
+  } // This "is possible" national number (length) check has been commented out
+  // because it's superceded by the (effectively) same check done in the
+  // `extractNationalNumber()` function after it calls `shouldHaveExtractedNationalPrefix()`.
+  // In other words, why run the same check twice if it could only be run once.
+  // // Check the national (significant) number length after extracting national prefix and carrier code.
+  // // Fixes a minor "weird behavior" bug: https://gitlab.com/catamphetamine/libphonenumber-js/-/issues/57
+  // // (Legacy generated metadata (before `1.0.18`) didn't support the "possible lengths" feature).
+  // if (metadata.possibleLengths()) {
+  // 	if (isPossibleIncompleteNationalNumber(nationalNumberBefore, metadata) &&
+  // 		!isPossibleIncompleteNationalNumber(nationalNumberAfter, metadata)) {
+  // 		return false
+  // 	}
+  // }
+
+
+  return true;
+}
+
+function isPossibleIncompleteNationalNumber(nationalNumber, metadata) {
+  switch ((0,_checkNumberLength_js__WEBPACK_IMPORTED_MODULE_2__["default"])(nationalNumber, metadata)) {
+    case 'TOO_SHORT':
+    case 'INVALID_LENGTH':
+      // This library ignores "local-only" phone numbers (for simplicity).
+      // See the readme for more info on what are "local-only" phone numbers.
+      // case 'IS_POSSIBLE_LOCAL_ONLY':
+      return false;
+
+    default:
+      return true;
+  }
+}
+//# sourceMappingURL=extractNationalNumber.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/extractNationalNumberFromPossiblyIncompleteNumber.js":
+/*!*********************************************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/extractNationalNumberFromPossiblyIncompleteNumber.js ***!
+  \*********************************************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ extractNationalNumberFromPossiblyIncompleteNumber)
+/* harmony export */ });
+/**
+ * Strips any national prefix (such as 0, 1) present in a
+ * (possibly incomplete) number provided.
+ * "Carrier codes" are only used  in Colombia and Brazil,
+ * and only when dialing within those countries from a mobile phone to a fixed line number.
+ * Sometimes it won't actually strip national prefix
+ * and will instead prepend some digits to the `number`:
+ * for example, when number `2345678` is passed with `VI` country selected,
+ * it will return `{ number: "3402345678" }`, because `340` area code is prepended.
+ * @param {string} number — National number digits.
+ * @param {object} metadata — Metadata with country selected.
+ * @return {object} `{ nationalNumber: string, nationalPrefix: string? carrierCode: string? }`. Even if a national prefix was extracted, it's not necessarily present in the returned object, so don't rely on its presence in the returned object in order to find out whether a national prefix has been extracted or not.
+ */
+function extractNationalNumberFromPossiblyIncompleteNumber(number, metadata) {
+  if (number && metadata.numberingPlan.nationalPrefixForParsing()) {
+    // See METADATA.md for the description of
+    // `national_prefix_for_parsing` and `national_prefix_transform_rule`.
+    // Attempt to parse the first digits as a national prefix.
+    var prefixPattern = new RegExp('^(?:' + metadata.numberingPlan.nationalPrefixForParsing() + ')');
+    var prefixMatch = prefixPattern.exec(number);
+
+    if (prefixMatch) {
+      var nationalNumber;
+      var carrierCode; // https://gitlab.com/catamphetamine/libphonenumber-js/-/blob/master/METADATA.md#national_prefix_for_parsing--national_prefix_transform_rule
+      // If a `national_prefix_for_parsing` has any "capturing groups"
+      // then it means that the national (significant) number is equal to
+      // those "capturing groups" transformed via `national_prefix_transform_rule`,
+      // and nothing could be said about the actual national prefix:
+      // what is it and was it even there.
+      // If a `national_prefix_for_parsing` doesn't have any "capturing groups",
+      // then everything it matches is a national prefix.
+      // To determine whether `national_prefix_for_parsing` matched any
+      // "capturing groups", the value of the result of calling `.exec()`
+      // is looked at, and if it has non-undefined values where there're
+      // "capturing groups" in the regular expression, then it means
+      // that "capturing groups" have been matched.
+      // It's not possible to tell whether there'll be any "capturing gropus"
+      // before the matching process, because a `national_prefix_for_parsing`
+      // could exhibit both behaviors.
+
+      var capturedGroupsCount = prefixMatch.length - 1;
+      var hasCapturedGroups = capturedGroupsCount > 0 && prefixMatch[capturedGroupsCount];
+
+      if (metadata.nationalPrefixTransformRule() && hasCapturedGroups) {
+        nationalNumber = number.replace(prefixPattern, metadata.nationalPrefixTransformRule()); // If there's more than one captured group,
+        // then carrier code is the second one.
+
+        if (capturedGroupsCount > 1) {
+          carrierCode = prefixMatch[1];
+        }
+      } // If there're no "capturing groups",
+      // or if there're "capturing groups" but no
+      // `national_prefix_transform_rule`,
+      // then just strip the national prefix from the number,
+      // and possibly a carrier code.
+      // Seems like there could be more.
+      else {
+        // `prefixBeforeNationalNumber` is the whole substring matched by
+        // the `national_prefix_for_parsing` regular expression.
+        // There seem to be no guarantees that it's just a national prefix.
+        // For example, if there's a carrier code, it's gonna be a
+        // part of `prefixBeforeNationalNumber` too.
+        var prefixBeforeNationalNumber = prefixMatch[0];
+        nationalNumber = number.slice(prefixBeforeNationalNumber.length); // If there's at least one captured group,
+        // then carrier code is the first one.
+
+        if (hasCapturedGroups) {
+          carrierCode = prefixMatch[1];
+        }
+      } // Tries to guess whether a national prefix was present in the input.
+      // This is not something copy-pasted from Google's library:
+      // they don't seem to have an equivalent for that.
+      // So this isn't an "officially approved" way of doing something like that.
+      // But since there seems no other existing method, this library uses it.
+
+
+      var nationalPrefix;
+
+      if (hasCapturedGroups) {
+        var possiblePositionOfTheFirstCapturedGroup = number.indexOf(prefixMatch[1]);
+        var possibleNationalPrefix = number.slice(0, possiblePositionOfTheFirstCapturedGroup); // Example: an Argentinian (AR) phone number `0111523456789`.
+        // `prefixMatch[0]` is `01115`, and `$1` is `11`,
+        // and the rest of the phone number is `23456789`.
+        // The national number is transformed via `9$1` to `91123456789`.
+        // National prefix `0` is detected being present at the start.
+        // if (possibleNationalPrefix.indexOf(metadata.numberingPlan.nationalPrefix()) === 0) {
+
+        if (possibleNationalPrefix === metadata.numberingPlan.nationalPrefix()) {
+          nationalPrefix = metadata.numberingPlan.nationalPrefix();
+        }
+      } else {
+        nationalPrefix = prefixMatch[0];
+      }
+
+      return {
+        nationalNumber: nationalNumber,
+        nationalPrefix: nationalPrefix,
+        carrierCode: carrierCode
+      };
+    }
+  }
+
+  return {
+    nationalNumber: number
+  };
+}
+//# sourceMappingURL=extractNationalNumberFromPossiblyIncompleteNumber.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/formatNationalNumberUsingFormat.js":
+/*!***************************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/formatNationalNumberUsingFormat.js ***!
+  \***************************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "FIRST_GROUP_PATTERN": () => (/* binding */ FIRST_GROUP_PATTERN),
+/* harmony export */   "default": () => (/* binding */ formatNationalNumberUsingFormat)
+/* harmony export */ });
+/* harmony import */ var _applyInternationalSeparatorStyle_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./applyInternationalSeparatorStyle.js */ "./node_modules/libphonenumber-js/es6/helpers/applyInternationalSeparatorStyle.js");
+ // This was originally set to $1 but there are some countries for which the
+// first group is not used in the national pattern (e.g. Argentina) so the $1
+// group does not match correctly. Therefore, we use `\d`, so that the first
+// group actually used in the pattern will be matched.
+
+var FIRST_GROUP_PATTERN = /(\$\d)/;
+function formatNationalNumberUsingFormat(number, format, _ref) {
+  var useInternationalFormat = _ref.useInternationalFormat,
+      withNationalPrefix = _ref.withNationalPrefix,
+      carrierCode = _ref.carrierCode,
+      metadata = _ref.metadata;
+  var formattedNumber = number.replace(new RegExp(format.pattern()), useInternationalFormat ? format.internationalFormat() : // This library doesn't use `domestic_carrier_code_formatting_rule`,
+  // because that one is only used when formatting phone numbers
+  // for dialing from a mobile phone, and this is not a dialing library.
+  // carrierCode && format.domesticCarrierCodeFormattingRule()
+  // 	// First, replace the $CC in the formatting rule with the desired carrier code.
+  // 	// Then, replace the $FG in the formatting rule with the first group
+  // 	// and the carrier code combined in the appropriate way.
+  // 	? format.format().replace(FIRST_GROUP_PATTERN, format.domesticCarrierCodeFormattingRule().replace('$CC', carrierCode))
+  // 	: (
+  // 		withNationalPrefix && format.nationalPrefixFormattingRule()
+  // 			? format.format().replace(FIRST_GROUP_PATTERN, format.nationalPrefixFormattingRule())
+  // 			: format.format()
+  // 	)
+  withNationalPrefix && format.nationalPrefixFormattingRule() ? format.format().replace(FIRST_GROUP_PATTERN, format.nationalPrefixFormattingRule()) : format.format());
+
+  if (useInternationalFormat) {
+    return (0,_applyInternationalSeparatorStyle_js__WEBPACK_IMPORTED_MODULE_0__["default"])(formattedNumber);
+  }
+
+  return formattedNumber;
+}
+//# sourceMappingURL=formatNationalNumberUsingFormat.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/getCountryByCallingCode.js":
+/*!*******************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/getCountryByCallingCode.js ***!
+  \*******************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ getCountryByCallingCode)
+/* harmony export */ });
+/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../metadata.js */ "./node_modules/libphonenumber-js/es6/metadata.js");
+/* harmony import */ var _getNumberType_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./getNumberType.js */ "./node_modules/libphonenumber-js/es6/helpers/getNumberType.js");
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+
+
+var USE_NON_GEOGRAPHIC_COUNTRY_CODE = false;
+function getCountryByCallingCode(callingCode, nationalPhoneNumber, metadata) {
+  /* istanbul ignore if */
+  if (USE_NON_GEOGRAPHIC_COUNTRY_CODE) {
+    if (metadata.isNonGeographicCallingCode(callingCode)) {
+      return '001';
+    }
+  } // Is always non-empty, because `callingCode` is always valid
+
+
+  var possibleCountries = metadata.getCountryCodesForCallingCode(callingCode);
+
+  if (!possibleCountries) {
+    return;
+  } // If there's just one country corresponding to the country code,
+  // then just return it, without further phone number digits validation.
+
+
+  if (possibleCountries.length === 1) {
+    return possibleCountries[0];
+  }
+
+  return selectCountryFromList(possibleCountries, nationalPhoneNumber, metadata.metadata);
+}
+
+function selectCountryFromList(possibleCountries, nationalPhoneNumber, metadata) {
+  // Re-create `metadata` because it will be selecting a `country`.
+  metadata = new _metadata_js__WEBPACK_IMPORTED_MODULE_0__["default"](metadata);
+
+  for (var _iterator = _createForOfIteratorHelperLoose(possibleCountries), _step; !(_step = _iterator()).done;) {
+    var country = _step.value;
+    metadata.country(country); // Leading digits check would be the simplest and fastest one.
+    // Leading digits patterns are only defined for about 20% of all countries.
+    // https://gitlab.com/catamphetamine/libphonenumber-js/blob/master/METADATA.md#leading_digits
+    // Matching "leading digits" is a sufficient but not necessary condition.
+
+    if (metadata.leadingDigits()) {
+      if (nationalPhoneNumber && nationalPhoneNumber.search(metadata.leadingDigits()) === 0) {
+        return country;
+      }
+    } // Else perform full validation with all of those
+    // fixed-line/mobile/etc regular expressions.
+    else if ((0,_getNumberType_js__WEBPACK_IMPORTED_MODULE_1__["default"])({
+      phone: nationalPhoneNumber,
+      country: country
+    }, undefined, metadata.metadata)) {
+      return country;
+    }
+  }
+}
+//# sourceMappingURL=getCountryByCallingCode.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/getIddPrefix.js":
+/*!********************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/getIddPrefix.js ***!
+  \********************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ getIddPrefix)
+/* harmony export */ });
+/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../metadata.js */ "./node_modules/libphonenumber-js/es6/metadata.js");
+
+/**
+ * Pattern that makes it easy to distinguish whether a region has a single
+ * international dialing prefix or not. If a region has a single international
+ * prefix (e.g. 011 in USA), it will be represented as a string that contains
+ * a sequence of ASCII digits, and possibly a tilde, which signals waiting for
+ * the tone. If there are multiple available international prefixes in a
+ * region, they will be represented as a regex string that always contains one
+ * or more characters that are not ASCII digits or a tilde.
+ */
+
+var SINGLE_IDD_PREFIX_REG_EXP = /^[\d]+(?:[~\u2053\u223C\uFF5E][\d]+)?$/; // For regions that have multiple IDD prefixes
+// a preferred IDD prefix is returned.
+
+function getIddPrefix(country, callingCode, metadata) {
+  var countryMetadata = new _metadata_js__WEBPACK_IMPORTED_MODULE_0__["default"](metadata);
+  countryMetadata.selectNumberingPlan(country, callingCode);
+
+  if (countryMetadata.defaultIDDPrefix()) {
+    return countryMetadata.defaultIDDPrefix();
+  }
+
+  if (SINGLE_IDD_PREFIX_REG_EXP.test(countryMetadata.IDDPrefix())) {
+    return countryMetadata.IDDPrefix();
+  }
+}
+//# sourceMappingURL=getIddPrefix.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/getNumberType.js":
+/*!*********************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/getNumberType.js ***!
+  \*********************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ getNumberType),
+/* harmony export */   "isNumberTypeEqualTo": () => (/* binding */ isNumberTypeEqualTo)
+/* harmony export */ });
+/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../metadata.js */ "./node_modules/libphonenumber-js/es6/metadata.js");
+/* harmony import */ var _matchesEntirely_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./matchesEntirely.js */ "./node_modules/libphonenumber-js/es6/helpers/matchesEntirely.js");
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+
+
+var NON_FIXED_LINE_PHONE_TYPES = ['MOBILE', 'PREMIUM_RATE', 'TOLL_FREE', 'SHARED_COST', 'VOIP', 'PERSONAL_NUMBER', 'PAGER', 'UAN', 'VOICEMAIL']; // Finds out national phone number type (fixed line, mobile, etc)
+
+function getNumberType(input, options, metadata) {
+  // If assigning the `{}` default value is moved to the arguments above,
+  // code coverage would decrease for some weird reason.
+  options = options || {}; // When `parse()` returned `{}`
+  // meaning that the phone number is not a valid one.
+
+  if (!input.country) {
+    return;
+  }
+
+  metadata = new _metadata_js__WEBPACK_IMPORTED_MODULE_0__["default"](metadata);
+  metadata.selectNumberingPlan(input.country, input.countryCallingCode);
+  var nationalNumber = options.v2 ? input.nationalNumber : input.phone; // The following is copy-pasted from the original function:
+  // https://github.com/googlei18n/libphonenumber/blob/3ea547d4fbaa2d0b67588904dfa5d3f2557c27ff/javascript/i18n/phonenumbers/phonenumberutil.js#L2835
+  // Is this national number even valid for this country
+
+  if (!(0,_matchesEntirely_js__WEBPACK_IMPORTED_MODULE_1__["default"])(nationalNumber, metadata.nationalNumberPattern())) {
+    return;
+  } // Is it fixed line number
+
+
+  if (isNumberTypeEqualTo(nationalNumber, 'FIXED_LINE', metadata)) {
+    // Because duplicate regular expressions are removed
+    // to reduce metadata size, if "mobile" pattern is ""
+    // then it means it was removed due to being a duplicate of the fixed-line pattern.
+    //
+    if (metadata.type('MOBILE') && metadata.type('MOBILE').pattern() === '') {
+      return 'FIXED_LINE_OR_MOBILE';
+    } // `MOBILE` type pattern isn't included if it matched `FIXED_LINE` one.
+    // For example, for "US" country.
+    // Old metadata (< `1.0.18`) had a specific "types" data structure
+    // that happened to be `undefined` for `MOBILE` in that case.
+    // Newer metadata (>= `1.0.18`) has another data structure that is
+    // not `undefined` for `MOBILE` in that case (it's just an empty array).
+    // So this `if` is just for backwards compatibility with old metadata.
+
+
+    if (!metadata.type('MOBILE')) {
+      return 'FIXED_LINE_OR_MOBILE';
+    } // Check if the number happens to qualify as both fixed line and mobile.
+    // (no such country in the minimal metadata set)
+
+    /* istanbul ignore if */
+
+
+    if (isNumberTypeEqualTo(nationalNumber, 'MOBILE', metadata)) {
+      return 'FIXED_LINE_OR_MOBILE';
+    }
+
+    return 'FIXED_LINE';
+  }
+
+  for (var _iterator = _createForOfIteratorHelperLoose(NON_FIXED_LINE_PHONE_TYPES), _step; !(_step = _iterator()).done;) {
+    var type = _step.value;
+
+    if (isNumberTypeEqualTo(nationalNumber, type, metadata)) {
+      return type;
+    }
+  }
+}
+function isNumberTypeEqualTo(nationalNumber, type, metadata) {
+  type = metadata.type(type);
+
+  if (!type || !type.pattern()) {
+    return false;
+  } // Check if any possible number lengths are present;
+  // if so, we use them to avoid checking
+  // the validation pattern if they don't match.
+  // If they are absent, this means they match
+  // the general description, which we have
+  // already checked before a specific number type.
+
+
+  if (type.possibleLengths() && type.possibleLengths().indexOf(nationalNumber.length) < 0) {
+    return false;
+  }
+
+  return (0,_matchesEntirely_js__WEBPACK_IMPORTED_MODULE_1__["default"])(nationalNumber, type.pattern());
+}
+//# sourceMappingURL=getNumberType.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/isViablePhoneNumber.js":
+/*!***************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/isViablePhoneNumber.js ***!
+  \***************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "VALID_PHONE_NUMBER": () => (/* binding */ VALID_PHONE_NUMBER),
+/* harmony export */   "VALID_PHONE_NUMBER_WITH_EXTENSION": () => (/* binding */ VALID_PHONE_NUMBER_WITH_EXTENSION),
+/* harmony export */   "default": () => (/* binding */ isViablePhoneNumber),
+/* harmony export */   "isViablePhoneNumberStart": () => (/* binding */ isViablePhoneNumberStart)
+/* harmony export */ });
+/* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants.js */ "./node_modules/libphonenumber-js/es6/constants.js");
+/* harmony import */ var _extension_createExtensionPattern_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./extension/createExtensionPattern.js */ "./node_modules/libphonenumber-js/es6/helpers/extension/createExtensionPattern.js");
+
+ //  Regular expression of viable phone numbers. This is location independent.
+//  Checks we have at least three leading digits, and only valid punctuation,
+//  alpha characters and digits in the phone number. Does not include extension
+//  data. The symbol 'x' is allowed here as valid punctuation since it is often
+//  used as a placeholder for carrier codes, for example in Brazilian phone
+//  numbers. We also allow multiple '+' characters at the start.
+//
+//  Corresponds to the following:
+//  [digits]{minLengthNsn}|
+//  plus_sign*
+//  (([punctuation]|[star])*[digits]){3,}([punctuation]|[star]|[digits]|[alpha])*
+//
+//  The first reg-ex is to allow short numbers (two digits long) to be parsed if
+//  they are entered as "15" etc, but only if there is no punctuation in them.
+//  The second expression restricts the number of digits to three or more, but
+//  then allows them to be in international form, and to have alpha-characters
+//  and punctuation. We split up the two reg-exes here and combine them when
+//  creating the reg-ex VALID_PHONE_NUMBER_PATTERN itself so we can prefix it
+//  with ^ and append $ to each branch.
+//
+//  "Note VALID_PUNCTUATION starts with a -,
+//   so must be the first in the range" (c) Google devs.
+//  (wtf did they mean by saying that; probably nothing)
+//
+
+var MIN_LENGTH_PHONE_NUMBER_PATTERN = '[' + _constants_js__WEBPACK_IMPORTED_MODULE_0__.VALID_DIGITS + ']{' + _constants_js__WEBPACK_IMPORTED_MODULE_0__.MIN_LENGTH_FOR_NSN + '}'; //
+// And this is the second reg-exp:
+// (see MIN_LENGTH_PHONE_NUMBER_PATTERN for a full description of this reg-exp)
+//
+
+var VALID_PHONE_NUMBER = '[' + _constants_js__WEBPACK_IMPORTED_MODULE_0__.PLUS_CHARS + ']{0,1}' + '(?:' + '[' + _constants_js__WEBPACK_IMPORTED_MODULE_0__.VALID_PUNCTUATION + ']*' + '[' + _constants_js__WEBPACK_IMPORTED_MODULE_0__.VALID_DIGITS + ']' + '){3,}' + '[' + _constants_js__WEBPACK_IMPORTED_MODULE_0__.VALID_PUNCTUATION + _constants_js__WEBPACK_IMPORTED_MODULE_0__.VALID_DIGITS + ']*'; // This regular expression isn't present in Google's `libphonenumber`
+// and is only used to determine whether the phone number being input
+// is too short for it to even consider it a "valid" number.
+// This is just a way to differentiate between a really invalid phone
+// number like "abcde" and a valid phone number that a user has just
+// started inputting, like "+1" or "1": both these cases would be
+// considered `NOT_A_NUMBER` by Google's `libphonenumber`, but this
+// library can provide a more detailed error message — whether it's
+// really "not a number", or is it just a start of a valid phone number.
+
+var VALID_PHONE_NUMBER_START_REG_EXP = new RegExp('^' + '[' + _constants_js__WEBPACK_IMPORTED_MODULE_0__.PLUS_CHARS + ']{0,1}' + '(?:' + '[' + _constants_js__WEBPACK_IMPORTED_MODULE_0__.VALID_PUNCTUATION + ']*' + '[' + _constants_js__WEBPACK_IMPORTED_MODULE_0__.VALID_DIGITS + ']' + '){1,2}' + '$', 'i');
+var VALID_PHONE_NUMBER_WITH_EXTENSION = VALID_PHONE_NUMBER + // Phone number extensions
+'(?:' + (0,_extension_createExtensionPattern_js__WEBPACK_IMPORTED_MODULE_1__["default"])() + ')?'; // The combined regular expression for valid phone numbers:
+//
+
+var VALID_PHONE_NUMBER_PATTERN = new RegExp( // Either a short two-digit-only phone number
+'^' + MIN_LENGTH_PHONE_NUMBER_PATTERN + '$' + '|' + // Or a longer fully parsed phone number (min 3 characters)
+'^' + VALID_PHONE_NUMBER_WITH_EXTENSION + '$', 'i'); // Checks to see if the string of characters could possibly be a phone number at
+// all. At the moment, checks to see that the string begins with at least 2
+// digits, ignoring any punctuation commonly found in phone numbers. This method
+// does not require the number to be normalized in advance - but does assume
+// that leading non-number symbols have been removed, such as by the method
+// `extract_possible_number`.
+//
+
+function isViablePhoneNumber(number) {
+  return number.length >= _constants_js__WEBPACK_IMPORTED_MODULE_0__.MIN_LENGTH_FOR_NSN && VALID_PHONE_NUMBER_PATTERN.test(number);
+} // This is just a way to differentiate between a really invalid phone
+// number like "abcde" and a valid phone number that a user has just
+// started inputting, like "+1" or "1": both these cases would be
+// considered `NOT_A_NUMBER` by Google's `libphonenumber`, but this
+// library can provide a more detailed error message — whether it's
+// really "not a number", or is it just a start of a valid phone number.
+
+function isViablePhoneNumberStart(number) {
+  return VALID_PHONE_NUMBER_START_REG_EXP.test(number);
+}
+//# sourceMappingURL=isViablePhoneNumber.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/matchesEntirely.js":
+/*!***********************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/matchesEntirely.js ***!
+  \***********************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ matchesEntirely)
+/* harmony export */ });
+/**
+ * Checks whether the entire input sequence can be matched
+ * against the regular expression.
+ * @return {boolean}
+ */
+function matchesEntirely(text, regular_expression) {
+  // If assigning the `''` default value is moved to the arguments above,
+  // code coverage would decrease for some weird reason.
+  text = text || '';
+  return new RegExp('^(?:' + regular_expression + ')$').test(text);
+}
+//# sourceMappingURL=matchesEntirely.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/mergeArrays.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/mergeArrays.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ mergeArrays)
+/* harmony export */ });
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+/**
+ * Merges two arrays.
+ * @param  {*} a
+ * @param  {*} b
+ * @return {*}
+ */
+function mergeArrays(a, b) {
+  var merged = a.slice();
+
+  for (var _iterator = _createForOfIteratorHelperLoose(b), _step; !(_step = _iterator()).done;) {
+    var element = _step.value;
+
+    if (a.indexOf(element) < 0) {
+      merged.push(element);
+    }
+  }
+
+  return merged.sort(function (a, b) {
+    return a - b;
+  }); // ES6 version, requires Set polyfill.
+  // let merged = new Set(a)
+  // for (const element of b) {
+  // 	merged.add(i)
+  // }
+  // return Array.from(merged).sort((a, b) => a - b)
+}
+//# sourceMappingURL=mergeArrays.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/parseDigits.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/parseDigits.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "DIGITS": () => (/* binding */ DIGITS),
+/* harmony export */   "default": () => (/* binding */ parseDigits),
+/* harmony export */   "parseDigit": () => (/* binding */ parseDigit)
+/* harmony export */ });
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+// These mappings map a character (key) to a specific digit that should
+// replace it for normalization purposes. Non-European digits that
+// may be used in phone numbers are mapped to a European equivalent.
+//
+// E.g. in Iraq they don't write `+442323234` but rather `+٤٤٢٣٢٣٢٣٤`.
+//
+var DIGITS = {
+  '0': '0',
+  '1': '1',
+  '2': '2',
+  '3': '3',
+  '4': '4',
+  '5': '5',
+  '6': '6',
+  '7': '7',
+  '8': '8',
+  '9': '9',
+  "\uFF10": '0',
+  // Fullwidth digit 0
+  "\uFF11": '1',
+  // Fullwidth digit 1
+  "\uFF12": '2',
+  // Fullwidth digit 2
+  "\uFF13": '3',
+  // Fullwidth digit 3
+  "\uFF14": '4',
+  // Fullwidth digit 4
+  "\uFF15": '5',
+  // Fullwidth digit 5
+  "\uFF16": '6',
+  // Fullwidth digit 6
+  "\uFF17": '7',
+  // Fullwidth digit 7
+  "\uFF18": '8',
+  // Fullwidth digit 8
+  "\uFF19": '9',
+  // Fullwidth digit 9
+  "\u0660": '0',
+  // Arabic-indic digit 0
+  "\u0661": '1',
+  // Arabic-indic digit 1
+  "\u0662": '2',
+  // Arabic-indic digit 2
+  "\u0663": '3',
+  // Arabic-indic digit 3
+  "\u0664": '4',
+  // Arabic-indic digit 4
+  "\u0665": '5',
+  // Arabic-indic digit 5
+  "\u0666": '6',
+  // Arabic-indic digit 6
+  "\u0667": '7',
+  // Arabic-indic digit 7
+  "\u0668": '8',
+  // Arabic-indic digit 8
+  "\u0669": '9',
+  // Arabic-indic digit 9
+  "\u06F0": '0',
+  // Eastern-Arabic digit 0
+  "\u06F1": '1',
+  // Eastern-Arabic digit 1
+  "\u06F2": '2',
+  // Eastern-Arabic digit 2
+  "\u06F3": '3',
+  // Eastern-Arabic digit 3
+  "\u06F4": '4',
+  // Eastern-Arabic digit 4
+  "\u06F5": '5',
+  // Eastern-Arabic digit 5
+  "\u06F6": '6',
+  // Eastern-Arabic digit 6
+  "\u06F7": '7',
+  // Eastern-Arabic digit 7
+  "\u06F8": '8',
+  // Eastern-Arabic digit 8
+  "\u06F9": '9' // Eastern-Arabic digit 9
+
+};
+function parseDigit(character) {
+  return DIGITS[character];
+}
+/**
+ * Parses phone number digits from a string.
+ * Drops all punctuation leaving only digits.
+ * Also converts wide-ascii and arabic-indic numerals to conventional numerals.
+ * E.g. in Iraq they don't write `+442323234` but rather `+٤٤٢٣٢٣٢٣٤`.
+ * @param  {string} string
+ * @return {string}
+ * @example
+ * ```js
+ * parseDigits('8 (800) 555')
+ * // Outputs '8800555'.
+ * ```
+ */
+
+function parseDigits(string) {
+  var result = ''; // Using `.split('')` here instead of normal `for ... of`
+  // because the importing application doesn't neccessarily include an ES6 polyfill.
+  // The `.split('')` approach discards "exotic" UTF-8 characters
+  // (the ones consisting of four bytes) but digits
+  // (including non-European ones) don't fall into that range
+  // so such "exotic" characters would be discarded anyway.
+
+  for (var _iterator = _createForOfIteratorHelperLoose(string.split('')), _step; !(_step = _iterator()).done;) {
+    var character = _step.value;
+    var digit = parseDigit(character);
+
+    if (digit) {
+      result += digit;
+    }
+  }
+
+  return result;
+}
+//# sourceMappingURL=parseDigits.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/helpers/stripIddPrefix.js":
+/*!**********************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/helpers/stripIddPrefix.js ***!
+  \**********************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ stripIddPrefix)
+/* harmony export */ });
+/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../metadata.js */ "./node_modules/libphonenumber-js/es6/metadata.js");
+/* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../constants.js */ "./node_modules/libphonenumber-js/es6/constants.js");
+
+
+var CAPTURING_DIGIT_PATTERN = new RegExp('([' + _constants_js__WEBPACK_IMPORTED_MODULE_0__.VALID_DIGITS + '])');
+function stripIddPrefix(number, country, callingCode, metadata) {
+  if (!country) {
+    return;
+  } // Check if the number is IDD-prefixed.
+
+
+  var countryMetadata = new _metadata_js__WEBPACK_IMPORTED_MODULE_1__["default"](metadata);
+  countryMetadata.selectNumberingPlan(country, callingCode);
+  var IDDPrefixPattern = new RegExp(countryMetadata.IDDPrefix());
+
+  if (number.search(IDDPrefixPattern) !== 0) {
+    return;
+  } // Strip IDD prefix.
+
+
+  number = number.slice(number.match(IDDPrefixPattern)[0].length); // If there're any digits after an IDD prefix,
+  // then those digits are a country calling code.
+  // Since no country code starts with a `0`,
+  // the code below validates that the next digit (if present) is not `0`.
+
+  var matchedGroups = number.match(CAPTURING_DIGIT_PATTERN);
+
+  if (matchedGroups && matchedGroups[1] != null && matchedGroups[1].length > 0) {
+    if (matchedGroups[1] === '0') {
+      return;
+    }
+  }
+
+  return number;
+}
+//# sourceMappingURL=stripIddPrefix.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/isPossibleNumber_.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/isPossibleNumber_.js ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ isPossiblePhoneNumber),
+/* harmony export */   "isPossibleNumber": () => (/* binding */ isPossibleNumber)
+/* harmony export */ });
+/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./metadata.js */ "./node_modules/libphonenumber-js/es6/metadata.js");
+/* harmony import */ var _helpers_checkNumberLength_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helpers/checkNumberLength.js */ "./node_modules/libphonenumber-js/es6/helpers/checkNumberLength.js");
+
+
+function isPossiblePhoneNumber(input, options, metadata) {
+  /* istanbul ignore if */
+  if (options === undefined) {
+    options = {};
+  }
+
+  metadata = new _metadata_js__WEBPACK_IMPORTED_MODULE_0__["default"](metadata);
+
+  if (options.v2) {
+    if (!input.countryCallingCode) {
+      throw new Error('Invalid phone number object passed');
+    }
+
+    metadata.selectNumberingPlan(input.countryCallingCode);
+  } else {
+    if (!input.phone) {
+      return false;
+    }
+
+    if (input.country) {
+      if (!metadata.hasCountry(input.country)) {
+        throw new Error("Unknown country: ".concat(input.country));
+      }
+
+      metadata.country(input.country);
+    } else {
+      if (!input.countryCallingCode) {
+        throw new Error('Invalid phone number object passed');
+      }
+
+      metadata.selectNumberingPlan(input.countryCallingCode);
+    }
+  } // Old metadata (< 1.0.18) had no "possible length" data.
+
+
+  if (metadata.possibleLengths()) {
+    return isPossibleNumber(input.phone || input.nationalNumber, metadata);
+  } else {
+    // There was a bug between `1.7.35` and `1.7.37` where "possible_lengths"
+    // were missing for "non-geographical" numbering plans.
+    // Just assume the number is possible in such cases:
+    // it's unlikely that anyone generated their custom metadata
+    // in that short period of time (one day).
+    // This code can be removed in some future major version update.
+    if (input.countryCallingCode && metadata.isNonGeographicCallingCode(input.countryCallingCode)) {
+      // "Non-geographic entities" did't have `possibleLengths`
+      // due to a bug in metadata generation process.
+      return true;
+    } else {
+      throw new Error('Missing "possibleLengths" in metadata. Perhaps the metadata has been generated before v1.0.18.');
+    }
+  }
+}
+function isPossibleNumber(nationalNumber, metadata) {
+  //, isInternational) {
+  switch ((0,_helpers_checkNumberLength_js__WEBPACK_IMPORTED_MODULE_1__["default"])(nationalNumber, metadata)) {
+    case 'IS_POSSIBLE':
+      return true;
+    // This library ignores "local-only" phone numbers (for simplicity).
+    // See the readme for more info on what are "local-only" phone numbers.
+    // case 'IS_POSSIBLE_LOCAL_ONLY':
+    // 	return !isInternational
+
+    default:
+      return false;
+  }
+}
+//# sourceMappingURL=isPossibleNumber_.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/metadata.js":
+/*!********************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/metadata.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Metadata),
+/* harmony export */   "getCountryCallingCode": () => (/* binding */ getCountryCallingCode),
+/* harmony export */   "getExtPrefix": () => (/* binding */ getExtPrefix),
+/* harmony export */   "isSupportedCountry": () => (/* binding */ isSupportedCountry),
+/* harmony export */   "validateMetadata": () => (/* binding */ validateMetadata)
+/* harmony export */ });
+/* harmony import */ var _tools_semver_compare_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tools/semver-compare.js */ "./node_modules/libphonenumber-js/es6/tools/semver-compare.js");
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+ // Added "possibleLengths" and renamed
+// "country_phone_code_to_countries" to "country_calling_codes".
+
+var V2 = '1.0.18'; // Added "idd_prefix" and "default_idd_prefix".
+
+var V3 = '1.2.0'; // Moved `001` country code to "nonGeographic" section of metadata.
+
+var V4 = '1.7.35';
+var DEFAULT_EXT_PREFIX = ' ext. ';
+var CALLING_CODE_REG_EXP = /^\d+$/;
+/**
+ * See: https://gitlab.com/catamphetamine/libphonenumber-js/blob/master/METADATA.md
+ */
+
+var Metadata = /*#__PURE__*/function () {
+  function Metadata(metadata) {
+    _classCallCheck(this, Metadata);
+
+    validateMetadata(metadata);
+    this.metadata = metadata;
+    setVersion.call(this, metadata);
+  }
+
+  _createClass(Metadata, [{
+    key: "getCountries",
+    value: function getCountries() {
+      return Object.keys(this.metadata.countries).filter(function (_) {
+        return _ !== '001';
+      });
+    }
+  }, {
+    key: "getCountryMetadata",
+    value: function getCountryMetadata(countryCode) {
+      return this.metadata.countries[countryCode];
+    }
+  }, {
+    key: "nonGeographic",
+    value: function nonGeographic() {
+      if (this.v1 || this.v2 || this.v3) return; // `nonGeographical` was a typo.
+      // It's present in metadata generated from `1.7.35` to `1.7.37`.
+      // The test case could be found by searching for "nonGeographical".
+
+      return this.metadata.nonGeographic || this.metadata.nonGeographical;
+    }
+  }, {
+    key: "hasCountry",
+    value: function hasCountry(country) {
+      return this.getCountryMetadata(country) !== undefined;
+    }
+  }, {
+    key: "hasCallingCode",
+    value: function hasCallingCode(callingCode) {
+      if (this.getCountryCodesForCallingCode(callingCode)) {
+        return true;
+      }
+
+      if (this.nonGeographic()) {
+        if (this.nonGeographic()[callingCode]) {
+          return true;
+        }
+      } else {
+        // A hacky workaround for old custom metadata (generated before V4).
+        var countryCodes = this.countryCallingCodes()[callingCode];
+
+        if (countryCodes && countryCodes.length === 1 && countryCodes[0] === '001') {
+          return true;
+        }
+      }
+    }
+  }, {
+    key: "isNonGeographicCallingCode",
+    value: function isNonGeographicCallingCode(callingCode) {
+      if (this.nonGeographic()) {
+        return this.nonGeographic()[callingCode] ? true : false;
+      } else {
+        return this.getCountryCodesForCallingCode(callingCode) ? false : true;
+      }
+    } // Deprecated.
+
+  }, {
+    key: "country",
+    value: function country(countryCode) {
+      return this.selectNumberingPlan(countryCode);
+    }
+  }, {
+    key: "selectNumberingPlan",
+    value: function selectNumberingPlan(countryCode, callingCode) {
+      // Supports just passing `callingCode` as the first argument.
+      if (countryCode && CALLING_CODE_REG_EXP.test(countryCode)) {
+        callingCode = countryCode;
+        countryCode = null;
+      }
+
+      if (countryCode && countryCode !== '001') {
+        if (!this.hasCountry(countryCode)) {
+          throw new Error("Unknown country: ".concat(countryCode));
+        }
+
+        this.numberingPlan = new NumberingPlan(this.getCountryMetadata(countryCode), this);
+      } else if (callingCode) {
+        if (!this.hasCallingCode(callingCode)) {
+          throw new Error("Unknown calling code: ".concat(callingCode));
+        }
+
+        this.numberingPlan = new NumberingPlan(this.getNumberingPlanMetadata(callingCode), this);
+      } else {
+        this.numberingPlan = undefined;
+      }
+
+      return this;
+    }
+  }, {
+    key: "getCountryCodesForCallingCode",
+    value: function getCountryCodesForCallingCode(callingCode) {
+      var countryCodes = this.countryCallingCodes()[callingCode];
+
+      if (countryCodes) {
+        // Metadata before V4 included "non-geographic entity" calling codes
+        // inside `country_calling_codes` (for example, `"881":["001"]`).
+        // Now the semantics of `country_calling_codes` has changed:
+        // it's specifically for "countries" now.
+        // Older versions of custom metadata will simply skip parsing
+        // "non-geographic entity" phone numbers with new versions
+        // of this library: it's not considered a bug,
+        // because such numbers are extremely rare,
+        // and developers extremely rarely use custom metadata.
+        if (countryCodes.length === 1 && countryCodes[0].length === 3) {
+          return;
+        }
+
+        return countryCodes;
+      }
+    }
+  }, {
+    key: "getCountryCodeForCallingCode",
+    value: function getCountryCodeForCallingCode(callingCode) {
+      var countryCodes = this.getCountryCodesForCallingCode(callingCode);
+
+      if (countryCodes) {
+        return countryCodes[0];
+      }
+    }
+  }, {
+    key: "getNumberingPlanMetadata",
+    value: function getNumberingPlanMetadata(callingCode) {
+      var countryCode = this.getCountryCodeForCallingCode(callingCode);
+
+      if (countryCode) {
+        return this.getCountryMetadata(countryCode);
+      }
+
+      if (this.nonGeographic()) {
+        var metadata = this.nonGeographic()[callingCode];
+
+        if (metadata) {
+          return metadata;
+        }
+      } else {
+        // A hacky workaround for old custom metadata (generated before V4).
+        // In that metadata, there was no concept of "non-geographic" metadata
+        // so metadata for `001` country code was stored along with other countries.
+        // The test case can be found by searching for:
+        // "should work around `nonGeographic` metadata not existing".
+        var countryCodes = this.countryCallingCodes()[callingCode];
+
+        if (countryCodes && countryCodes.length === 1 && countryCodes[0] === '001') {
+          return this.metadata.countries['001'];
+        }
+      }
+    } // Deprecated.
+
+  }, {
+    key: "countryCallingCode",
+    value: function countryCallingCode() {
+      return this.numberingPlan.callingCode();
+    } // Deprecated.
+
+  }, {
+    key: "IDDPrefix",
+    value: function IDDPrefix() {
+      return this.numberingPlan.IDDPrefix();
+    } // Deprecated.
+
+  }, {
+    key: "defaultIDDPrefix",
+    value: function defaultIDDPrefix() {
+      return this.numberingPlan.defaultIDDPrefix();
+    } // Deprecated.
+
+  }, {
+    key: "nationalNumberPattern",
+    value: function nationalNumberPattern() {
+      return this.numberingPlan.nationalNumberPattern();
+    } // Deprecated.
+
+  }, {
+    key: "possibleLengths",
+    value: function possibleLengths() {
+      return this.numberingPlan.possibleLengths();
+    } // Deprecated.
+
+  }, {
+    key: "formats",
+    value: function formats() {
+      return this.numberingPlan.formats();
+    } // Deprecated.
+
+  }, {
+    key: "nationalPrefixForParsing",
+    value: function nationalPrefixForParsing() {
+      return this.numberingPlan.nationalPrefixForParsing();
+    } // Deprecated.
+
+  }, {
+    key: "nationalPrefixTransformRule",
+    value: function nationalPrefixTransformRule() {
+      return this.numberingPlan.nationalPrefixTransformRule();
+    } // Deprecated.
+
+  }, {
+    key: "leadingDigits",
+    value: function leadingDigits() {
+      return this.numberingPlan.leadingDigits();
+    } // Deprecated.
+
+  }, {
+    key: "hasTypes",
+    value: function hasTypes() {
+      return this.numberingPlan.hasTypes();
+    } // Deprecated.
+
+  }, {
+    key: "type",
+    value: function type(_type) {
+      return this.numberingPlan.type(_type);
+    } // Deprecated.
+
+  }, {
+    key: "ext",
+    value: function ext() {
+      return this.numberingPlan.ext();
+    }
+  }, {
+    key: "countryCallingCodes",
+    value: function countryCallingCodes() {
+      if (this.v1) return this.metadata.country_phone_code_to_countries;
+      return this.metadata.country_calling_codes;
+    } // Deprecated.
+
+  }, {
+    key: "chooseCountryByCountryCallingCode",
+    value: function chooseCountryByCountryCallingCode(callingCode) {
+      return this.selectNumberingPlan(callingCode);
+    }
+  }, {
+    key: "hasSelectedNumberingPlan",
+    value: function hasSelectedNumberingPlan() {
+      return this.numberingPlan !== undefined;
+    }
+  }]);
+
+  return Metadata;
+}();
+
+
+
+var NumberingPlan = /*#__PURE__*/function () {
+  function NumberingPlan(metadata, globalMetadataObject) {
+    _classCallCheck(this, NumberingPlan);
+
+    this.globalMetadataObject = globalMetadataObject;
+    this.metadata = metadata;
+    setVersion.call(this, globalMetadataObject.metadata);
+  }
+
+  _createClass(NumberingPlan, [{
+    key: "callingCode",
+    value: function callingCode() {
+      return this.metadata[0];
+    } // Formatting information for regions which share
+    // a country calling code is contained by only one region
+    // for performance reasons. For example, for NANPA region
+    // ("North American Numbering Plan Administration",
+    //  which includes USA, Canada, Cayman Islands, Bahamas, etc)
+    // it will be contained in the metadata for `US`.
+
+  }, {
+    key: "getDefaultCountryMetadataForRegion",
+    value: function getDefaultCountryMetadataForRegion() {
+      return this.globalMetadataObject.getNumberingPlanMetadata(this.callingCode());
+    } // Is always present.
+
+  }, {
+    key: "IDDPrefix",
+    value: function IDDPrefix() {
+      if (this.v1 || this.v2) return;
+      return this.metadata[1];
+    } // Is only present when a country supports multiple IDD prefixes.
+
+  }, {
+    key: "defaultIDDPrefix",
+    value: function defaultIDDPrefix() {
+      if (this.v1 || this.v2) return;
+      return this.metadata[12];
+    }
+  }, {
+    key: "nationalNumberPattern",
+    value: function nationalNumberPattern() {
+      if (this.v1 || this.v2) return this.metadata[1];
+      return this.metadata[2];
+    } // "possible length" data is always present in Google's metadata.
+
+  }, {
+    key: "possibleLengths",
+    value: function possibleLengths() {
+      if (this.v1) return;
+      return this.metadata[this.v2 ? 2 : 3];
+    }
+  }, {
+    key: "_getFormats",
+    value: function _getFormats(metadata) {
+      return metadata[this.v1 ? 2 : this.v2 ? 3 : 4];
+    } // For countries of the same region (e.g. NANPA)
+    // formats are all stored in the "main" country for that region.
+    // E.g. "RU" and "KZ", "US" and "CA".
+
+  }, {
+    key: "formats",
+    value: function formats() {
+      var _this = this;
+
+      var formats = this._getFormats(this.metadata) || this._getFormats(this.getDefaultCountryMetadataForRegion()) || [];
+      return formats.map(function (_) {
+        return new Format(_, _this);
+      });
+    }
+  }, {
+    key: "nationalPrefix",
+    value: function nationalPrefix() {
+      return this.metadata[this.v1 ? 3 : this.v2 ? 4 : 5];
+    }
+  }, {
+    key: "_getNationalPrefixFormattingRule",
+    value: function _getNationalPrefixFormattingRule(metadata) {
+      return metadata[this.v1 ? 4 : this.v2 ? 5 : 6];
+    } // For countries of the same region (e.g. NANPA)
+    // national prefix formatting rule is stored in the "main" country for that region.
+    // E.g. "RU" and "KZ", "US" and "CA".
+
+  }, {
+    key: "nationalPrefixFormattingRule",
+    value: function nationalPrefixFormattingRule() {
+      return this._getNationalPrefixFormattingRule(this.metadata) || this._getNationalPrefixFormattingRule(this.getDefaultCountryMetadataForRegion());
+    }
+  }, {
+    key: "_nationalPrefixForParsing",
+    value: function _nationalPrefixForParsing() {
+      return this.metadata[this.v1 ? 5 : this.v2 ? 6 : 7];
+    }
+  }, {
+    key: "nationalPrefixForParsing",
+    value: function nationalPrefixForParsing() {
+      // If `national_prefix_for_parsing` is not set explicitly,
+      // then infer it from `national_prefix` (if any)
+      return this._nationalPrefixForParsing() || this.nationalPrefix();
+    }
+  }, {
+    key: "nationalPrefixTransformRule",
+    value: function nationalPrefixTransformRule() {
+      return this.metadata[this.v1 ? 6 : this.v2 ? 7 : 8];
+    }
+  }, {
+    key: "_getNationalPrefixIsOptionalWhenFormatting",
+    value: function _getNationalPrefixIsOptionalWhenFormatting() {
+      return !!this.metadata[this.v1 ? 7 : this.v2 ? 8 : 9];
+    } // For countries of the same region (e.g. NANPA)
+    // "national prefix is optional when formatting" flag is
+    // stored in the "main" country for that region.
+    // E.g. "RU" and "KZ", "US" and "CA".
+
+  }, {
+    key: "nationalPrefixIsOptionalWhenFormattingInNationalFormat",
+    value: function nationalPrefixIsOptionalWhenFormattingInNationalFormat() {
+      return this._getNationalPrefixIsOptionalWhenFormatting(this.metadata) || this._getNationalPrefixIsOptionalWhenFormatting(this.getDefaultCountryMetadataForRegion());
+    }
+  }, {
+    key: "leadingDigits",
+    value: function leadingDigits() {
+      return this.metadata[this.v1 ? 8 : this.v2 ? 9 : 10];
+    }
+  }, {
+    key: "types",
+    value: function types() {
+      return this.metadata[this.v1 ? 9 : this.v2 ? 10 : 11];
+    }
+  }, {
+    key: "hasTypes",
+    value: function hasTypes() {
+      // Versions 1.2.0 - 1.2.4: can be `[]`.
+
+      /* istanbul ignore next */
+      if (this.types() && this.types().length === 0) {
+        return false;
+      } // Versions <= 1.2.4: can be `undefined`.
+      // Version >= 1.2.5: can be `0`.
+
+
+      return !!this.types();
+    }
+  }, {
+    key: "type",
+    value: function type(_type2) {
+      if (this.hasTypes() && getType(this.types(), _type2)) {
+        return new Type(getType(this.types(), _type2), this);
+      }
+    }
+  }, {
+    key: "ext",
+    value: function ext() {
+      if (this.v1 || this.v2) return DEFAULT_EXT_PREFIX;
+      return this.metadata[13] || DEFAULT_EXT_PREFIX;
+    }
+  }]);
+
+  return NumberingPlan;
+}();
+
+var Format = /*#__PURE__*/function () {
+  function Format(format, metadata) {
+    _classCallCheck(this, Format);
+
+    this._format = format;
+    this.metadata = metadata;
+  }
+
+  _createClass(Format, [{
+    key: "pattern",
+    value: function pattern() {
+      return this._format[0];
+    }
+  }, {
+    key: "format",
+    value: function format() {
+      return this._format[1];
+    }
+  }, {
+    key: "leadingDigitsPatterns",
+    value: function leadingDigitsPatterns() {
+      return this._format[2] || [];
+    }
+  }, {
+    key: "nationalPrefixFormattingRule",
+    value: function nationalPrefixFormattingRule() {
+      return this._format[3] || this.metadata.nationalPrefixFormattingRule();
+    }
+  }, {
+    key: "nationalPrefixIsOptionalWhenFormattingInNationalFormat",
+    value: function nationalPrefixIsOptionalWhenFormattingInNationalFormat() {
+      return !!this._format[4] || this.metadata.nationalPrefixIsOptionalWhenFormattingInNationalFormat();
+    }
+  }, {
+    key: "nationalPrefixIsMandatoryWhenFormattingInNationalFormat",
+    value: function nationalPrefixIsMandatoryWhenFormattingInNationalFormat() {
+      // National prefix is omitted if there's no national prefix formatting rule
+      // set for this country, or when the national prefix formatting rule
+      // contains no national prefix itself, or when this rule is set but
+      // national prefix is optional for this phone number format
+      // (and it is not enforced explicitly)
+      return this.usesNationalPrefix() && !this.nationalPrefixIsOptionalWhenFormattingInNationalFormat();
+    } // Checks whether national prefix formatting rule contains national prefix.
+
+  }, {
+    key: "usesNationalPrefix",
+    value: function usesNationalPrefix() {
+      return this.nationalPrefixFormattingRule() && // Check that national prefix formatting rule is not a "dummy" one.
+      !FIRST_GROUP_ONLY_PREFIX_PATTERN.test(this.nationalPrefixFormattingRule()) // In compressed metadata, `this.nationalPrefixFormattingRule()` is `0`
+      // when `national_prefix_formatting_rule` is not present.
+      // So, `true` or `false` are returned explicitly here, so that
+      // `0` number isn't returned.
+      ? true : false;
+    }
+  }, {
+    key: "internationalFormat",
+    value: function internationalFormat() {
+      return this._format[5] || this.format();
+    }
+  }]);
+
+  return Format;
+}();
+/**
+ * A pattern that is used to determine if the national prefix formatting rule
+ * has the first group only, i.e., does not start with the national prefix.
+ * Note that the pattern explicitly allows for unbalanced parentheses.
+ */
+
+
+var FIRST_GROUP_ONLY_PREFIX_PATTERN = /^\(?\$1\)?$/;
+
+var Type = /*#__PURE__*/function () {
+  function Type(type, metadata) {
+    _classCallCheck(this, Type);
+
+    this.type = type;
+    this.metadata = metadata;
+  }
+
+  _createClass(Type, [{
+    key: "pattern",
+    value: function pattern() {
+      if (this.metadata.v1) return this.type;
+      return this.type[0];
+    }
+  }, {
+    key: "possibleLengths",
+    value: function possibleLengths() {
+      if (this.metadata.v1) return;
+      return this.type[1] || this.metadata.possibleLengths();
+    }
+  }]);
+
+  return Type;
+}();
+
+function getType(types, type) {
+  switch (type) {
+    case 'FIXED_LINE':
+      return types[0];
+
+    case 'MOBILE':
+      return types[1];
+
+    case 'TOLL_FREE':
+      return types[2];
+
+    case 'PREMIUM_RATE':
+      return types[3];
+
+    case 'PERSONAL_NUMBER':
+      return types[4];
+
+    case 'VOICEMAIL':
+      return types[5];
+
+    case 'UAN':
+      return types[6];
+
+    case 'PAGER':
+      return types[7];
+
+    case 'VOIP':
+      return types[8];
+
+    case 'SHARED_COST':
+      return types[9];
+  }
+}
+
+function validateMetadata(metadata) {
+  if (!metadata) {
+    throw new Error('[libphonenumber-js] `metadata` argument not passed. Check your arguments.');
+  } // `country_phone_code_to_countries` was renamed to
+  // `country_calling_codes` in `1.0.18`.
+
+
+  if (!is_object(metadata) || !is_object(metadata.countries)) {
+    throw new Error("[libphonenumber-js] `metadata` argument was passed but it's not a valid metadata. Must be an object having `.countries` child object property. Got ".concat(is_object(metadata) ? 'an object of shape: { ' + Object.keys(metadata).join(', ') + ' }' : 'a ' + type_of(metadata) + ': ' + metadata, "."));
+  }
+} // Babel transforms `typeof` into some "branches"
+// so istanbul will show this as "branch not covered".
+
+/* istanbul ignore next */
+
+var is_object = function is_object(_) {
+  return _typeof(_) === 'object';
+}; // Babel transforms `typeof` into some "branches"
+// so istanbul will show this as "branch not covered".
+
+/* istanbul ignore next */
+
+
+var type_of = function type_of(_) {
+  return _typeof(_);
+};
+/**
+ * Returns extension prefix for a country.
+ * @param  {string} country
+ * @param  {object} metadata
+ * @return {string?}
+ * @example
+ * // Returns " ext. "
+ * getExtPrefix("US")
+ */
+
+
+function getExtPrefix(country, metadata) {
+  metadata = new Metadata(metadata);
+
+  if (metadata.hasCountry(country)) {
+    return metadata.country(country).ext();
+  }
+
+  return DEFAULT_EXT_PREFIX;
+}
+/**
+ * Returns "country calling code" for a country.
+ * Throws an error if the country doesn't exist or isn't supported by this library.
+ * @param  {string} country
+ * @param  {object} metadata
+ * @return {string}
+ * @example
+ * // Returns "44"
+ * getCountryCallingCode("GB")
+ */
+
+function getCountryCallingCode(country, metadata) {
+  metadata = new Metadata(metadata);
+
+  if (metadata.hasCountry(country)) {
+    return metadata.country(country).countryCallingCode();
+  }
+
+  throw new Error("Unknown country: ".concat(country));
+}
+function isSupportedCountry(country, metadata) {
+  // metadata = new Metadata(metadata)
+  // return metadata.hasCountry(country)
+  return metadata.countries[country] !== undefined;
+}
+
+function setVersion(metadata) {
+  var version = metadata.version;
+
+  if (typeof version === 'number') {
+    this.v1 = version === 1;
+    this.v2 = version === 2;
+    this.v3 = version === 3;
+    this.v4 = version === 4;
+  } else {
+    if (!version) {
+      this.v1 = true;
+    } else if ((0,_tools_semver_compare_js__WEBPACK_IMPORTED_MODULE_0__["default"])(version, V3) === -1) {
+      this.v2 = true;
+    } else if ((0,_tools_semver_compare_js__WEBPACK_IMPORTED_MODULE_0__["default"])(version, V4) === -1) {
+      this.v3 = true;
+    } else {
+      this.v4 = true;
+    }
+  }
+} // const ISO_COUNTRY_CODE = /^[A-Z]{2}$/
+// function isCountryCode(countryCode) {
+// 	return ISO_COUNTRY_CODE.test(countryCodeOrCountryCallingCode)
+// }
+//# sourceMappingURL=metadata.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/parseIncompletePhoneNumber.js":
+/*!**************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/parseIncompletePhoneNumber.js ***!
+  \**************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ parseIncompletePhoneNumber),
+/* harmony export */   "parsePhoneNumberCharacter": () => (/* binding */ parsePhoneNumberCharacter)
+/* harmony export */ });
+/* harmony import */ var _helpers_parseDigits_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helpers/parseDigits.js */ "./node_modules/libphonenumber-js/es6/helpers/parseDigits.js");
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+
+/**
+ * Parses phone number characters from a string.
+ * Drops all punctuation leaving only digits and the leading `+` sign (if any).
+ * Also converts wide-ascii and arabic-indic numerals to conventional numerals.
+ * E.g. in Iraq they don't write `+442323234` but rather `+٤٤٢٣٢٣٢٣٤`.
+ * @param  {string} string
+ * @return {string}
+ * @example
+ * ```js
+ * // Outputs '8800555'.
+ * parseIncompletePhoneNumber('8 (800) 555')
+ * // Outputs '+7800555'.
+ * parseIncompletePhoneNumber('+7 800 555')
+ * ```
+ */
+
+function parseIncompletePhoneNumber(string) {
+  var result = ''; // Using `.split('')` here instead of normal `for ... of`
+  // because the importing application doesn't neccessarily include an ES6 polyfill.
+  // The `.split('')` approach discards "exotic" UTF-8 characters
+  // (the ones consisting of four bytes) but digits
+  // (including non-European ones) don't fall into that range
+  // so such "exotic" characters would be discarded anyway.
+
+  for (var _iterator = _createForOfIteratorHelperLoose(string.split('')), _step; !(_step = _iterator()).done;) {
+    var character = _step.value;
+    result += parsePhoneNumberCharacter(character, result) || '';
+  }
+
+  return result;
+}
+/**
+ * Parses next character while parsing phone number digits (including a `+`)
+ * from text: discards everything except `+` and digits, and `+` is only allowed
+ * at the start of a phone number.
+ * For example, is used in `react-phone-number-input` where it uses
+ * [`input-format`](https://gitlab.com/catamphetamine/input-format).
+ * @param  {string} character - Yet another character from raw input string.
+ * @param  {string?} prevParsedCharacters - Previous parsed characters.
+ * @param  {object} meta - Optional custom use-case-specific metadata.
+ * @return {string?} The parsed character.
+ */
+
+function parsePhoneNumberCharacter(character, prevParsedCharacters) {
+  // Only allow a leading `+`.
+  if (character === '+') {
+    // If this `+` is not the first parsed character
+    // then discard it.
+    if (prevParsedCharacters) {
+      return;
+    }
+
+    return '+';
+  } // Allow digits.
+
+
+  return (0,_helpers_parseDigits_js__WEBPACK_IMPORTED_MODULE_0__.parseDigit)(character);
+}
+//# sourceMappingURL=parseIncompletePhoneNumber.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/parsePhoneNumber.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/parsePhoneNumber.js ***!
+  \****************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ parsePhoneNumber),
+/* harmony export */   "normalizeArguments": () => (/* binding */ normalizeArguments)
+/* harmony export */ });
+/* harmony import */ var _parsePhoneNumber_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./parsePhoneNumber_.js */ "./node_modules/libphonenumber-js/es6/parsePhoneNumber_.js");
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+
+function parsePhoneNumber() {
+  var _normalizeArguments = normalizeArguments(arguments),
+      text = _normalizeArguments.text,
+      options = _normalizeArguments.options,
+      metadata = _normalizeArguments.metadata;
+
+  return (0,_parsePhoneNumber_js__WEBPACK_IMPORTED_MODULE_0__["default"])(text, options, metadata);
+}
+function normalizeArguments(args) {
+  var _Array$prototype$slic = Array.prototype.slice.call(args),
+      _Array$prototype$slic2 = _slicedToArray(_Array$prototype$slic, 4),
+      arg_1 = _Array$prototype$slic2[0],
+      arg_2 = _Array$prototype$slic2[1],
+      arg_3 = _Array$prototype$slic2[2],
+      arg_4 = _Array$prototype$slic2[3];
+
+  var text;
+  var options;
+  var metadata; // If the phone number is passed as a string.
+  // `parsePhoneNumber('88005553535', ...)`.
+
+  if (typeof arg_1 === 'string') {
+    text = arg_1;
+  } else throw new TypeError('A text for parsing must be a string.'); // If "default country" argument is being passed then move it to `options`.
+  // `parsePhoneNumber('88005553535', 'RU', [options], metadata)`.
+
+
+  if (!arg_2 || typeof arg_2 === 'string') {
+    if (arg_4) {
+      options = arg_3;
+      metadata = arg_4;
+    } else {
+      options = undefined;
+      metadata = arg_3;
+    }
+
+    if (arg_2) {
+      options = _objectSpread({
+        defaultCountry: arg_2
+      }, options);
+    }
+  } // `defaultCountry` is not passed.
+  // Example: `parsePhoneNumber('+78005553535', [options], metadata)`.
+  else if (isObject(arg_2)) {
+    if (arg_3) {
+      options = arg_2;
+      metadata = arg_3;
+    } else {
+      metadata = arg_2;
+    }
+  } else throw new Error("Invalid second argument: ".concat(arg_2));
+
+  return {
+    text: text,
+    options: options,
+    metadata: metadata
+  };
+} // Otherwise istanbul would show this as "branch not covered".
+
+/* istanbul ignore next */
+
+var isObject = function isObject(_) {
+  return _typeof(_) === 'object';
+};
+//# sourceMappingURL=parsePhoneNumber.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/parsePhoneNumberFromString.js":
+/*!**************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/parsePhoneNumberFromString.js ***!
+  \**************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ parsePhoneNumberFromString)
+/* harmony export */ });
+/* harmony import */ var _parsePhoneNumber_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./parsePhoneNumber.js */ "./node_modules/libphonenumber-js/es6/parsePhoneNumber.js");
+/* harmony import */ var _parsePhoneNumberFromString_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./parsePhoneNumberFromString_.js */ "./node_modules/libphonenumber-js/es6/parsePhoneNumberFromString_.js");
+
+
+function parsePhoneNumberFromString() {
+  var _normalizeArguments = (0,_parsePhoneNumber_js__WEBPACK_IMPORTED_MODULE_0__.normalizeArguments)(arguments),
+      text = _normalizeArguments.text,
+      options = _normalizeArguments.options,
+      metadata = _normalizeArguments.metadata;
+
+  return (0,_parsePhoneNumberFromString_js__WEBPACK_IMPORTED_MODULE_1__["default"])(text, options, metadata);
+}
+//# sourceMappingURL=parsePhoneNumberFromString.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/parsePhoneNumberFromString_.js":
+/*!***************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/parsePhoneNumberFromString_.js ***!
+  \***************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ parsePhoneNumberFromString)
+/* harmony export */ });
+/* harmony import */ var _parsePhoneNumber_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./parsePhoneNumber_.js */ "./node_modules/libphonenumber-js/es6/parsePhoneNumber_.js");
+/* harmony import */ var _ParseError_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ParseError.js */ "./node_modules/libphonenumber-js/es6/ParseError.js");
+/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./metadata.js */ "./node_modules/libphonenumber-js/es6/metadata.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+
+
+function parsePhoneNumberFromString(text, options, metadata) {
+  // Validate `defaultCountry`.
+  if (options && options.defaultCountry && !(0,_metadata_js__WEBPACK_IMPORTED_MODULE_0__.isSupportedCountry)(options.defaultCountry, metadata)) {
+    options = _objectSpread(_objectSpread({}, options), {}, {
+      defaultCountry: undefined
+    });
+  } // Parse phone number.
+
+
+  try {
+    return (0,_parsePhoneNumber_js__WEBPACK_IMPORTED_MODULE_1__["default"])(text, options, metadata);
+  } catch (error) {
+    /* istanbul ignore else */
+    if (error instanceof _ParseError_js__WEBPACK_IMPORTED_MODULE_2__["default"]) {//
+    } else {
+      throw error;
+    }
+  }
+}
+//# sourceMappingURL=parsePhoneNumberFromString_.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/parsePhoneNumber_.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/parsePhoneNumber_.js ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ parsePhoneNumber)
+/* harmony export */ });
+/* harmony import */ var _parse_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./parse_.js */ "./node_modules/libphonenumber-js/es6/parse_.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+function parsePhoneNumber(text, options, metadata) {
+  return (0,_parse_js__WEBPACK_IMPORTED_MODULE_0__["default"])(text, _objectSpread(_objectSpread({}, options), {}, {
+    v2: true
+  }), metadata);
+}
+//# sourceMappingURL=parsePhoneNumber_.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/parse_.js":
+/*!******************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/parse_.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ parse)
+/* harmony export */ });
+/* harmony import */ var _constants_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./constants.js */ "./node_modules/libphonenumber-js/es6/constants.js");
+/* harmony import */ var _ParseError_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ParseError.js */ "./node_modules/libphonenumber-js/es6/ParseError.js");
+/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./getCountryCallingCode.js */ "./node_modules/libphonenumber-js/es6/metadata.js");
+/* harmony import */ var _helpers_isViablePhoneNumber_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./helpers/isViablePhoneNumber.js */ "./node_modules/libphonenumber-js/es6/helpers/isViablePhoneNumber.js");
+/* harmony import */ var _helpers_extension_extractExtension_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./helpers/extension/extractExtension.js */ "./node_modules/libphonenumber-js/es6/helpers/extension/extractExtension.js");
+/* harmony import */ var _parseIncompletePhoneNumber_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./parseIncompletePhoneNumber.js */ "./node_modules/libphonenumber-js/es6/parseIncompletePhoneNumber.js");
+/* harmony import */ var _isPossibleNumber_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./isPossibleNumber_.js */ "./node_modules/libphonenumber-js/es6/isPossibleNumber_.js");
+/* harmony import */ var _helpers_RFC3966_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./helpers/RFC3966.js */ "./node_modules/libphonenumber-js/es6/helpers/RFC3966.js");
+/* harmony import */ var _PhoneNumber_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./PhoneNumber.js */ "./node_modules/libphonenumber-js/es6/PhoneNumber.js");
+/* harmony import */ var _helpers_matchesEntirely_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./helpers/matchesEntirely.js */ "./node_modules/libphonenumber-js/es6/helpers/matchesEntirely.js");
+/* harmony import */ var _helpers_extractCountryCallingCode_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./helpers/extractCountryCallingCode.js */ "./node_modules/libphonenumber-js/es6/helpers/extractCountryCallingCode.js");
+/* harmony import */ var _helpers_extractNationalNumber_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./helpers/extractNationalNumber.js */ "./node_modules/libphonenumber-js/es6/helpers/extractNationalNumber.js");
+/* harmony import */ var _helpers_getCountryByCallingCode_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./helpers/getCountryByCallingCode.js */ "./node_modules/libphonenumber-js/es6/helpers/getCountryByCallingCode.js");
+// This is a port of Google Android `libphonenumber`'s
+// `phonenumberutil.js` of December 31th, 2018.
+//
+// https://github.com/googlei18n/libphonenumber/commits/master/javascript/i18n/phonenumbers/phonenumberutil.js
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ // We don't allow input strings for parsing to be longer than 250 chars.
+// This prevents malicious input from consuming CPU.
+
+var MAX_INPUT_STRING_LENGTH = 250; // This consists of the plus symbol, digits, and arabic-indic digits.
+
+var PHONE_NUMBER_START_PATTERN = new RegExp('[' + _constants_js__WEBPACK_IMPORTED_MODULE_0__.PLUS_CHARS + _constants_js__WEBPACK_IMPORTED_MODULE_0__.VALID_DIGITS + ']'); // Regular expression of trailing characters that we want to remove.
+// A trailing `#` is sometimes used when writing phone numbers with extensions in US.
+// Example: "+1 (645) 123 1234-910#" number has extension "910".
+
+var AFTER_PHONE_NUMBER_END_PATTERN = new RegExp('[^' + _constants_js__WEBPACK_IMPORTED_MODULE_0__.VALID_DIGITS + '#' + ']+$');
+var USE_NON_GEOGRAPHIC_COUNTRY_CODE = false; // Examples:
+//
+// ```js
+// parse('8 (800) 555-35-35', 'RU')
+// parse('8 (800) 555-35-35', 'RU', metadata)
+// parse('8 (800) 555-35-35', { country: { default: 'RU' } })
+// parse('8 (800) 555-35-35', { country: { default: 'RU' } }, metadata)
+// parse('+7 800 555 35 35')
+// parse('+7 800 555 35 35', metadata)
+// ```
+//
+
+function parse(text, options, metadata) {
+  // If assigning the `{}` default value is moved to the arguments above,
+  // code coverage would decrease for some weird reason.
+  options = options || {};
+  metadata = new _metadata_js__WEBPACK_IMPORTED_MODULE_1__["default"](metadata); // Validate `defaultCountry`.
+
+  if (options.defaultCountry && !metadata.hasCountry(options.defaultCountry)) {
+    if (options.v2) {
+      throw new _ParseError_js__WEBPACK_IMPORTED_MODULE_2__["default"]('INVALID_COUNTRY');
+    }
+
+    throw new Error("Unknown country: ".concat(options.defaultCountry));
+  } // Parse the phone number.
+
+
+  var _parseInput = parseInput(text, options.v2, options.extract),
+      formattedPhoneNumber = _parseInput.number,
+      ext = _parseInput.ext,
+      error = _parseInput.error; // If the phone number is not viable then return nothing.
+
+
+  if (!formattedPhoneNumber) {
+    if (options.v2) {
+      if (error === 'TOO_SHORT') {
+        throw new _ParseError_js__WEBPACK_IMPORTED_MODULE_2__["default"]('TOO_SHORT');
+      }
+
+      throw new _ParseError_js__WEBPACK_IMPORTED_MODULE_2__["default"]('NOT_A_NUMBER');
+    }
+
+    return {};
+  }
+
+  var _parsePhoneNumber = parsePhoneNumber(formattedPhoneNumber, options.defaultCountry, options.defaultCallingCode, metadata),
+      country = _parsePhoneNumber.country,
+      nationalNumber = _parsePhoneNumber.nationalNumber,
+      countryCallingCode = _parsePhoneNumber.countryCallingCode,
+      carrierCode = _parsePhoneNumber.carrierCode;
+
+  if (!metadata.hasSelectedNumberingPlan()) {
+    if (options.v2) {
+      throw new _ParseError_js__WEBPACK_IMPORTED_MODULE_2__["default"]('INVALID_COUNTRY');
+    }
+
+    return {};
+  } // Validate national (significant) number length.
+
+
+  if (!nationalNumber || nationalNumber.length < _constants_js__WEBPACK_IMPORTED_MODULE_0__.MIN_LENGTH_FOR_NSN) {
+    // Won't throw here because the regexp already demands length > 1.
+
+    /* istanbul ignore if */
+    if (options.v2) {
+      throw new _ParseError_js__WEBPACK_IMPORTED_MODULE_2__["default"]('TOO_SHORT');
+    } // Google's demo just throws an error in this case.
+
+
+    return {};
+  } // Validate national (significant) number length.
+  //
+  // A sidenote:
+  //
+  // They say that sometimes national (significant) numbers
+  // can be longer than `MAX_LENGTH_FOR_NSN` (e.g. in Germany).
+  // https://github.com/googlei18n/libphonenumber/blob/7e1748645552da39c4e1ba731e47969d97bdb539/resources/phonenumber.proto#L36
+  // Such numbers will just be discarded.
+  //
+
+
+  if (nationalNumber.length > _constants_js__WEBPACK_IMPORTED_MODULE_0__.MAX_LENGTH_FOR_NSN) {
+    if (options.v2) {
+      throw new _ParseError_js__WEBPACK_IMPORTED_MODULE_2__["default"]('TOO_LONG');
+    } // Google's demo just throws an error in this case.
+
+
+    return {};
+  }
+
+  if (options.v2) {
+    var phoneNumber = new _PhoneNumber_js__WEBPACK_IMPORTED_MODULE_3__["default"](countryCallingCode, nationalNumber, metadata.metadata);
+
+    if (country) {
+      phoneNumber.country = country;
+    }
+
+    if (carrierCode) {
+      phoneNumber.carrierCode = carrierCode;
+    }
+
+    if (ext) {
+      phoneNumber.ext = ext;
+    }
+
+    return phoneNumber;
+  } // Check if national phone number pattern matches the number.
+  // National number pattern is different for each country,
+  // even for those ones which are part of the "NANPA" group.
+
+
+  var valid = (options.extended ? metadata.hasSelectedNumberingPlan() : country) ? (0,_helpers_matchesEntirely_js__WEBPACK_IMPORTED_MODULE_4__["default"])(nationalNumber, metadata.nationalNumberPattern()) : false;
+
+  if (!options.extended) {
+    return valid ? result(country, nationalNumber, ext) : {};
+  } // isInternational: countryCallingCode !== undefined
+
+
+  return {
+    country: country,
+    countryCallingCode: countryCallingCode,
+    carrierCode: carrierCode,
+    valid: valid,
+    possible: valid ? true : options.extended === true && metadata.possibleLengths() && (0,_isPossibleNumber_js__WEBPACK_IMPORTED_MODULE_5__.isPossibleNumber)(nationalNumber, metadata) ? true : false,
+    phone: nationalNumber,
+    ext: ext
+  };
+}
+/**
+ * Extracts a formatted phone number from text.
+ * Doesn't guarantee that the extracted phone number
+ * is a valid phone number (for example, doesn't validate its length).
+ * @param  {string} text
+ * @param  {boolean} [extract] — If `false`, then will parse the entire `text` as a phone number.
+ * @param  {boolean} [throwOnError] — By default, it won't throw if the text is too long.
+ * @return {string}
+ * @example
+ * // Returns "(213) 373-4253".
+ * extractFormattedPhoneNumber("Call (213) 373-4253 for assistance.")
+ */
+
+function extractFormattedPhoneNumber(text, extract, throwOnError) {
+  if (!text) {
+    return;
+  }
+
+  if (text.length > MAX_INPUT_STRING_LENGTH) {
+    if (throwOnError) {
+      throw new _ParseError_js__WEBPACK_IMPORTED_MODULE_2__["default"]('TOO_LONG');
+    }
+
+    return;
+  }
+
+  if (extract === false) {
+    return text;
+  } // Attempt to extract a possible number from the string passed in
+
+
+  var startsAt = text.search(PHONE_NUMBER_START_PATTERN);
+
+  if (startsAt < 0) {
+    return;
+  }
+
+  return text // Trim everything to the left of the phone number
+  .slice(startsAt) // Remove trailing non-numerical characters
+  .replace(AFTER_PHONE_NUMBER_END_PATTERN, '');
+}
+/**
+ * @param  {string} text - Input.
+ * @param  {boolean} v2 - Legacy API functions don't pass `v2: true` flag.
+ * @param  {boolean} [extract] - Whether to extract a phone number from `text`, or attempt to parse the entire text as a phone number.
+ * @return {object} `{ ?number, ?ext }`.
+ */
+
+
+function parseInput(text, v2, extract) {
+  // Parse RFC 3966 phone number URI.
+  if (text && text.indexOf('tel:') === 0) {
+    return (0,_helpers_RFC3966_js__WEBPACK_IMPORTED_MODULE_6__.parseRFC3966)(text);
+  }
+
+  var number = extractFormattedPhoneNumber(text, extract, v2); // If the phone number is not viable, then abort.
+
+  if (!number) {
+    return {};
+  }
+
+  if (!(0,_helpers_isViablePhoneNumber_js__WEBPACK_IMPORTED_MODULE_7__["default"])(number)) {
+    if ((0,_helpers_isViablePhoneNumber_js__WEBPACK_IMPORTED_MODULE_7__.isViablePhoneNumberStart)(number)) {
+      return {
+        error: 'TOO_SHORT'
+      };
+    }
+
+    return {};
+  } // Attempt to parse extension first, since it doesn't require region-specific
+  // data and we want to have the non-normalised number here.
+
+
+  var withExtensionStripped = (0,_helpers_extension_extractExtension_js__WEBPACK_IMPORTED_MODULE_8__["default"])(number);
+
+  if (withExtensionStripped.ext) {
+    return withExtensionStripped;
+  }
+
+  return {
+    number: number
+  };
+}
+/**
+ * Creates `parse()` result object.
+ */
+
+
+function result(country, nationalNumber, ext) {
+  var result = {
+    country: country,
+    phone: nationalNumber
+  };
+
+  if (ext) {
+    result.ext = ext;
+  }
+
+  return result;
+}
+/**
+ * Parses a viable phone number.
+ * @param {string} formattedPhoneNumber — Example: "(213) 373-4253".
+ * @param {string} [defaultCountry]
+ * @param {string} [defaultCallingCode]
+ * @param {Metadata} metadata
+ * @return {object} Returns `{ country: string?, countryCallingCode: string?, nationalNumber: string? }`.
+ */
+
+
+function parsePhoneNumber(formattedPhoneNumber, defaultCountry, defaultCallingCode, metadata) {
+  // Extract calling code from phone number.
+  var _extractCountryCallin = (0,_helpers_extractCountryCallingCode_js__WEBPACK_IMPORTED_MODULE_9__["default"])((0,_parseIncompletePhoneNumber_js__WEBPACK_IMPORTED_MODULE_10__["default"])(formattedPhoneNumber), defaultCountry, defaultCallingCode, metadata.metadata),
+      countryCallingCode = _extractCountryCallin.countryCallingCode,
+      number = _extractCountryCallin.number; // Choose a country by `countryCallingCode`.
+
+
+  var country;
+
+  if (countryCallingCode) {
+    metadata.selectNumberingPlan(countryCallingCode);
+  } // If `formattedPhoneNumber` is in "national" format
+  // then `number` is defined and `countryCallingCode` isn't.
+  else if (number && (defaultCountry || defaultCallingCode)) {
+    metadata.selectNumberingPlan(defaultCountry, defaultCallingCode);
+
+    if (defaultCountry) {
+      country = defaultCountry;
+    } else {
+      /* istanbul ignore if */
+      if (USE_NON_GEOGRAPHIC_COUNTRY_CODE) {
+        if (metadata.isNonGeographicCallingCode(defaultCallingCode)) {
+          country = '001';
+        }
+      }
+    }
+
+    countryCallingCode = defaultCallingCode || (0,_metadata_js__WEBPACK_IMPORTED_MODULE_1__.getCountryCallingCode)(defaultCountry, metadata.metadata);
+  } else return {};
+
+  if (!number) {
+    return {
+      countryCallingCode: countryCallingCode
+    };
+  }
+
+  var _extractNationalNumbe = (0,_helpers_extractNationalNumber_js__WEBPACK_IMPORTED_MODULE_11__["default"])((0,_parseIncompletePhoneNumber_js__WEBPACK_IMPORTED_MODULE_10__["default"])(number), metadata),
+      nationalNumber = _extractNationalNumbe.nationalNumber,
+      carrierCode = _extractNationalNumbe.carrierCode; // Sometimes there are several countries
+  // corresponding to the same country phone code
+  // (e.g. NANPA countries all having `1` country phone code).
+  // Therefore, to reliably determine the exact country,
+  // national (significant) number should have been parsed first.
+  //
+  // When `metadata.json` is generated, all "ambiguous" country phone codes
+  // get their countries populated with the full set of
+  // "phone number type" regular expressions.
+  //
+
+
+  var exactCountry = (0,_helpers_getCountryByCallingCode_js__WEBPACK_IMPORTED_MODULE_12__["default"])(countryCallingCode, nationalNumber, metadata);
+
+  if (exactCountry) {
+    country = exactCountry;
+    /* istanbul ignore if */
+
+    if (exactCountry === '001') {// Can't happen with `USE_NON_GEOGRAPHIC_COUNTRY_CODE` being `false`.
+      // If `USE_NON_GEOGRAPHIC_COUNTRY_CODE` is set to `true` for some reason,
+      // then remove the "istanbul ignore if".
+    } else {
+      metadata.country(country);
+    }
+  }
+
+  return {
+    country: country,
+    countryCallingCode: countryCallingCode,
+    nationalNumber: nationalNumber,
+    carrierCode: carrierCode
+  };
+}
+//# sourceMappingURL=parse_.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/tools/semver-compare.js":
+/*!********************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/tools/semver-compare.js ***!
+  \********************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+// Copy-pasted from:
+// https://github.com/substack/semver-compare/blob/master/index.js
+//
+// Inlining this function because some users reported issues with
+// importing from `semver-compare` in a browser with ES6 "native" modules.
+//
+// Fixes `semver-compare` not being able to compare versions with alpha/beta/etc "tags".
+// https://github.com/catamphetamine/libphonenumber-js/issues/381
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__(a, b) {
+  a = a.split('-');
+  b = b.split('-');
+  var pa = a[0].split('.');
+  var pb = b[0].split('.');
+
+  for (var i = 0; i < 3; i++) {
+    var na = Number(pa[i]);
+    var nb = Number(pb[i]);
+    if (na > nb) return 1;
+    if (nb > na) return -1;
+    if (!isNaN(na) && isNaN(nb)) return 1;
+    if (isNaN(na) && !isNaN(nb)) return -1;
+  }
+
+  if (a[1] && b[1]) {
+    return a[1] > b[1] ? 1 : a[1] < b[1] ? -1 : 0;
+  }
+
+  return !a[1] && b[1] ? 1 : a[1] && !b[1] ? -1 : 0;
+}
+//# sourceMappingURL=semver-compare.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/es6/validate_.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/libphonenumber-js/es6/validate_.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ isValidNumber)
+/* harmony export */ });
+/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./metadata.js */ "./node_modules/libphonenumber-js/es6/metadata.js");
+/* harmony import */ var _helpers_matchesEntirely_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helpers/matchesEntirely.js */ "./node_modules/libphonenumber-js/es6/helpers/matchesEntirely.js");
+/* harmony import */ var _helpers_getNumberType_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./helpers/getNumberType.js */ "./node_modules/libphonenumber-js/es6/helpers/getNumberType.js");
+
+
+
+/**
+ * Checks if a given phone number is valid.
+ *
+ * If the `number` is a string, it will be parsed to an object,
+ * but only if it contains only valid phone number characters (including punctuation).
+ * If the `number` is an object, it is used as is.
+ *
+ * The optional `defaultCountry` argument is the default country.
+ * I.e. it does not restrict to just that country,
+ * e.g. in those cases where several countries share
+ * the same phone numbering rules (NANPA, Britain, etc).
+ * For example, even though the number `07624 369230`
+ * belongs to the Isle of Man ("IM" country code)
+ * calling `isValidNumber('07624369230', 'GB', metadata)`
+ * still returns `true` because the country is not restricted to `GB`,
+ * it's just that `GB` is the default one for the phone numbering rules.
+ * For restricting the country see `isValidNumberForRegion()`
+ * though restricting a country might not be a good idea.
+ * https://github.com/googlei18n/libphonenumber/blob/master/FAQ.md#when-should-i-use-isvalidnumberforregion
+ *
+ * Examples:
+ *
+ * ```js
+ * isValidNumber('+78005553535', metadata)
+ * isValidNumber('8005553535', 'RU', metadata)
+ * isValidNumber('88005553535', 'RU', metadata)
+ * isValidNumber({ phone: '8005553535', country: 'RU' }, metadata)
+ * ```
+ */
+
+function isValidNumber(input, options, metadata) {
+  // If assigning the `{}` default value is moved to the arguments above,
+  // code coverage would decrease for some weird reason.
+  options = options || {};
+  metadata = new _metadata_js__WEBPACK_IMPORTED_MODULE_0__["default"](metadata); // This is just to support `isValidNumber({})`
+  // for cases when `parseNumber()` returns `{}`.
+
+  if (!input.country) {
+    return false;
+  }
+
+  metadata.selectNumberingPlan(input.country, input.countryCallingCode); // By default, countries only have type regexps when it's required for
+  // distinguishing different countries having the same `countryCallingCode`.
+
+  if (metadata.hasTypes()) {
+    return (0,_helpers_getNumberType_js__WEBPACK_IMPORTED_MODULE_1__["default"])(input, options, metadata.metadata) !== undefined;
+  } // If there are no type regexps for this country in metadata then use
+  // `nationalNumberPattern` as a "better than nothing" replacement.
+
+
+  var national_number = options.v2 ? input.nationalNumber : input.phone;
+  return (0,_helpers_matchesEntirely_js__WEBPACK_IMPORTED_MODULE_2__["default"])(national_number, metadata.nationalNumberPattern());
+}
+//# sourceMappingURL=validate_.js.map
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/max/exports/parsePhoneNumberFromString.js":
+/*!**********************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/max/exports/parsePhoneNumberFromString.js ***!
+  \**********************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "parsePhoneNumberFromString": () => (/* binding */ parsePhoneNumberFromString)
+/* harmony export */ });
+/* harmony import */ var _withMetadataArgument_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./withMetadataArgument.js */ "./node_modules/libphonenumber-js/max/exports/withMetadataArgument.js");
+/* harmony import */ var _core_index_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../core/index.js */ "./node_modules/libphonenumber-js/es6/parsePhoneNumberFromString.js");
+
+
+
+function parsePhoneNumberFromString() {
+	return (0,_withMetadataArgument_js__WEBPACK_IMPORTED_MODULE_0__["default"])(_core_index_js__WEBPACK_IMPORTED_MODULE_1__["default"], arguments)
+}
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/max/exports/withMetadataArgument.js":
+/*!****************************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/max/exports/withMetadataArgument.js ***!
+  \****************************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ withMetadataArgument)
+/* harmony export */ });
+/* harmony import */ var _metadata_max_json_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../metadata.max.json.js */ "./node_modules/libphonenumber-js/metadata.max.json.js");
+// Importing from a ".js" file is a workaround for Node.js "ES Modules"
+// importing system which is even uncapable of importing "*.json" files.
+
+
+function withMetadataArgument(func, _arguments) {
+	var args = Array.prototype.slice.call(_arguments)
+	args.push(_metadata_max_json_js__WEBPACK_IMPORTED_MODULE_0__["default"])
+	return func.apply(this, args)
+}
+
+/***/ }),
+
+/***/ "./node_modules/libphonenumber-js/metadata.max.json.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/libphonenumber-js/metadata.max.json.js ***!
+  \*************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+// This file is a workaround for a bug in web browsers' "native"
+// ES6 importing system which is uncapable of importing "*.json" files.
+// https://github.com/catamphetamine/libphonenumber-js/issues/239
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({"version":4,"country_calling_codes":{"1":["US","AG","AI","AS","BB","BM","BS","CA","DM","DO","GD","GU","JM","KN","KY","LC","MP","MS","PR","SX","TC","TT","VC","VG","VI"],"7":["RU","KZ"],"20":["EG"],"27":["ZA"],"30":["GR"],"31":["NL"],"32":["BE"],"33":["FR"],"34":["ES"],"36":["HU"],"39":["IT","VA"],"40":["RO"],"41":["CH"],"43":["AT"],"44":["GB","GG","IM","JE"],"45":["DK"],"46":["SE"],"47":["NO","SJ"],"48":["PL"],"49":["DE"],"51":["PE"],"52":["MX"],"53":["CU"],"54":["AR"],"55":["BR"],"56":["CL"],"57":["CO"],"58":["VE"],"60":["MY"],"61":["AU","CC","CX"],"62":["ID"],"63":["PH"],"64":["NZ"],"65":["SG"],"66":["TH"],"81":["JP"],"82":["KR"],"84":["VN"],"86":["CN"],"90":["TR"],"91":["IN"],"92":["PK"],"93":["AF"],"94":["LK"],"95":["MM"],"98":["IR"],"211":["SS"],"212":["MA","EH"],"213":["DZ"],"216":["TN"],"218":["LY"],"220":["GM"],"221":["SN"],"222":["MR"],"223":["ML"],"224":["GN"],"225":["CI"],"226":["BF"],"227":["NE"],"228":["TG"],"229":["BJ"],"230":["MU"],"231":["LR"],"232":["SL"],"233":["GH"],"234":["NG"],"235":["TD"],"236":["CF"],"237":["CM"],"238":["CV"],"239":["ST"],"240":["GQ"],"241":["GA"],"242":["CG"],"243":["CD"],"244":["AO"],"245":["GW"],"246":["IO"],"247":["AC"],"248":["SC"],"249":["SD"],"250":["RW"],"251":["ET"],"252":["SO"],"253":["DJ"],"254":["KE"],"255":["TZ"],"256":["UG"],"257":["BI"],"258":["MZ"],"260":["ZM"],"261":["MG"],"262":["RE","YT"],"263":["ZW"],"264":["NA"],"265":["MW"],"266":["LS"],"267":["BW"],"268":["SZ"],"269":["KM"],"290":["SH","TA"],"291":["ER"],"297":["AW"],"298":["FO"],"299":["GL"],"350":["GI"],"351":["PT"],"352":["LU"],"353":["IE"],"354":["IS"],"355":["AL"],"356":["MT"],"357":["CY"],"358":["FI","AX"],"359":["BG"],"370":["LT"],"371":["LV"],"372":["EE"],"373":["MD"],"374":["AM"],"375":["BY"],"376":["AD"],"377":["MC"],"378":["SM"],"380":["UA"],"381":["RS"],"382":["ME"],"383":["XK"],"385":["HR"],"386":["SI"],"387":["BA"],"389":["MK"],"420":["CZ"],"421":["SK"],"423":["LI"],"500":["FK"],"501":["BZ"],"502":["GT"],"503":["SV"],"504":["HN"],"505":["NI"],"506":["CR"],"507":["PA"],"508":["PM"],"509":["HT"],"590":["GP","BL","MF"],"591":["BO"],"592":["GY"],"593":["EC"],"594":["GF"],"595":["PY"],"596":["MQ"],"597":["SR"],"598":["UY"],"599":["CW","BQ"],"670":["TL"],"672":["NF"],"673":["BN"],"674":["NR"],"675":["PG"],"676":["TO"],"677":["SB"],"678":["VU"],"679":["FJ"],"680":["PW"],"681":["WF"],"682":["CK"],"683":["NU"],"685":["WS"],"686":["KI"],"687":["NC"],"688":["TV"],"689":["PF"],"690":["TK"],"691":["FM"],"692":["MH"],"850":["KP"],"852":["HK"],"853":["MO"],"855":["KH"],"856":["LA"],"880":["BD"],"886":["TW"],"960":["MV"],"961":["LB"],"962":["JO"],"963":["SY"],"964":["IQ"],"965":["KW"],"966":["SA"],"967":["YE"],"968":["OM"],"970":["PS"],"971":["AE"],"972":["IL"],"973":["BH"],"974":["QA"],"975":["BT"],"976":["MN"],"977":["NP"],"992":["TJ"],"993":["TM"],"994":["AZ"],"995":["GE"],"996":["KG"],"998":["UZ"]},"countries":{"AC":["247","00","(?:[01589]\\d|[46])\\d{4}",[5,6],0,0,0,0,0,0,0,[["6[2-467]\\d{3}",[5]],["4\\d{4}",[5]],0,0,0,0,["(?:0[1-9]|[1589]\\d)\\d{4}",[6]]]],"AD":["376","00","(?:1|6\\d)\\d{7}|[135-9]\\d{5}",[6,8,9],[["(\\d{3})(\\d{3})","$1 $2",["[135-9]"]],["(\\d{4})(\\d{4})","$1 $2",["1"]],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["6"]]],0,0,0,0,0,0,[["[78]\\d{5}",[6]],["690\\d{6}|[356]\\d{5}",[6,9]],["180[02]\\d{4}",[8]],["[19]\\d{5}",[6]]]],"AE":["971","00","(?:[4-7]\\d|9[0-689])\\d{7}|800\\d{2,9}|[2-4679]\\d{7}",[5,6,7,8,9,10,11,12],[["(\\d{3})(\\d{2,9})","$1 $2",["60|8"]],["(\\d)(\\d{3})(\\d{4})","$1 $2 $3",["[236]|[479][2-8]"],"0$1"],["(\\d{3})(\\d)(\\d{5})","$1 $2 $3",["[479]"]],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["5"],"0$1"]],"0",0,0,0,0,0,[["[2-4679][2-8]\\d{6}",[8]],["5[024-68]\\d{7}",[9]],["400\\d{6}|800\\d{2,9}"],["900[02]\\d{5}",[9]],0,0,["600[25]\\d{5}",[9]],0,0,["700[05]\\d{5}",[9]]]],"AF":["93","00","[2-7]\\d{8}",[9],[["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[2-7]"],"0$1"]],"0",0,0,0,0,0,[["(?:[25][0-8]|[34][0-4]|6[0-5])[2-9]\\d{6}"],["7\\d{8}"]]],"AG":["1","011","(?:268|[58]\\d\\d|900)\\d{7}",[10],0,"1",0,"1|([457]\\d{6})$","268$1",0,"268",[["268(?:4(?:6[0-38]|84)|56[0-2])\\d{4}"],["268(?:464|7(?:1[3-9]|[28]\\d|3[0246]|64|7[0-689]))\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"],0,0,["26840[69]\\d{4}"],["26848[01]\\d{4}"]]],"AI":["1","011","(?:264|[58]\\d\\d|900)\\d{7}",[10],0,"1",0,"1|([2457]\\d{6})$","264$1",0,"264",[["264(?:292|4(?:6[12]|9[78]))\\d{4}"],["264(?:235|4(?:69|76)|5(?:3[6-9]|8[1-4])|7(?:29|72))\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"],0,0,["264724\\d{4}"]]],"AL":["355","00","(?:700\\d\\d|900)\\d{3}|8\\d{5,7}|(?:[2-5]|6\\d)\\d{7}",[6,7,8,9],[["(\\d{3})(\\d{3,4})","$1 $2",["80|9"],"0$1"],["(\\d)(\\d{3})(\\d{4})","$1 $2 $3",["4[2-6]"],"0$1"],["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["[2358][2-5]|4"],"0$1"],["(\\d{3})(\\d{5})","$1 $2",["[23578]"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["6"],"0$1"]],"0",0,0,0,0,0,[["4505[0-2]\\d{3}|(?:[2358][16-9]\\d[2-9]|4410)\\d{4}|(?:[2358][2-5][2-9]|4(?:[2-57-9][2-9]|6\\d))\\d{5}",[8]],["6(?:[78][2-9]|9\\d)\\d{6}",[9]],["800\\d{4}",[7]],["900[1-9]\\d\\d",[6]],["700[2-9]\\d{4}",[8]],0,0,0,0,["808[1-9]\\d\\d",[6]]]],"AM":["374","00","(?:[1-489]\\d|55|60|77)\\d{6}",[8],[["(\\d{3})(\\d{2})(\\d{3})","$1 $2 $3",["[89]0"],"0 $1"],["(\\d{3})(\\d{5})","$1 $2",["2|3[12]"],"(0$1)"],["(\\d{2})(\\d{6})","$1 $2",["1|47"],"(0$1)"],["(\\d{2})(\\d{6})","$1 $2",["[3-9]"],"0$1"]],"0",0,0,0,0,0,[["(?:(?:1[0-25]|47)\\d|2(?:2[2-46]|3[1-8]|4[2-69]|5[2-7]|6[1-9]|8[1-7])|3[12]2)\\d{5}"],["(?:33|4[1349]|55|77|88|9[13-9])\\d{6}"],["800\\d{5}"],["90[016]\\d{5}"],0,0,0,0,["60(?:2[78]|3[5-9]|4[02-9]|5[0-46-9]|[6-8]\\d|9[01])\\d{4}"],["80[1-4]\\d{5}"]]],"AO":["244","00","[29]\\d{8}",[9],[["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[29]"]]],0,0,0,0,0,0,[["2\\d(?:[0134][25-9]|[25-9]\\d)\\d{5}"],["9[1-59]\\d{7}"]]],"AR":["54","00","(?:11|[89]\\d\\d)\\d{8}|[2368]\\d{9}",[10,11],[["(\\d{4})(\\d{2})(\\d{4})","$1 $2-$3",["2(?:2[024-9]|3[0-59]|47|6[245]|9[02-8])|3(?:3[28]|4[03-9]|5[2-46-8]|7[1-578]|8[2-9])","2(?:[23]02|6(?:[25]|4[6-8])|9(?:[02356]|4[02568]|72|8[23]))|3(?:3[28]|4(?:[04679]|3[5-8]|5[4-68]|8[2379])|5(?:[2467]|3[237]|8[2-5])|7[1-578]|8(?:[2469]|3[2578]|5[4-8]|7[36-8]|8[5-8]))|2(?:2[24-9]|3[1-59]|47)","2(?:[23]02|6(?:[25]|4(?:64|[78]))|9(?:[02356]|4(?:[0268]|5[2-6])|72|8[23]))|3(?:3[28]|4(?:[04679]|3[78]|5(?:4[46]|8)|8[2379])|5(?:[2467]|3[237]|8[23])|7[1-578]|8(?:[2469]|3[278]|5[56][46]|86[3-6]))|2(?:2[24-9]|3[1-59]|47)|38(?:[58][78]|7[378])|3(?:4[35][56]|58[45]|8(?:[38]5|54|76))[4-6]","2(?:[23]02|6(?:[25]|4(?:64|[78]))|9(?:[02356]|4(?:[0268]|5[2-6])|72|8[23]))|3(?:3[28]|4(?:[04679]|3(?:5(?:4[0-25689]|[56])|[78])|58|8[2379])|5(?:[2467]|3[237]|8(?:[23]|4(?:[45]|60)|5(?:4[0-39]|5|64)))|7[1-578]|8(?:[2469]|3[278]|54(?:4|5[13-7]|6[89])|86[3-6]))|2(?:2[24-9]|3[1-59]|47)|38(?:[58][78]|7[378])|3(?:454|85[56])[46]|3(?:4(?:36|5[56])|8(?:[38]5|76))[4-6]"],"0$1",1],["(\\d{2})(\\d{4})(\\d{4})","$1 $2-$3",["1"],"0$1",1],["(\\d{3})(\\d{3})(\\d{4})","$1-$2-$3",["[68]"],"0$1"],["(\\d{3})(\\d{3})(\\d{4})","$1 $2-$3",["[23]"],"0$1",1],["(\\d)(\\d{4})(\\d{2})(\\d{4})","$2 15-$3-$4",["9(?:2[2-469]|3[3-578])","9(?:2(?:2[024-9]|3[0-59]|47|6[245]|9[02-8])|3(?:3[28]|4[03-9]|5[2-46-8]|7[1-578]|8[2-9]))","9(?:2(?:[23]02|6(?:[25]|4[6-8])|9(?:[02356]|4[02568]|72|8[23]))|3(?:3[28]|4(?:[04679]|3[5-8]|5[4-68]|8[2379])|5(?:[2467]|3[237]|8[2-5])|7[1-578]|8(?:[2469]|3[2578]|5[4-8]|7[36-8]|8[5-8])))|92(?:2[24-9]|3[1-59]|47)","9(?:2(?:[23]02|6(?:[25]|4(?:64|[78]))|9(?:[02356]|4(?:[0268]|5[2-6])|72|8[23]))|3(?:3[28]|4(?:[04679]|3[78]|5(?:4[46]|8)|8[2379])|5(?:[2467]|3[237]|8[23])|7[1-578]|8(?:[2469]|3[278]|5(?:[56][46]|[78])|7[378]|8(?:6[3-6]|[78]))))|92(?:2[24-9]|3[1-59]|47)|93(?:4[35][56]|58[45]|8(?:[38]5|54|76))[4-6]","9(?:2(?:[23]02|6(?:[25]|4(?:64|[78]))|9(?:[02356]|4(?:[0268]|5[2-6])|72|8[23]))|3(?:3[28]|4(?:[04679]|3(?:5(?:4[0-25689]|[56])|[78])|5(?:4[46]|8)|8[2379])|5(?:[2467]|3[237]|8(?:[23]|4(?:[45]|60)|5(?:4[0-39]|5|64)))|7[1-578]|8(?:[2469]|3[278]|5(?:4(?:4|5[13-7]|6[89])|[56][46]|[78])|7[378]|8(?:6[3-6]|[78]))))|92(?:2[24-9]|3[1-59]|47)|93(?:4(?:36|5[56])|8(?:[38]5|76))[4-6]"],"0$1",0,"$1 $2 $3-$4"],["(\\d)(\\d{2})(\\d{4})(\\d{4})","$2 15-$3-$4",["91"],"0$1",0,"$1 $2 $3-$4"],["(\\d{3})(\\d{3})(\\d{5})","$1-$2-$3",["8"],"0$1"],["(\\d)(\\d{3})(\\d{3})(\\d{4})","$2 15-$3-$4",["9"],"0$1",0,"$1 $2 $3-$4"]],"0",0,"0?(?:(11|2(?:2(?:02?|[13]|2[13-79]|4[1-6]|5[2457]|6[124-8]|7[1-4]|8[13-6]|9[1267])|3(?:02?|1[467]|2[03-6]|3[13-8]|[49][2-6]|5[2-8]|[67])|4(?:7[3-578]|9)|6(?:[0136]|2[24-6]|4[6-8]?|5[15-8])|80|9(?:0[1-3]|[19]|2\\d|3[1-6]|4[02568]?|5[2-4]|6[2-46]|72?|8[23]?))|3(?:3(?:2[79]|6|8[2578])|4(?:0[0-24-9]|[12]|3[5-8]?|4[24-7]|5[4-68]?|6[02-9]|7[126]|8[2379]?|9[1-36-8])|5(?:1|2[1245]|3[237]?|4[1-46-9]|6[2-4]|7[1-6]|8[2-5]?)|6[24]|7(?:[069]|1[1568]|2[15]|3[145]|4[13]|5[14-8]|7[2-57]|8[126])|8(?:[01]|2[15-7]|3[2578]?|4[13-6]|5[4-8]?|6[1-357-9]|7[36-8]?|8[5-8]?|9[124])))15)?","9$1",0,0,[["3888[013-9]\\d{5}|3(?:7(?:1[15]|81)|8(?:21|4[16]|69|9[12]))[46]\\d{5}|(?:29(?:54|66)|3(?:7(?:55|77)|865))[2-8]\\d{5}|(?:2(?:2(?:2[59]|44|52)|3(?:26|44)|473|9(?:[07]2|2[26]|34|46))|3327)[45]\\d{5}|(?:2(?:284|3(?:02|23)|657|920)|3(?:4(?:8[27]|92)|541|878))[2-7]\\d{5}|(?:2(?:(?:26|62)2|320|477|9(?:42|83))|3(?:329|4(?:[47]6|62|89)|564))[2-6]\\d{5}|(?:(?:11[1-8]|670)\\d|2(?:2(?:0[45]|1[2-6]|3[3-6])|3(?:[06]4|7[45])|494|6(?:04|1[2-8]|[36][45]|4[3-6])|80[45]|9(?:[17][4-6]|[48][45]|9[3-6]))|3(?:364|4(?:1[2-7]|[235][4-6]|84)|5(?:1[2-9]|[38][4-6])|6(?:2[45]|44)|7[069][45]|8(?:0[45]|[17][2-6]|3[4-6]|[58][3-6])))\\d{6}|2(?:2(?:21|4[23]|6[145]|7[1-4]|8[356]|9[267])|3(?:16|3[13-8]|43|5[346-8]|9[3-5])|475|6(?:2[46]|4[78]|5[1568])|9(?:03|2[1457-9]|3[1356]|4[08]|[56][23]|82))4\\d{5}|(?:2(?:2(?:57|81)|3(?:24|46|92)|9(?:01|23|64))|3(?:4(?:42|71)|5(?:25|37|4[347]|71)|7(?:18|5[17])))[3-6]\\d{5}|(?:2(?:2(?:02|2[3467]|4[156]|5[45]|6[6-8]|91)|3(?:1[47]|25|[45][25]|96)|47[48]|625|932)|3(?:38[2578]|4(?:0[0-24-9]|3[78]|4[457]|58|6[03-9]|72|83|9[136-8])|5(?:2[124]|[368][23]|4[2689]|7[2-6])|7(?:16|2[15]|3[145]|4[13]|5[468]|7[2-5]|8[26])|8(?:2[5-7]|3[278]|4[3-5]|5[78]|6[1-378]|[78]7|94)))[4-6]\\d{5}",[10]],["93(?:7(?:1[15]|81)[46]|8(?:(?:21|4[16]|69|9[12])[46]|88[013-9]))\\d{5}|9(?:29(?:54|66)|3(?:7(?:55|77)|865))[2-8]\\d{5}|9(?:2(?:2(?:2[59]|44|52)|3(?:26|44)|473|9(?:[07]2|2[26]|34|46))|3327)[45]\\d{5}|9(?:2(?:284|3(?:02|23)|657|920)|3(?:4(?:8[27]|92)|541|878))[2-7]\\d{5}|9(?:2(?:(?:26|62)2|320|477|9(?:42|83))|3(?:329|4(?:[47]6|62|89)|564))[2-6]\\d{5}|(?:675\\d|9(?:11[1-8]\\d|2(?:2(?:0[45]|1[2-6]|3[3-6])|3(?:[06]4|7[45])|494|6(?:04|1[2-8]|[36][45]|4[3-6])|80[45]|9(?:[17][4-6]|[48][45]|9[3-6]))|3(?:364|4(?:1[2-7]|[235][4-6]|84)|5(?:1[2-9]|[38][4-6])|6(?:2[45]|44)|7[069][45]|8(?:0[45]|[17][2-6]|3[4-6]|[58][3-6]))))\\d{6}|92(?:2(?:21|4[23]|6[145]|7[1-4]|8[356]|9[267])|3(?:16|3[13-8]|43|5[346-8]|9[3-5])|475|6(?:2[46]|4[78]|5[1568])|9(?:03|2[1457-9]|3[1356]|4[08]|[56][23]|82))4\\d{5}|9(?:2(?:2(?:57|81)|3(?:24|46|92)|9(?:01|23|64))|3(?:4(?:42|71)|5(?:25|37|4[347]|71)|7(?:18|5[17])))[3-6]\\d{5}|9(?:2(?:2(?:02|2[3467]|4[156]|5[45]|6[6-8]|91)|3(?:1[47]|25|[45][25]|96)|47[48]|625|932)|3(?:38[2578]|4(?:0[0-24-9]|3[78]|4[457]|58|6[03-9]|72|83|9[136-8])|5(?:2[124]|[368][23]|4[2689]|7[2-6])|7(?:16|2[15]|3[145]|4[13]|5[468]|7[2-5]|8[26])|8(?:2[5-7]|3[278]|4[3-5]|5[78]|6[1-378]|[78]7|94)))[4-6]\\d{5}"],["800\\d{7,8}"],["60[04579]\\d{7}",[10]],0,0,["810\\d{7}",[10]]]],"AS":["1","011","(?:[58]\\d\\d|684|900)\\d{7}",[10],0,"1",0,"1|([267]\\d{6})$","684$1",0,"684",[["6846(?:22|33|44|55|77|88|9[19])\\d{4}"],["684(?:2(?:48|5[2468]|72)|7(?:3[13]|70|82))\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"AT":["43","00","1\\d{3,12}|2\\d{6,12}|43(?:(?:0\\d|5[02-9])\\d{3,9}|2\\d{4,5}|[3467]\\d{4}|8\\d{4,6}|9\\d{4,7})|5\\d{4,12}|8\\d{7,12}|9\\d{8,12}|(?:[367]\\d|4[0-24-9])\\d{4,11}",[4,5,6,7,8,9,10,11,12,13],[["(\\d)(\\d{3,12})","$1 $2",["1(?:11|[2-9])"],"0$1"],["(\\d{3})(\\d{2})","$1 $2",["517"],"0$1"],["(\\d{2})(\\d{3,5})","$1 $2",["5[079]"],"0$1"],["(\\d{3})(\\d{3,10})","$1 $2",["(?:31|4)6|51|6(?:5[0-3579]|[6-9])|7(?:20|32|8)|[89]"],"0$1"],["(\\d{4})(\\d{3,9})","$1 $2",["[2-467]|5[2-6]"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["5"],"0$1"],["(\\d{2})(\\d{4})(\\d{4,7})","$1 $2 $3",["5"],"0$1"]],"0",0,0,0,0,0,[["1(?:11\\d|[2-9]\\d{3,11})|(?:316|463|(?:51|66|73)2)\\d{3,10}|(?:2(?:1[467]|2[13-8]|5[2357]|6[1-46-8]|7[1-8]|8[124-7]|9[1458])|3(?:1[1-578]|3[23568]|4[5-7]|5[1378]|6[1-38]|8[3-68])|4(?:2[1-8]|35|7[1368]|8[2457])|5(?:2[1-8]|3[357]|4[147]|5[12578]|6[37])|6(?:13|2[1-47]|4[135-8]|5[468])|7(?:2[1-8]|35|4[13478]|5[68]|6[16-8]|7[1-6]|9[45]))\\d{4,10}"],["6(?:5[0-3579]|6[013-9]|[7-9]\\d)\\d{4,10}",[7,8,9,10,11,12,13]],["800\\d{6,10}",[9,10,11,12,13]],["(?:8[69][2-68]|9(?:0[01]|3[019]))\\d{6,10}",[9,10,11,12,13]],0,0,0,0,["5(?:0[1-9]|17|[79]\\d)\\d{2,10}|7[28]0\\d{6,10}",[5,6,7,8,9,10,11,12,13]],["8(?:10|2[018])\\d{6,10}|828\\d{5}",[8,9,10,11,12,13]]]],"AU":["61","001[14-689]|14(?:1[14]|34|4[17]|[56]6|7[47]|88)0011","1(?:[0-79]\\d{7}(?:\\d(?:\\d{2})?)?|8[0-24-9]\\d{7})|[2-478]\\d{8}|1\\d{4,7}",[5,6,7,8,9,10,12],[["(\\d{2})(\\d{3,4})","$1 $2",["16"],"0$1"],["(\\d{2})(\\d{3})(\\d{2,4})","$1 $2 $3",["16"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["14|4"],"0$1"],["(\\d)(\\d{4})(\\d{4})","$1 $2 $3",["[2378]"],"(0$1)"],["(\\d{4})(\\d{3})(\\d{3})","$1 $2 $3",["1(?:30|[89])"]]],"0",0,"0|(183[12])",0,0,0,[["(?:(?:2(?:[0-26-9]\\d|3[0-8]|4[02-9]|5[0135-9])|3(?:[0-3589]\\d|4[0-578]|6[1-9]|7[0-35-9])|7(?:[013-57-9]\\d|2[0-8]))\\d{3}|8(?:51(?:0(?:0[03-9]|[12479]\\d|3[2-9]|5[0-8]|6[1-9]|8[0-7])|1(?:[0235689]\\d|1[0-69]|4[0-589]|7[0-47-9])|2(?:0[0-79]|[18][13579]|2[14-9]|3[0-46-9]|[4-6]\\d|7[89]|9[0-4]))|(?:6[0-8]|[78]\\d)\\d{3}|9(?:[02-9]\\d{3}|1(?:(?:[0-58]\\d|6[0135-9])\\d|7(?:0[0-24-9]|[1-9]\\d)|9(?:[0-46-9]\\d|5[0-79])))))\\d{3}",[9]],["4(?:83[0-38]|93[0-6])\\d{5}|4(?:[0-3]\\d|4[047-9]|5[0-25-9]|6[06-9]|7[02-9]|8[0-24-9]|9[0-27-9])\\d{6}",[9]],["180(?:0\\d{3}|2)\\d{3}",[7,10]],["190[0-26]\\d{6}",[10]],0,0,0,["163\\d{2,6}",[5,6,7,8,9]],["14(?:5(?:1[0458]|[23][458])|71\\d)\\d{4}",[9]],["13(?:00\\d{6}(?:\\d{2})?|45[0-4]\\d{3})|13\\d{4}",[6,8,10,12]]],"0011"],"AW":["297","00","(?:[25-79]\\d\\d|800)\\d{4}",[7],[["(\\d{3})(\\d{4})","$1 $2",["[25-9]"]]],0,0,0,0,0,0,[["5(?:2\\d|8[1-9])\\d{4}"],["(?:290|5[69]\\d|6(?:[03]0|22|4[0-2]|[69]\\d)|7(?:[34]\\d|7[07])|9(?:6[45]|9[4-8]))\\d{4}"],["800\\d{4}"],["900\\d{4}"],0,0,0,0,["(?:28\\d|501)\\d{4}"]]],"AX":["358","00|99(?:[01469]|5(?:[14]1|3[23]|5[59]|77|88|9[09]))","2\\d{4,9}|35\\d{4,5}|(?:60\\d\\d|800)\\d{4,6}|7\\d{5,11}|(?:[14]\\d|3[0-46-9]|50)\\d{4,8}",[5,6,7,8,9,10,11,12],0,"0",0,0,0,0,"18",[["18[1-8]\\d{3,6}",[6,7,8,9]],["4946\\d{2,6}|(?:4[0-8]|50)\\d{4,8}",[6,7,8,9,10]],["800\\d{4,6}",[7,8,9]],["[67]00\\d{5,6}",[8,9]],0,0,["20\\d{4,8}|60[12]\\d{5,6}|7(?:099\\d{4,5}|5[03-9]\\d{3,7})|20[2-59]\\d\\d|(?:606|7(?:0[78]|1|3\\d))\\d{7}|(?:10|29|3[09]|70[1-5]\\d)\\d{4,8}"]],"00"],"AZ":["994","00","365\\d{6}|(?:[124579]\\d|60|88)\\d{7}",[9],[["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["90"],"0$1"],["(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["1[28]|2|365|46","1[28]|2|365[45]|46","1[28]|2|365(?:4|5[02])|46"],"(0$1)"],["(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[13-9]"],"0$1"]],"0",0,0,0,0,0,[["(?:2[12]428|3655[02])\\d{4}|(?:2(?:22[0-79]|63[0-28])|3654)\\d{5}|(?:(?:1[28]|46)\\d|2(?:[014-6]2|[23]3))\\d{6}"],["36554\\d{4}|(?:[16]0|4[04]|5[015]|7[07]|99)\\d{7}"],["88\\d{7}"],["900200\\d{3}"]]],"BA":["387","00","6\\d{8}|(?:[35689]\\d|49|70)\\d{6}",[8,9],[["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["6[1-3]|[7-9]"],"0$1"],["(\\d{2})(\\d{3})(\\d{3})","$1 $2-$3",["[3-5]|6[56]"],"0$1"],["(\\d{2})(\\d{2})(\\d{2})(\\d{3})","$1 $2 $3 $4",["6"],"0$1"]],"0",0,0,0,0,0,[["(?:3(?:[05-79][2-9]|1[4579]|[23][24-9]|4[2-4689]|8[2457-9])|49[2-579]|5(?:0[2-49]|[13][2-9]|[268][2-4679]|4[4689]|5[2-79]|7[2-69]|9[2-4689]))\\d{5}",[8]],["6040\\d{5}|6(?:03|[1-356]|44|7\\d)\\d{6}"],["8[08]\\d{6}",[8]],["9[0246]\\d{6}",[8]],0,0,["703[235]0\\d{3}|70(?:2[0-5]|3[0146]|[56]0)\\d{4}",[8]],0,0,["8[12]\\d{6}",[8]]]],"BB":["1","011","(?:246|[58]\\d\\d|900)\\d{7}",[10],0,"1",0,"1|([2-9]\\d{6})$","246$1",0,"246",[["246521[0369]\\d{3}|246(?:2(?:2[78]|7[0-4])|4(?:1[024-6]|2\\d|3[2-9])|5(?:20|[34]\\d|54|7[1-3])|6(?:2\\d|38)|7[35]7|9(?:1[89]|63))\\d{4}"],["246(?:(?:2(?:[3568]\\d|4[0-57-9])|3(?:5[2-9]|6[0-6])|4(?:46|5\\d)|69[5-7]|8(?:[2-5]\\d|83))\\d|52(?:1[147]|20))\\d{3}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["(?:246976|900[2-9]\\d\\d)\\d{4}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"],0,["246(?:292|367|4(?:1[7-9]|3[01]|4[47-9]|67)|7(?:1[2-9]|2\\d|3[016]|53))\\d{4}"],0,["24631\\d{5}"]]],"BD":["880","00","[1-469]\\d{9}|8[0-79]\\d{7,8}|[2-79]\\d{8}|[2-9]\\d{7}|[3-9]\\d{6}|[57-9]\\d{5}",[6,7,8,9,10],[["(\\d{2})(\\d{4,6})","$1-$2",["31[5-8]|[459]1"],"0$1"],["(\\d{3})(\\d{3,7})","$1-$2",["3(?:[67]|8[013-9])|4(?:6[168]|7|[89][18])|5(?:6[128]|9)|6(?:28|4[14]|5)|7[2-589]|8(?:0[014-9]|[12])|9[358]|(?:3[2-5]|4[235]|5[2-578]|6[0389]|76|8[3-7]|9[24])1|(?:44|66)[01346-9]"],"0$1"],["(\\d{4})(\\d{3,6})","$1-$2",["[13-9]|22"],"0$1"],["(\\d)(\\d{7,8})","$1-$2",["2"],"0$1"]],"0",0,0,0,0,0,[["(?:4(?:31\\d\\d|423)|5222)\\d{3}(?:\\d{2})?|8332[6-9]\\d\\d|(?:3(?:03[56]|224)|4(?:22[25]|653))\\d{3,4}|(?:3(?:42[47]|529|823)|4(?:027|525|65(?:28|8))|562|6257|7(?:1(?:5[3-5]|6[12]|7[156]|89)|22[589]56|32|42675|52(?:[25689](?:56|8)|[347]8)|71(?:6[1267]|75|89)|92374)|82(?:2[59]|32)56|9(?:03[23]56|23(?:256|373)|31|5(?:1|2[4589]56)))\\d{3}|(?:3(?:02[348]|22[35]|324|422)|4(?:22[67]|32[236-9]|6(?:2[46]|5[57])|953)|5526|6(?:024|6655)|81)\\d{4,5}|(?:2(?:7(?:1[0-267]|2[0-289]|3[0-29]|4[01]|5[1-3]|6[013]|7[0178]|91)|8(?:0[125]|1[1-6]|2[0157-9]|3[1-69]|41|6[1-35]|7[1-5]|8[1-8]|9[0-6])|9(?:0[0-2]|1[0-4]|2[568]|3[3-6]|5[5-7]|6[0136-9]|7[0-7]|8[014-9]))|3(?:0(?:2[025-79]|3[2-4])|181|22[12]|32[2356]|824)|4(?:02[09]|22[348]|32[045]|523|6(?:27|54))|666(?:22|53)|7(?:22[57-9]|42[56]|82[35])8|8(?:0[124-9]|2(?:181|2[02-4679]8)|4[12]|[5-7]2)|9(?:[04]2|2(?:2|328)|81))\\d{4}|(?:2(?:222|[45]\\d)\\d|3(?:1(?:2[5-7]|[5-7])|425|822)|4(?:033|1\\d|[257]1|332|4(?:2[246]|5[25])|6(?:2[35]|56|62)|8(?:23|54)|92[2-5])|5(?:02[03489]|22[457]|32[35-79]|42[46]|6(?:[18]|53)|724|826)|6(?:023|2(?:2[2-5]|5[3-5]|8)|32[3478]|42[34]|52[47]|6(?:[18]|6(?:2[34]|5[24]))|[78]2[2-5]|92[2-6])|7(?:02|21\\d|[3-589]1|6[12]|72[24])|8(?:217|3[12]|[5-7]1)|9[24]1)\\d{5}|(?:(?:3[2-8]|5[2-57-9]|6[03-589])1|4[4689][18])\\d{5}|[59]1\\d{5}"],["(?:1[13-9]\\d|644)\\d{7}|(?:3[78]|44|66)[02-9]\\d{7}",[10]],["80[03]\\d{7}",[10]],0,0,0,0,0,["96(?:0[469]|1[0-47]|3[389]|6[69]|7[78])\\d{6}",[10]]]],"BE":["32","00","4\\d{8}|[1-9]\\d{7}",[8,9],[["(\\d{3})(\\d{2})(\\d{3})","$1 $2 $3",["(?:80|9)0"],"0$1"],["(\\d)(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[239]|4[23]"],"0$1"],["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[15-8]"],"0$1"],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["4"],"0$1"]],"0",0,0,0,0,0,[["80[2-8]\\d{5}|(?:1[0-69]|[23][2-8]|4[23]|5\\d|6[013-57-9]|71|8[1-79]|9[2-4])\\d{6}",[8]],["4[5-9]\\d{7}",[9]],["800[1-9]\\d{4}",[8]],["(?:70(?:2[0-57]|3[04-7]|44|69|7[0579])|90(?:0[0-8]|1[36]|2[0-3568]|3[013-689]|[47][2-68]|5[1-68]|6[0-378]|9[34679]))\\d{4}",[8]],0,0,["78(?:0[57]|1[0458]|2[25]|3[15-8]|48|[56]0|7[078]|9\\d)\\d{4}",[8]],0,0,["7879\\d{4}",[8]]]],"BF":["226","00","[025-7]\\d{7}",[8],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[025-7]"]]],0,0,0,0,0,0,[["2(?:0(?:49|5[23]|6[5-7]|9[016-9])|4(?:4[569]|5[4-6]|6[5-7]|7[0179])|5(?:[34]\\d|50|6[5-7]))\\d{4}"],["(?:0[125-7]|5[1-8]|[67]\\d)\\d{6}"]]],"BG":["359","00","[2-7]\\d{6,7}|[89]\\d{6,8}|2\\d{5}",[6,7,8,9],[["(\\d)(\\d)(\\d{2})(\\d{2})","$1 $2 $3 $4",["2"],"0$1"],["(\\d{3})(\\d{4})","$1 $2",["43[1-6]|70[1-9]"],"0$1"],["(\\d)(\\d{3})(\\d{3,4})","$1 $2 $3",["2"],"0$1"],["(\\d{2})(\\d{3})(\\d{2,3})","$1 $2 $3",["[356]|4[124-7]|7[1-9]|8[1-6]|9[1-7]"],"0$1"],["(\\d{3})(\\d{2})(\\d{3})","$1 $2 $3",["(?:70|8)0"],"0$1"],["(\\d{3})(\\d{3})(\\d{2})","$1 $2 $3",["43[1-7]|7"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["[48]|9[08]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["9"],"0$1"]],"0",0,0,0,0,0,[["2\\d{5,7}|(?:43[1-6]|70[1-9])\\d{4,5}|(?:[36]\\d|4[124-7]|[57][1-9]|8[1-6]|9[1-7])\\d{5,6}",[6,7,8]],["(?:43[07-9]|99[69]\\d)\\d{5}|(?:8[7-9]|98)\\d{7}",[8,9]],["800\\d{5}",[8]],["90\\d{6}",[8]],0,0,0,0,0,["700\\d{5}",[8]]]],"BH":["973","00","[136-9]\\d{7}",[8],[["(\\d{4})(\\d{4})","$1 $2",["[13679]|8[047]"]]],0,0,0,0,0,0,[["(?:1(?:3[1356]|6[0156]|7\\d)\\d|6(?:1[16]\\d|500|6(?:0\\d|3[12]|44|7[7-9]|88)|9[69][69])|7(?:1(?:11|78)|7\\d\\d))\\d{4}"],["(?:3(?:[1-79]\\d|8[0-47-9])\\d|6(?:3(?:00|33|6[16])|6(?:3[03-9]|[69]\\d|7[0-6])))\\d{4}"],["80\\d{6}"],["(?:87|9[014578])\\d{6}"],0,0,0,0,0,["84\\d{6}"]]],"BI":["257","00","(?:[267]\\d|31)\\d{6}",[8],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[2367]"]]],0,0,0,0,0,0,[["(?:22|31)\\d{6}"],["(?:29|6[1257-9]|7[125-9])\\d{6}"]]],"BJ":["229","00","(?:[25689]\\d|40)\\d{6}",[8],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[24-689]"]]],0,0,0,0,0,0,[["2(?:02|1[037]|2[45]|3[68])\\d{5}"],["(?:40|5[1-8]|6\\d|9[013-9])\\d{6}"],0,0,0,0,["81\\d{6}"],0,["857[58]\\d{4}"]]],"BL":["590","00","(?:590|(?:69|80)\\d|976)\\d{6}",[9],0,"0",0,0,0,0,0,[["590(?:2[7-9]|5[12]|87)\\d{4}"],["69(?:0\\d\\d|1(?:2[2-9]|3[0-5]))\\d{4}"],["80[0-5]\\d{6}"],0,0,0,0,0,["976[01]\\d{5}"]]],"BM":["1","011","(?:441|[58]\\d\\d|900)\\d{7}",[10],0,"1",0,"1|([2-8]\\d{6})$","441$1",0,"441",[["441(?:[46]\\d\\d|5(?:4\\d|60|89))\\d{4}"],["441(?:[2378]\\d|5[0-39])\\d{5}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"BN":["673","00","[2-578]\\d{6}",[7],[["(\\d{3})(\\d{4})","$1 $2",["[2-578]"]]],0,0,0,0,0,0,[["22[0-7]\\d{4}|(?:2[013-9]|[34]\\d|5[0-25-9])\\d{5}"],["(?:22[89]|[78]\\d\\d)\\d{4}"],0,0,0,0,0,0,["5[34]\\d{5}"]]],"BO":["591","00(?:1\\d)?","(?:[2-467]\\d\\d|8001)\\d{5}",[8,9],[["(\\d)(\\d{7})","$1 $2",["[23]|4[46]"]],["(\\d{8})","$1",["[67]"]],["(\\d{3})(\\d{2})(\\d{4})","$1 $2 $3",["8"]]],"0",0,"0(1\\d)?",0,0,0,[["(?:2(?:2\\d\\d|5(?:11|[258]\\d|9[67])|6(?:12|2\\d|9[34])|8(?:2[34]|39|62))|3(?:3\\d\\d|4(?:6\\d|8[24])|8(?:25|42|5[257]|86|9[25])|9(?:[27]\\d|3[2-4]|4[248]|5[24]|6[2-6]))|4(?:4\\d\\d|6(?:11|[24689]\\d|72)))\\d{4}",[8]],["[67]\\d{7}",[8]],["8001[07]\\d{4}",[9]]]],"BQ":["599","00","(?:[34]1|7\\d)\\d{5}",[7],0,0,0,0,0,0,"[347]",[["(?:318[023]|41(?:6[023]|70)|7(?:1[578]|2[05]|50)\\d)\\d{3}"],["(?:31(?:8[14-8]|9[14578])|416[14-9]|7(?:0[01]|7[07]|8\\d|9[056])\\d)\\d{3}"]]],"BR":["55","00(?:1[245]|2[1-35]|31|4[13]|[56]5|99)","(?:[1-46-9]\\d\\d|5(?:[0-46-9]\\d|5[0-24679]))\\d{8}|[1-9]\\d{9}|[3589]\\d{8}|[34]\\d{7}",[8,9,10,11],[["(\\d{4})(\\d{4})","$1-$2",["300|4(?:0[02]|37)","4(?:02|37)0|[34]00"]],["(\\d{3})(\\d{2,3})(\\d{4})","$1 $2 $3",["(?:[358]|90)0"],"0$1"],["(\\d{2})(\\d{4})(\\d{4})","$1 $2-$3",["(?:[14689][1-9]|2[12478]|3[1-578]|5[13-5]|7[13-579])[2-57]"],"($1)"],["(\\d{2})(\\d{5})(\\d{4})","$1 $2-$3",["[16][1-9]|[2-57-9]"],"($1)"]],"0",0,"(?:0|90)(?:(1[245]|2[1-35]|31|4[13]|[56]5|99)(\\d{10,11}))?","$2",0,0,[["(?:[14689][1-9]|2[12478]|3[1-578]|5[13-5]|7[13-579])[2-5]\\d{7}",[10]],["(?:[14689][1-9]|2[12478]|3[1-578]|5[13-5]|7[13-579])(?:7|9\\d)\\d{7}",[10,11]],["800\\d{6,7}",[9,10]],["300\\d{6}|[59]00\\d{6,7}",[9,10]],0,0,0,0,0,["(?:30[03]\\d{3}|4(?:0(?:0\\d|20)|370))\\d{4}|300\\d{5}",[8,10]]]],"BS":["1","011","(?:242|[58]\\d\\d|900)\\d{7}",[10],0,"1",0,"1|([3-8]\\d{6})$","242$1",0,"242",[["242(?:3(?:02|[236][1-9]|4[0-24-9]|5[0-68]|7[347]|8[0-4]|9[2-467])|461|502|6(?:0[1-4]|12|2[013]|[45]0|7[67]|8[78]|9[89])|7(?:02|88))\\d{4}"],["242(?:3(?:5[79]|7[56]|95)|4(?:[23][1-9]|4[1-35-9]|5[1-8]|6[2-8]|7\\d|81)|5(?:2[45]|3[35]|44|5[1-46-9]|65|77)|6[34]6|7(?:27|38)|8(?:0[1-9]|1[02-9]|2\\d|[89]9))\\d{4}"],["242300\\d{4}|8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"],0,["242225\\d{4}"]]],"BT":["975","00","[17]\\d{7}|[2-8]\\d{6}",[7,8],[["(\\d)(\\d{3})(\\d{3})","$1 $2 $3",["[2-68]|7[246]"]],["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["1[67]|7"]]],0,0,0,0,0,0,[["(?:2[3-6]|[34][5-7]|5[236]|6[2-46]|7[246]|8[2-4])\\d{5}",[7]],["(?:1[67]|77)\\d{6}",[8]]]],"BW":["267","00","(?:0800|(?:[37]|800)\\d)\\d{6}|(?:[2-6]\\d|90)\\d{5}",[7,8,10],[["(\\d{2})(\\d{5})","$1 $2",["90"]],["(\\d{3})(\\d{4})","$1 $2",["[24-6]|3[15-79]"]],["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["[37]"]],["(\\d{4})(\\d{3})(\\d{3})","$1 $2 $3",["0"]],["(\\d{3})(\\d{4})(\\d{3})","$1 $2 $3",["8"]]],0,0,0,0,0,0,[["(?:2(?:4[0-48]|6[0-24]|9[0578])|3(?:1[0-35-9]|55|[69]\\d|7[013])|4(?:6[03]|7[1267]|9[0-5])|5(?:3[03489]|4[0489]|7[1-47]|88|9[0-49])|6(?:2[1-35]|5[149]|8[067]))\\d{4}",[7]],["(?:321|7(?:[1-7]\\d|8[01]))\\d{5}",[8]],["(?:0800|800\\d)\\d{6}",[10]],["90\\d{5}",[7]],0,0,0,0,["79(?:1(?:[01]\\d|20)|2[0-25-7]\\d)\\d{3}",[8]]]],"BY":["375","810","(?:[12]\\d|33|44|902)\\d{7}|8(?:0[0-79]\\d{5,7}|[1-7]\\d{9})|8(?:1[0-489]|[5-79]\\d)\\d{7}|8[1-79]\\d{6,7}|8[0-79]\\d{5}|8\\d{5}",[6,7,8,9,10,11],[["(\\d{3})(\\d{3})","$1 $2",["800"],"8 $1"],["(\\d{3})(\\d{2})(\\d{2,4})","$1 $2 $3",["800"],"8 $1"],["(\\d{4})(\\d{2})(\\d{3})","$1 $2-$3",["1(?:5[169]|6[3-5]|7[179])|2(?:1[35]|2[34]|3[3-5])","1(?:5[169]|6(?:3[1-3]|4|5[125])|7(?:1[3-9]|7[0-24-6]|9[2-7]))|2(?:1[35]|2[34]|3[3-5])"],"8 0$1"],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2-$3-$4",["1(?:[56]|7[467])|2[1-3]"],"8 0$1"],["(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1 $2-$3-$4",["[1-4]"],"8 0$1"],["(\\d{3})(\\d{3,4})(\\d{4})","$1 $2 $3",["[89]"],"8 $1"]],"8",0,"0|80?",0,0,0,[["(?:1(?:5(?:1[1-5]|[24]\\d|6[2-4]|9[1-7])|6(?:[235]\\d|4[1-7])|7\\d\\d)|2(?:1(?:[246]\\d|3[0-35-9]|5[1-9])|2(?:[235]\\d|4[0-8])|3(?:[26]\\d|3[02-79]|4[024-7]|5[03-7])))\\d{5}",[9]],["(?:2(?:5[5-79]|9[1-9])|(?:33|44)\\d)\\d{6}",[9]],["800\\d{3,7}|8(?:0[13]|20\\d)\\d{7}"],["(?:810|902)\\d{7}",[10]],0,0,0,0,["249\\d{6}",[9]]],"8~10"],"BZ":["501","00","(?:0800\\d|[2-8])\\d{6}",[7,11],[["(\\d{3})(\\d{4})","$1-$2",["[2-8]"]],["(\\d)(\\d{3})(\\d{4})(\\d{3})","$1-$2-$3-$4",["0"]]],0,0,0,0,0,0,[["(?:2(?:[02]\\d|36|[68]0)|[3-58](?:[02]\\d|[68]0)|7(?:[02]\\d|32|[68]0))\\d{4}",[7]],["6[0-35-7]\\d{5}",[7]],["0800\\d{7}",[11]]]],"CA":["1","011","(?:[2-8]\\d|90)\\d{8}|3\\d{6}",[7,10],0,"1",0,0,0,0,0,[["(?:2(?:04|[23]6|[48]9|50|63)|3(?:06|43|6[578])|4(?:03|1[68]|3[178]|50|68|74)|5(?:06|1[49]|48|79|8[147])|6(?:04|13|39|47|72)|7(?:0[59]|78|8[02])|8(?:[06]7|19|25|73)|90[25])[2-9]\\d{6}",[10]],["",[10]],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}",[10]],["900[2-9]\\d{6}",[10]],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|(?:5(?:00|2[125-7]|33|44|66|77|88)|622)[2-9]\\d{6}",[10]],0,["310\\d{4}",[7]],0,["600[2-9]\\d{6}",[10]]]],"CC":["61","001[14-689]|14(?:1[14]|34|4[17]|[56]6|7[47]|88)0011","1(?:[0-79]\\d{8}(?:\\d{2})?|8[0-24-9]\\d{7})|[148]\\d{8}|1\\d{5,7}",[6,7,8,9,10,12],0,"0",0,"0|([59]\\d{7})$","8$1",0,0,[["8(?:51(?:0(?:02|31|60|89)|1(?:18|76)|223)|91(?:0(?:1[0-2]|29)|1(?:[28]2|50|79)|2(?:10|64)|3(?:[06]8|22)|4[29]8|62\\d|70[23]|959))\\d{3}",[9]],["4(?:83[0-38]|93[0-6])\\d{5}|4(?:[0-3]\\d|4[047-9]|5[0-25-9]|6[06-9]|7[02-9]|8[0-24-9]|9[0-27-9])\\d{6}",[9]],["180(?:0\\d{3}|2)\\d{3}",[7,10]],["190[0-26]\\d{6}",[10]],0,0,0,0,["14(?:5(?:1[0458]|[23][458])|71\\d)\\d{4}",[9]],["13(?:00\\d{6}(?:\\d{2})?|45[0-4]\\d{3})|13\\d{4}",[6,8,10,12]]],"0011"],"CD":["243","00","[189]\\d{8}|[1-68]\\d{6}",[7,9],[["(\\d{2})(\\d{2})(\\d{3})","$1 $2 $3",["88"],"0$1"],["(\\d{2})(\\d{5})","$1 $2",["[1-6]"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["1"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[89]"],"0$1"]],"0",0,0,0,0,0,[["12\\d{7}|[1-6]\\d{6}"],["88\\d{5}|(?:8[0-59]|9[017-9])\\d{7}"]]],"CF":["236","00","(?:[27]\\d{3}|8776)\\d{4}",[8],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[278]"]]],0,0,0,0,0,0,[["2[12]\\d{6}"],["7[02457]\\d{6}"],0,["8776\\d{4}"]]],"CG":["242","00","222\\d{6}|(?:0\\d|80)\\d{7}",[9],[["(\\d)(\\d{4})(\\d{4})","$1 $2 $3",["8"]],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[02]"]]],0,0,0,0,0,0,[["222[1-589]\\d{5}"],["026(?:1[0-5]|6[6-9])\\d{4}|0(?:[14-6]\\d\\d|2(?:40|5[5-8]|6[07-9]))\\d{5}"],0,["80(?:0\\d\\d|120)\\d{4}"]]],"CH":["41","00","8\\d{11}|[2-9]\\d{8}",[9],[["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["8[047]|90"],"0$1"],["(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[2-79]|81"],"0$1"],["(\\d{3})(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4 $5",["8"],"0$1"]],"0",0,0,0,0,0,[["(?:2[12467]|3[1-4]|4[134]|5[256]|6[12]|[7-9]1)\\d{7}"],["7[35-9]\\d{7}"],["800\\d{6}"],["90[016]\\d{6}"],["878\\d{6}"],0,["5[18]\\d{7}"],["74[0248]\\d{6}"],0,["84[0248]\\d{6}"]]],"CI":["225","00","[02]\\d{9}",[10],[["(\\d{2})(\\d{2})(\\d)(\\d{5})","$1 $2 $3 $4",["2"]],["(\\d{2})(\\d{2})(\\d{2})(\\d{4})","$1 $2 $3 $4",["0"]]],0,0,0,0,0,0,[["2(?:[15]\\d{3}|7(?:2(?:0[23]|1[2357]|[23][45]|4[3-5])|3(?:06|1[69]|[2-6]7)))\\d{5}"],["0704[0-7]\\d{5}|0(?:[15]\\d\\d|7(?:0[0-37-9]|[4-9][7-9]))\\d{6}"]]],"CK":["682","00","[2-578]\\d{4}",[5],[["(\\d{2})(\\d{3})","$1 $2",["[2-578]"]]],0,0,0,0,0,0,[["(?:2\\d|3[13-7]|4[1-5])\\d{3}"],["[578]\\d{4}"]]],"CL":["56","(?:0|1(?:1[0-69]|2[02-5]|5[13-58]|69|7[0167]|8[018]))0","12300\\d{6}|6\\d{9,10}|[2-9]\\d{8}",[9,10,11],[["(\\d{5})(\\d{4})","$1 $2",["219","2196"],"($1)"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["44"]],["(\\d)(\\d{4})(\\d{4})","$1 $2 $3",["2[1-36]"],"($1)"],["(\\d)(\\d{4})(\\d{4})","$1 $2 $3",["9[2-9]"]],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["3[2-5]|[47]|5[1-3578]|6[13-57]|8(?:0[1-9]|[1-9])"],"($1)"],["(\\d{3})(\\d{3})(\\d{3,4})","$1 $2 $3",["60|8"]],["(\\d{4})(\\d{3})(\\d{4})","$1 $2 $3",["1"]],["(\\d{3})(\\d{3})(\\d{2})(\\d{3})","$1 $2 $3 $4",["60"]]],0,0,0,0,0,0,[["2(?:1982[0-6]|3314[05-9])\\d{3}|(?:2(?:1(?:160|962)|3(?:2\\d\\d|3(?:[034]\\d|1[0-35-9]|2[1-9]|5[0-2])|600)|646[59])|80[1-9]\\d\\d|9(?:3(?:[0-57-9]\\d\\d|6(?:0[02-9]|[1-9]\\d))|6(?:[0-8]\\d\\d|9(?:[02-79]\\d|1[05-9]))|7[1-9]\\d\\d|9(?:[03-9]\\d\\d|1(?:[0235-9]\\d|4[0-24-9])|2(?:[0-79]\\d|8[0-46-9]))))\\d{4}|(?:22|3[2-5]|[47][1-35]|5[1-3578]|6[13-57]|8[1-9]|9[2458])\\d{7}",[9]],["",[9]],["(?:123|8)00\\d{6}",[9,11]],0,0,0,0,0,["44\\d{7}",[9]],["600\\d{7,8}",[10,11]]]],"CM":["237","00","[26]\\d{8}|88\\d{6,7}",[8,9],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["88"]],["(\\d)(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4 $5",["[26]|88"]]],0,0,0,0,0,0,[["2(?:22|33)\\d{6}",[9]],["(?:24[23]|6[25-9]\\d)\\d{6}",[9]],["88\\d{6,7}"]]],"CN":["86","00|1(?:[12]\\d|79)\\d\\d00","1[127]\\d{8,9}|2\\d{9}(?:\\d{2})?|[12]\\d{6,7}|86\\d{6}|(?:1[03-689]\\d|6)\\d{7,9}|(?:[3-579]\\d|8[0-57-9])\\d{6,9}",[7,8,9,10,11,12],[["(\\d{2})(\\d{5,6})","$1 $2",["(?:10|2[0-57-9])[19]","(?:10|2[0-57-9])(?:10|9[56])","(?:10|2[0-57-9])(?:100|9[56])"],"0$1"],["(\\d{3})(\\d{5,6})","$1 $2",["3(?:[157]|35|49|9[1-68])|4(?:[17]|2[179]|6[47-9]|8[23])|5(?:[1357]|2[37]|4[36]|6[1-46]|80)|6(?:3[1-5]|6[0238]|9[12])|7(?:01|[1579]|2[248]|3[014-9]|4[3-6]|6[023689])|8(?:1[236-8]|2[5-7]|[37]|8[36-8]|9[1-8])|9(?:0[1-3689]|1[1-79]|[379]|4[13]|5[1-5])|(?:4[35]|59|85)[1-9]","(?:3(?:[157]\\d|35|49|9[1-68])|4(?:[17]\\d|2[179]|[35][1-9]|6[47-9]|8[23])|5(?:[1357]\\d|2[37]|4[36]|6[1-46]|80|9[1-9])|6(?:3[1-5]|6[0238]|9[12])|7(?:01|[1579]\\d|2[248]|3[014-9]|4[3-6]|6[023689])|8(?:1[236-8]|2[5-7]|[37]\\d|5[1-9]|8[36-8]|9[1-8])|9(?:0[1-3689]|1[1-79]|[379]\\d|4[13]|5[1-5]))[19]","85[23](?:10|95)|(?:3(?:[157]\\d|35|49|9[1-68])|4(?:[17]\\d|2[179]|[35][1-9]|6[47-9]|8[23])|5(?:[1357]\\d|2[37]|4[36]|6[1-46]|80|9[1-9])|6(?:3[1-5]|6[0238]|9[12])|7(?:01|[1579]\\d|2[248]|3[014-9]|4[3-6]|6[023689])|8(?:1[236-8]|2[5-7]|[37]\\d|5[14-9]|8[36-8]|9[1-8])|9(?:0[1-3689]|1[1-79]|[379]\\d|4[13]|5[1-5]))(?:10|9[56])","85[23](?:100|95)|(?:3(?:[157]\\d|35|49|9[1-68])|4(?:[17]\\d|2[179]|[35][1-9]|6[47-9]|8[23])|5(?:[1357]\\d|2[37]|4[36]|6[1-46]|80|9[1-9])|6(?:3[1-5]|6[0238]|9[12])|7(?:01|[1579]\\d|2[248]|3[014-9]|4[3-6]|6[023689])|8(?:1[236-8]|2[5-7]|[37]\\d|5[14-9]|8[36-8]|9[1-8])|9(?:0[1-3689]|1[1-79]|[379]\\d|4[13]|5[1-5]))(?:100|9[56])"],"0$1"],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["(?:4|80)0"]],["(\\d{2})(\\d{4})(\\d{4})","$1 $2 $3",["10|2(?:[02-57-9]|1[1-9])","10|2(?:[02-57-9]|1[1-9])","10[0-79]|2(?:[02-57-9]|1[1-79])|(?:10|21)8(?:0[1-9]|[1-9])"],"0$1",1],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["3(?:[3-59]|7[02-68])|4(?:[26-8]|3[3-9]|5[2-9])|5(?:3[03-9]|[468]|7[028]|9[2-46-9])|6|7(?:[0-247]|3[04-9]|5[0-4689]|6[2368])|8(?:[1-358]|9[1-7])|9(?:[013479]|5[1-5])|(?:[34]1|55|79|87)[02-9]"],"0$1",1],["(\\d{3})(\\d{7,8})","$1 $2",["9"]],["(\\d{4})(\\d{3})(\\d{4})","$1 $2 $3",["80"],"0$1",1],["(\\d{3})(\\d{4})(\\d{4})","$1 $2 $3",["[3-578]"],"0$1",1],["(\\d{3})(\\d{4})(\\d{4})","$1 $2 $3",["1[3-9]"]],["(\\d{2})(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3 $4",["[12]"],"0$1",1]],"0",0,"0|(1(?:[12]\\d|79)\\d\\d)",0,0,0,[["(?:10(?:[02-79]\\d\\d|[18](?:0[1-9]|[1-9]\\d))|21(?:[18](?:0[1-9]|[1-9]\\d)|[2-79]\\d\\d))\\d{5}|(?:43[35]|754)\\d{7,8}|8(?:078\\d{7}|51\\d{7,8})|(?:10|(?:2|85)1|43[35]|754)(?:100\\d\\d|95\\d{3,4})|(?:2[02-57-9]|3(?:11|7[179])|4(?:[15]1|3[12])|5(?:1\\d|2[37]|3[12]|51|7[13-79]|9[15])|7(?:[39]1|5[57]|6[09])|8(?:71|98))(?:[02-8]\\d{7}|1(?:0(?:0\\d\\d(?:\\d{3})?|[1-9]\\d{5})|[1-9]\\d{6})|9(?:[0-46-9]\\d{6}|5\\d{3}(?:\\d(?:\\d{2})?)?))|(?:3(?:1[02-9]|35|49|5\\d|7[02-68]|9[1-68])|4(?:1[02-9]|2[179]|3[46-9]|5[2-9]|6[47-9]|7\\d|8[23])|5(?:3[03-9]|4[36]|5[02-9]|6[1-46]|7[028]|80|9[2-46-9])|6(?:3[1-5]|6[0238]|9[12])|7(?:01|[17]\\d|2[248]|3[04-9]|4[3-6]|5[0-3689]|6[2368]|9[02-9])|8(?:1[236-8]|2[5-7]|3\\d|5[2-9]|7[02-9]|8[36-8]|9[1-7])|9(?:0[1-3689]|1[1-79]|[379]\\d|4[13]|5[1-5]))(?:[02-8]\\d{6}|1(?:0(?:0\\d\\d(?:\\d{2})?|[1-9]\\d{4})|[1-9]\\d{5})|9(?:[0-46-9]\\d{5}|5\\d{3,5}))",[7,8,9,10,11]],["1740[0-5]\\d{6}|1(?:[38]\\d|4[57]|5[0-35-9]|6[25-7]|7[0-35-8]|9[0135-9])\\d{8}",[11]],["(?:(?:10|21)8|8)00\\d{7}",[10,12]],["16[08]\\d{5}",[8]],0,0,0,0,0,["400\\d{7}|950\\d{7,8}|(?:10|2[0-57-9]|3(?:[157]\\d|35|49|9[1-68])|4(?:[17]\\d|2[179]|[35][1-9]|6[47-9]|8[23])|5(?:[1357]\\d|2[37]|4[36]|6[1-46]|80|9[1-9])|6(?:3[1-5]|6[0238]|9[12])|7(?:01|[1579]\\d|2[248]|3[014-9]|4[3-6]|6[023689])|8(?:1[236-8]|2[5-7]|[37]\\d|5[14-9]|8[36-8]|9[1-8])|9(?:0[1-3689]|1[1-79]|[379]\\d|4[13]|5[1-5]))96\\d{3,4}",[7,8,9,10,11]]],"00"],"CO":["57","00(?:4(?:[14]4|56)|[579])","(?:(?:1\\d|[36])\\d{3}|9101)\\d{6}|[124-8]\\d{7}",[8,10,11],[["(\\d)(\\d{7})","$1 $2",["[146][2-9]|[2578]"],"($1)"],["(\\d{3})(\\d{7})","$1 $2",["6"],"($1)"],["(\\d{3})(\\d{7})","$1 $2",["[39]"]],["(\\d)(\\d{3})(\\d{7})","$1-$2-$3",["1"],"0$1",0,"$1 $2 $3"]],"0",0,"0([3579]|4(?:[14]4|56))?",0,0,0,[["60[124-8][2-9]\\d{6}|[124-8][2-9]\\d{6}",[8,10]],["3333(?:0(?:0\\d|1[0-5])|[4-9]\\d\\d)\\d{3}|(?:3(?:24[1-9]|3(?:00|3[0-24-9]))|9101)\\d{6}|3(?:0[0-5]|1\\d|2[0-3]|5[01]|70)\\d{7}",[10]],["1800\\d{7}",[11]],["19(?:0[01]|4[78])\\d{7}",[11]]]],"CR":["506","00","(?:8\\d|90)\\d{8}|(?:[24-8]\\d{3}|3005)\\d{4}",[8,10],[["(\\d{4})(\\d{4})","$1 $2",["[2-7]|8[3-9]"]],["(\\d{3})(\\d{3})(\\d{4})","$1-$2-$3",["[89]"]]],0,0,"(19(?:0[0-2468]|1[09]|20|66|77|99))",0,0,0,[["210[7-9]\\d{4}|2(?:[024-7]\\d|1[1-9])\\d{5}",[8]],["(?:3005\\d|6500[01])\\d{3}|(?:5[07]|6[0-4]|7[0-3]|8[3-9])\\d{6}",[8]],["800\\d{7}",[10]],["90[059]\\d{7}",[10]],0,0,0,0,["(?:210[0-6]|4\\d{3}|5100)\\d{4}",[8]]]],"CU":["53","119","[27]\\d{6,7}|[34]\\d{5,7}|(?:5|8\\d\\d)\\d{7}",[6,7,8,10],[["(\\d{2})(\\d{4,6})","$1 $2",["2[1-4]|[34]"],"(0$1)"],["(\\d)(\\d{6,7})","$1 $2",["7"],"(0$1)"],["(\\d)(\\d{7})","$1 $2",["5"],"0$1"],["(\\d{3})(\\d{7})","$1 $2",["8"],"0$1"]],"0",0,0,0,0,0,[["(?:3[23]|48)\\d{4,6}|(?:31|4[36]|8(?:0[25]|78)\\d)\\d{6}|(?:2[1-4]|4[1257]|7\\d)\\d{5,6}"],["5\\d{7}",[8]],["800\\d{7}",[10]],0,0,0,0,0,0,["807\\d{7}",[10]]]],"CV":["238","0","(?:[2-59]\\d\\d|800)\\d{4}",[7],[["(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3",["[2-589]"]]],0,0,0,0,0,0,[["2(?:2[1-7]|3[0-8]|4[12]|5[1256]|6\\d|7[1-3]|8[1-5])\\d{4}"],["(?:36|5[1-389]|9\\d)\\d{5}"],["800\\d{4}"],0,0,0,0,0,["(?:3[3-5]|4[356])\\d{5}"]]],"CW":["599","00","(?:[34]1|60|(?:7|9\\d)\\d)\\d{5}",[7,8],[["(\\d{3})(\\d{4})","$1 $2",["[3467]"]],["(\\d)(\\d{3})(\\d{4})","$1 $2 $3",["9[4-8]"]]],0,0,0,0,0,"[69]",[["9(?:4(?:3[0-5]|4[14]|6\\d)|50\\d|7(?:2[014]|3[02-9]|4[4-9]|6[357]|77|8[7-9])|8(?:3[39]|[46]\\d|7[01]|8[57-9]))\\d{4}"],["953[01]\\d{4}|9(?:5[12467]|6[5-9])\\d{5}"],0,0,0,0,0,["955\\d{5}",[8]],0,["60[0-2]\\d{4}",[7]]]],"CX":["61","001[14-689]|14(?:1[14]|34|4[17]|[56]6|7[47]|88)0011","1(?:[0-79]\\d{8}(?:\\d{2})?|8[0-24-9]\\d{7})|[148]\\d{8}|1\\d{5,7}",[6,7,8,9,10,12],0,"0",0,"0|([59]\\d{7})$","8$1",0,0,[["8(?:51(?:0(?:01|30|59|88)|1(?:17|46|75)|2(?:22|35))|91(?:00[6-9]|1(?:[28]1|49|78)|2(?:09|63)|3(?:12|26|75)|4(?:56|97)|64\\d|7(?:0[01]|1[0-2])|958))\\d{3}",[9]],["4(?:83[0-38]|93[0-6])\\d{5}|4(?:[0-3]\\d|4[047-9]|5[0-25-9]|6[06-9]|7[02-9]|8[0-24-9]|9[0-27-9])\\d{6}",[9]],["180(?:0\\d{3}|2)\\d{3}",[7,10]],["190[0-26]\\d{6}",[10]],0,0,0,0,["14(?:5(?:1[0458]|[23][458])|71\\d)\\d{4}",[9]],["13(?:00\\d{6}(?:\\d{2})?|45[0-4]\\d{3})|13\\d{4}",[6,8,10,12]]],"0011"],"CY":["357","00","(?:[279]\\d|[58]0)\\d{6}",[8],[["(\\d{2})(\\d{6})","$1 $2",["[257-9]"]]],0,0,0,0,0,0,[["2[2-6]\\d{6}"],["9[4-79]\\d{6}"],["800\\d{5}"],["90[09]\\d{5}"],["700\\d{5}"],0,["(?:50|77)\\d{6}"],0,0,["80[1-9]\\d{5}"]]],"CZ":["420","00","(?:[2-578]\\d|60)\\d{7}|9\\d{8,11}",[9],[["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[2-8]|9[015-7]"]],["(\\d{2})(\\d{3})(\\d{3})(\\d{2})","$1 $2 $3 $4",["96"]],["(\\d{2})(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3 $4",["9"]],["(\\d{3})(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3 $4",["9"]]],0,0,0,0,0,0,[["(?:2\\d|3[1257-9]|4[16-9]|5[13-9])\\d{7}"],["(?:60[1-8]|7(?:0[2-5]|[2379]\\d))\\d{6}"],["800\\d{6}"],["9(?:0[05689]|76)\\d{6}"],["70[01]\\d{6}"],0,["9(?:5\\d|7[2-4])\\d{6}"],0,["9[17]0\\d{6}"],["8[134]\\d{7}"]]],"DE":["49","00","[2579]\\d{5,14}|49(?:[34]0|69|8\\d)\\d\\d?|49(?:37|49|60|7[089]|9\\d)\\d{1,3}|49(?:1\\d|2[02-9]|3[2-689]|7[1-7])\\d{1,8}|(?:1|[368]\\d|4[0-8])\\d{3,13}|49(?:[05]\\d|[23]1|[46][1-8])\\d{1,9}",[4,5,6,7,8,9,10,11,12,13,14,15],[["(\\d{2})(\\d{3,13})","$1 $2",["3[02]|40|[68]9"],"0$1"],["(\\d{3})(\\d{3,12})","$1 $2",["2(?:0[1-389]|1[124]|2[18]|3[14])|3(?:[35-9][15]|4[015])|906|(?:2[4-9]|4[2-9]|[579][1-9]|[68][1-8])1","2(?:0[1-389]|12[0-8])|3(?:[35-9][15]|4[015])|906|2(?:[13][14]|2[18])|(?:2[4-9]|4[2-9]|[579][1-9]|[68][1-8])1"],"0$1"],["(\\d{4})(\\d{2,11})","$1 $2",["[24-6]|3(?:[3569][02-46-9]|4[2-4679]|7[2-467]|8[2-46-8])|70[2-8]|8(?:0[2-9]|[1-8])|90[7-9]|[79][1-9]","[24-6]|3(?:3(?:0[1-467]|2[127-9]|3[124578]|7[1257-9]|8[1256]|9[145])|4(?:2[135]|4[13578]|9[1346])|5(?:0[14]|2[1-3589]|6[1-4]|7[13468]|8[13568])|6(?:2[1-489]|3[124-6]|6[13]|7[12579]|8[1-356]|9[135])|7(?:2[1-7]|4[145]|6[1-5]|7[1-4])|8(?:21|3[1468]|6|7[1467]|8[136])|9(?:0[12479]|2[1358]|4[134679]|6[1-9]|7[136]|8[147]|9[1468]))|70[2-8]|8(?:0[2-9]|[1-8])|90[7-9]|[79][1-9]|3[68]4[1347]|3(?:47|60)[1356]|3(?:3[46]|46|5[49])[1246]|3[4579]3[1357]"],"0$1"],["(\\d{3})(\\d{4})","$1 $2",["138"],"0$1"],["(\\d{5})(\\d{2,10})","$1 $2",["3"],"0$1"],["(\\d{3})(\\d{5,11})","$1 $2",["181"],"0$1"],["(\\d{3})(\\d)(\\d{4,10})","$1 $2 $3",["1(?:3|80)|9"],"0$1"],["(\\d{3})(\\d{7,8})","$1 $2",["1[67]"],"0$1"],["(\\d{3})(\\d{7,12})","$1 $2",["8"],"0$1"],["(\\d{5})(\\d{6})","$1 $2",["185","1850","18500"],"0$1"],["(\\d{3})(\\d{4})(\\d{4})","$1 $2 $3",["7"],"0$1"],["(\\d{4})(\\d{7})","$1 $2",["18[68]"],"0$1"],["(\\d{5})(\\d{6})","$1 $2",["15[0568]"],"0$1"],["(\\d{4})(\\d{7})","$1 $2",["15[1279]"],"0$1"],["(\\d{3})(\\d{8})","$1 $2",["18"],"0$1"],["(\\d{3})(\\d{2})(\\d{7,8})","$1 $2 $3",["1(?:6[023]|7)"],"0$1"],["(\\d{4})(\\d{2})(\\d{7})","$1 $2 $3",["15[279]"],"0$1"],["(\\d{3})(\\d{2})(\\d{8})","$1 $2 $3",["15"],"0$1"]],"0",0,0,0,0,0,[["32\\d{9,11}|49[2-6]\\d{10}|322\\d{6}|49[0-7]\\d{3,9}|(?:[34]0|[68]9)\\d{3,13}|(?:2(?:0[1-689]|[1-3569]\\d|4[0-8]|7[1-7]|8[0-7])|3(?:[3569]\\d|4[0-79]|7[1-7]|8[1-8])|4(?:1[02-9]|[2-48]\\d|5[0-6]|6[0-8]|7[0-79])|5(?:0[2-8]|[124-6]\\d|[38][0-8]|[79][0-7])|6(?:0[02-9]|[1-358]\\d|[47][0-8]|6[1-9])|7(?:0[2-8]|1[1-9]|[27][0-7]|3\\d|[4-6][0-8]|8[0-5]|9[013-7])|8(?:0[2-9]|1[0-79]|2\\d|3[0-46-9]|4[0-6]|5[013-9]|6[1-8]|7[0-8]|8[0-24-6])|9(?:0[6-9]|[1-4]\\d|[589][0-7]|6[0-8]|7[0-467]))\\d{3,12}",[5,6,7,8,9,10,11,12,13,14,15]],["15[0-25-9]\\d{8}|1(?:6[023]|7\\d)\\d{7,8}",[10,11]],["800\\d{7,12}",[10,11,12,13,14,15]],["(?:137[7-9]|900(?:[135]|9\\d))\\d{6}",[10,11]],["700\\d{8}",[11]],0,["18(?:1\\d{5,11}|[2-9]\\d{8})",[8,9,10,11,12,13,14]],["16(?:4\\d{1,10}|[89]\\d{1,11})",[4,5,6,7,8,9,10,11,12,13,14]],0,["180\\d{5,11}|13(?:7[1-6]\\d\\d|8)\\d{4}",[7,8,9,10,11,12,13,14]]]],"DJ":["253","00","(?:2\\d|77)\\d{6}",[8],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[27]"]]],0,0,0,0,0,0,[["2(?:1[2-5]|7[45])\\d{5}"],["77\\d{6}"]]],"DK":["45","00","[2-9]\\d{7}",[8],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[2-9]"]]],0,0,0,0,0,0,[["(?:[2-7]\\d|8[126-9]|9[1-46-9])\\d{6}"],[""],["80\\d{6}"],["90\\d{6}"]]],"DM":["1","011","(?:[58]\\d\\d|767|900)\\d{7}",[10],0,"1",0,"1|([2-7]\\d{6})$","767$1",0,"767",[["767(?:2(?:55|66)|4(?:2[01]|4[0-25-9])|50[0-4])\\d{4}"],["767(?:2(?:[2-4689]5|7[5-7])|31[5-7]|61[1-8]|70[1-6])\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"DO":["1","011","(?:[58]\\d\\d|900)\\d{7}",[10],0,"1",0,0,0,0,"8001|8[024]9",[["8(?:[04]9[2-9]\\d\\d|29(?:2(?:[0-59]\\d|6[04-9]|7[0-27]|8[0237-9])|3(?:[0-35-9]\\d|4[7-9])|[45]\\d\\d|6(?:[0-27-9]\\d|[3-5][1-9]|6[0135-8])|7(?:0[013-9]|[1-37]\\d|4[1-35689]|5[1-4689]|6[1-57-9]|8[1-79]|9[1-8])|8(?:0[146-9]|1[0-48]|[248]\\d|3[1-79]|5[01589]|6[013-68]|7[124-8]|9[0-8])|9(?:[0-24]\\d|3[02-46-9]|5[0-79]|60|7[0169]|8[57-9]|9[02-9])))\\d{4}"],["8[024]9[2-9]\\d{6}"],["8(?:00(?:14|[2-9]\\d)|(?:33|44|55|66|77|88)[2-9]\\d)\\d{5}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"DZ":["213","00","(?:[1-4]|[5-79]\\d|80)\\d{7}",[8,9],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[1-4]"],"0$1"],["(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["9"],"0$1"],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[5-8]"],"0$1"]],"0",0,0,0,0,0,[["9619\\d{5}|(?:1\\d|2[013-79]|3[0-8]|4[013-689])\\d{6}"],["(?:5(?:4[0-29]|5\\d|6[0-2])|6(?:[569]\\d|7[0-6])|7[7-9]\\d)\\d{6}",[9]],["800\\d{6}",[9]],["80[3-689]1\\d{5}",[9]],0,0,0,0,["98[23]\\d{6}",[9]],["80[12]1\\d{5}",[9]]]],"EC":["593","00","1\\d{9,10}|(?:[2-7]|9\\d)\\d{7}",[8,9,10,11],[["(\\d)(\\d{3})(\\d{4})","$1 $2-$3",["[2-7]"],"(0$1)",0,"$1-$2-$3"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["9"],"0$1"],["(\\d{4})(\\d{3})(\\d{3,4})","$1 $2 $3",["1"]]],"0",0,0,0,0,0,[["[2-7][2-7]\\d{6}",[8]],["964[0-2]\\d{5}|9(?:39|[57][89]|6[0-36-9]|[89]\\d)\\d{6}",[9]],["1800\\d{7}|1[78]00\\d{6}",[10,11]],0,0,0,0,0,["[2-7]890\\d{4}",[8]]]],"EE":["372","00","8\\d{9}|[4578]\\d{7}|(?:[3-8]\\d|90)\\d{5}",[7,8,10],[["(\\d{3})(\\d{4})","$1 $2",["[369]|4[3-8]|5(?:[0-2]|5[0-478]|6[45])|7[1-9]|88","[369]|4[3-8]|5(?:[02]|1(?:[0-8]|95)|5[0-478]|6(?:4[0-4]|5[1-589]))|7[1-9]|88"]],["(\\d{4})(\\d{3,4})","$1 $2",["[45]|8(?:00|[1-49])","[45]|8(?:00[1-9]|[1-49])"]],["(\\d{2})(\\d{2})(\\d{4})","$1 $2 $3",["7"]],["(\\d{4})(\\d{3})(\\d{3})","$1 $2 $3",["8"]]],0,0,0,0,0,0,[["(?:3[23589]|4[3-8]|6\\d|7[1-9]|88)\\d{5}",[7]],["(?:5\\d{5}|8(?:1(?:0(?:000|[3-9]\\d\\d)|(?:1(?:0[236]|1\\d)|(?:23|[3-79]\\d)\\d)\\d)|2(?:0(?:000|(?:19|[2-7]\\d)\\d)|(?:(?:[124-6]\\d|3[5-9])\\d|7(?:[3679]\\d|8[13-9])|8(?:[2-6]\\d|7[01]))\\d)|[349]\\d{4}))\\d\\d|5(?:(?:[02]\\d|5[0-478])\\d|1(?:[0-8]\\d|95)|6(?:4[0-4]|5[1-589]))\\d{3}",[7,8]],["800(?:(?:0\\d\\d|1)\\d|[2-9])\\d{3}"],["(?:40\\d\\d|900)\\d{4}",[7,8]],["70[0-2]\\d{5}",[8]]]],"EG":["20","00","[189]\\d{8,9}|[24-6]\\d{8}|[135]\\d{7}",[8,9,10],[["(\\d)(\\d{7,8})","$1 $2",["[23]"],"0$1"],["(\\d{2})(\\d{6,7})","$1 $2",["1[35]|[4-6]|8[2468]|9[235-7]"],"0$1"],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["[189]"],"0$1"]],"0",0,0,0,0,0,[["13[23]\\d{6}|(?:15|57)\\d{6,7}|(?:2[2-4]|3|4[05-8]|5[05]|6[24-689]|8[2468]|9[235-7])\\d{7}",[8,9]],["1[0-25]\\d{8}",[10]],["800\\d{7}",[10]],["900\\d{7}",[10]]]],"EH":["212","00","[5-8]\\d{8}",[9],0,"0",0,0,0,0,"528[89]",[["528[89]\\d{5}"],["(?:6(?:[0-79]\\d|8[0-247-9])|7(?:[017]\\d|2[0-2]|6[0-367]))\\d{6}"],["80\\d{7}"],["89\\d{7}"],0,0,0,0,["592(?:4[0-2]|93)\\d{4}"]]],"ER":["291","00","[178]\\d{6}",[7],[["(\\d)(\\d{3})(\\d{3})","$1 $2 $3",["[178]"],"0$1"]],"0",0,0,0,0,0,[["(?:1(?:1[12568]|[24]0|55|6[146])|8\\d\\d)\\d{4}"],["(?:17[1-3]|7\\d\\d)\\d{4}"]]],"ES":["34","00","[5-9]\\d{8}",[9],[["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[89]00"]],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[5-9]"]]],0,0,0,0,0,0,[["96906(?:0[0-8]|1[1-9]|[2-9]\\d)\\d\\d|9(?:69(?:0[0-57-9]|[1-9]\\d)|73(?:[0-8]\\d|9[1-9]))\\d{4}|(?:8(?:[1356]\\d|[28][0-8]|[47][1-9])|9(?:[135]\\d|[268][0-8]|4[1-9]|7[124-9]))\\d{6}"],["(?:590[16]00\\d|9(?:6906(?:09|10)|7390\\d\\d))\\d\\d|(?:6\\d|7[1-48])\\d{7}"],["[89]00\\d{6}"],["80[367]\\d{6}"],["70\\d{7}"],0,["51\\d{7}"],0,0,["90[12]\\d{6}"]]],"ET":["251","00","(?:11|[2-59]\\d)\\d{7}",[9],[["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[1-59]"],"0$1"]],"0",0,0,0,0,0,[["11667[01]\\d{3}|(?:11(?:1(?:1[124]|2[2-7]|3[1-5]|5[5-8]|8[6-8])|2(?:13|3[6-8]|5[89]|7[05-9]|8[2-6])|3(?:2[01]|3[0-289]|4[1289]|7[1-4]|87)|4(?:1[69]|3[2-49]|4[0-3]|6[5-8])|5(?:1[578]|44|5[0-4])|6(?:1[78]|2[69]|39|4[5-7]|5[1-5]|6[0-59]|8[015-8]))|2(?:2(?:11[1-9]|22[0-7]|33\\d|44[1467]|66[1-68])|5(?:11[124-6]|33[2-8]|44[1467]|55[14]|66[1-3679]|77[124-79]|880))|3(?:3(?:11[0-46-8]|(?:22|55)[0-6]|33[0134689]|44[04]|66[01467])|4(?:44[0-8]|55[0-69]|66[0-3]|77[1-5]))|4(?:6(?:119|22[0-24-7]|33[1-5]|44[13-69]|55[14-689]|660|88[1-4])|7(?:(?:11|22)[1-9]|33[13-7]|44[13-6]|55[1-689]))|5(?:7(?:227|55[05]|(?:66|77)[14-8])|8(?:11[149]|22[013-79]|33[0-68]|44[013-8]|550|66[1-5]|77\\d)))\\d{4}"],["9\\d{8}"]]],"FI":["358","00|99(?:[01469]|5(?:[14]1|3[23]|5[59]|77|88|9[09]))","[1-35689]\\d{4}|7\\d{10,11}|(?:[124-7]\\d|3[0-46-9])\\d{8}|[1-9]\\d{5,8}",[5,6,7,8,9,10,11,12],[["(\\d)(\\d{4,9})","$1 $2",["[2568][1-8]|3(?:0[1-9]|[1-9])|9"],"0$1"],["(\\d{3})(\\d{3,7})","$1 $2",["[12]00|[368]|70[07-9]"],"0$1"],["(\\d{2})(\\d{4,8})","$1 $2",["[1245]|7[135]"],"0$1"],["(\\d{2})(\\d{6,10})","$1 $2",["7"],"0$1"]],"0",0,0,0,0,"1[03-79]|[2-9]",[["(?:1[3-79][1-8]|[235689][1-8]\\d)\\d{2,6}",[5,6,7,8,9]],["4946\\d{2,6}|(?:4[0-8]|50)\\d{4,8}",[6,7,8,9,10]],["800\\d{4,6}",[7,8,9]],["[67]00\\d{5,6}",[8,9]],0,0,["20\\d{4,8}|60[12]\\d{5,6}|7(?:099\\d{4,5}|5[03-9]\\d{3,7})|20[2-59]\\d\\d|(?:606|7(?:0[78]|1|3\\d))\\d{7}|(?:10|29|3[09]|70[1-5]\\d)\\d{4,8}"]],"00"],"FJ":["679","0(?:0|52)","45\\d{5}|(?:0800\\d|[235-9])\\d{6}",[7,11],[["(\\d{3})(\\d{4})","$1 $2",["[235-9]|45"]],["(\\d{4})(\\d{3})(\\d{4})","$1 $2 $3",["0"]]],0,0,0,0,0,0,[["603\\d{4}|(?:3[0-5]|6[25-7]|8[58])\\d{5}",[7]],["(?:[279]\\d|45|5[01568]|8[034679])\\d{5}",[7]],["0800\\d{7}",[11]]],"00"],"FK":["500","00","[2-7]\\d{4}",[5],0,0,0,0,0,0,0,[["[2-47]\\d{4}"],["[56]\\d{4}"]]],"FM":["691","00","(?:[39]\\d\\d|820)\\d{4}",[7],[["(\\d{3})(\\d{4})","$1 $2",["[389]"]]],0,0,0,0,0,0,[["31(?:00[67]|208|309)\\d\\d|(?:3(?:[2357]0[1-9]|602|804|905)|(?:820|9[2-6]\\d)\\d)\\d{3}"],["31(?:00[67]|208|309)\\d\\d|(?:3(?:[2357]0[1-9]|602|804|905)|(?:820|9[2-7]\\d)\\d)\\d{3}"]]],"FO":["298","00","[2-9]\\d{5}",[6],[["(\\d{6})","$1",["[2-9]"]]],0,0,"(10(?:01|[12]0|88))",0,0,0,[["(?:20|[34]\\d|8[19])\\d{4}"],["(?:[27][1-9]|5\\d|91)\\d{4}"],["80[257-9]\\d{3}"],["90(?:[13-5][15-7]|2[125-7]|9\\d)\\d\\d"],0,0,0,0,["(?:6[0-36]|88)\\d{4}"]]],"FR":["33","00","[1-9]\\d{8}",[9],[["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["8"],"0 $1"],["(\\d)(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4 $5",["[1-79]"],"0$1"]],"0",0,0,0,0,0,[["(?:[1-35]\\d|4[1-9])\\d{7}"],["(?:6(?:[0-24-8]\\d|3[0-8]|9[589])|7(?:00|[3-9]\\d))\\d{6}"],["80[0-5]\\d{6}"],["836(?:0[0-36-9]|[1-9]\\d)\\d{4}|8(?:1[2-9]|2[2-47-9]|3[0-57-9]|[569]\\d|8[0-35-9])\\d{6}"],0,0,["80[6-9]\\d{6}"],0,["9\\d{8}"],["8(?:1[01]|2[0156]|4[02]|84)\\d{6}"]]],"GA":["241","00","(?:[067]\\d|11)\\d{6}|[2-7]\\d{6}",[7,8],[["(\\d)(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[2-7]"],"0$1"],["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["0"]],["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["11|[67]"],"0$1"]],0,0,"0(11\\d{6}|60\\d{6}|61\\d{6}|6[256]\\d{6}|7[467]\\d{6})","$1",0,0,[["[01]1\\d{6}",[8]],["(?:(?:0[2-7]|7[467])\\d|6(?:0[0-4]|10|[256]\\d))\\d{5}|[2-7]\\d{6}"]]],"GB":["44","00","[1-357-9]\\d{9}|[18]\\d{8}|8\\d{6}",[7,9,10],[["(\\d{3})(\\d{4})","$1 $2",["800","8001","80011","800111","8001111"],"0$1"],["(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3",["845","8454","84546","845464"],"0$1"],["(\\d{3})(\\d{6})","$1 $2",["800"],"0$1"],["(\\d{5})(\\d{4,5})","$1 $2",["1(?:38|5[23]|69|76|94)","1(?:(?:38|69)7|5(?:24|39)|768|946)","1(?:3873|5(?:242|39[4-6])|(?:697|768)[347]|9467)"],"0$1"],["(\\d{4})(\\d{5,6})","$1 $2",["1(?:[2-69][02-9]|[78])"],"0$1"],["(\\d{2})(\\d{4})(\\d{4})","$1 $2 $3",["[25]|7(?:0|6[02-9])","[25]|7(?:0|6(?:[03-9]|2[356]))"],"0$1"],["(\\d{4})(\\d{6})","$1 $2",["7"],"0$1"],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["[1389]"],"0$1"]],"0",0,0,0,0,0,[["(?:1(?:1(?:3(?:[0-58]\\d\\d|73[0235])|4(?:[0-5]\\d\\d|69[7-9]|70[01359])|(?:5[0-26-9]|[78][0-49])\\d\\d|6(?:[0-4]\\d\\d|50[0-79]))|2(?:(?:0[024-9]|2[3-9]|3[3-79]|4[1-689]|[58][02-9]|6[0-47-9]|7[013-9]|9\\d)\\d\\d|1(?:[0-7]\\d\\d|8(?:[02]\\d|1[0-26-9])))|(?:3(?:0\\d|1[0-8]|[25][02-9]|3[02-579]|[468][0-46-9]|7[1-35-79]|9[2-578])|4(?:0[03-9]|[137]\\d|[28][02-57-9]|4[02-69]|5[0-8]|[69][0-79])|5(?:0[1-35-9]|[16]\\d|2[024-9]|3[015689]|4[02-9]|5[03-9]|7[0-35-9]|8[0-468]|9[0-57-9])|6(?:0[034689]|1\\d|2[0-35689]|[38][013-9]|4[1-467]|5[0-69]|6[13-9]|7[0-8]|9[0-24578])|7(?:0[0246-9]|2\\d|3[0236-8]|4[03-9]|5[0-46-9]|6[013-9]|7[0-35-9]|8[024-9]|9[02-9])|8(?:0[35-9]|2[1-57-9]|3[02-578]|4[0-578]|5[124-9]|6[2-69]|7\\d|8[02-9]|9[02569])|9(?:0[02-589]|[18]\\d|2[02-689]|3[1-57-9]|4[2-9]|5[0-579]|6[2-47-9]|7[0-24578]|9[2-57]))\\d\\d)|2(?:0[013478]|3[0189]|4[017]|8[0-46-9]|9[0-2])\\d{3})\\d{4}|1(?:2(?:0(?:46[1-4]|87[2-9])|545[1-79]|76(?:2\\d|3[1-8]|6[1-6])|9(?:7(?:2[0-4]|3[2-5])|8(?:2[2-8]|7[0-47-9]|8[3-5])))|3(?:6(?:38[2-5]|47[23])|8(?:47[04-9]|64[0157-9]))|4(?:044[1-7]|20(?:2[23]|8\\d)|6(?:0(?:30|5[2-57]|6[1-8]|7[2-8])|140)|8(?:052|87[1-3]))|5(?:2(?:4(?:3[2-79]|6\\d)|76\\d)|6(?:26[06-9]|686))|6(?:06(?:4\\d|7[4-79])|295[5-7]|35[34]\\d|47(?:24|61)|59(?:5[08]|6[67]|74)|9(?:55[0-4]|77[23]))|7(?:26(?:6[13-9]|7[0-7])|(?:442|688)\\d|50(?:2[0-3]|[3-68]2|76))|8(?:27[56]\\d|37(?:5[2-5]|8[239])|843[2-58])|9(?:0(?:0(?:6[1-8]|85)|52\\d)|3583|4(?:66[1-8]|9(?:2[01]|81))|63(?:23|3[1-4])|9561))\\d{3}",[9,10]],["7(?:457[0-57-9]|700[01]|911[028])\\d{5}|7(?:[1-3]\\d\\d|4(?:[0-46-9]\\d|5[0-689])|5(?:0[0-8]|[13-9]\\d|2[0-35-9])|7(?:0[1-9]|[1-7]\\d|8[02-9]|9[0-689])|8(?:[014-9]\\d|[23][0-8])|9(?:[024-9]\\d|1[02-9]|3[0-689]))\\d{6}",[10]],["80[08]\\d{7}|800\\d{6}|8001111"],["(?:8(?:4[2-5]|7[0-3])|9(?:[01]\\d|8[2-49]))\\d{7}|845464\\d",[7,10]],["70\\d{8}",[10]],0,["(?:3[0347]|55)\\d{8}",[10]],["76(?:464|652)\\d{5}|76(?:0[0-2]|2[356]|34|4[01347]|5[49]|6[0-369]|77|8[14]|9[139])\\d{6}",[10]],["56\\d{8}",[10]]],0," x"],"GD":["1","011","(?:473|[58]\\d\\d|900)\\d{7}",[10],0,"1",0,"1|([2-9]\\d{6})$","473$1",0,"473",[["473(?:2(?:3[0-2]|69)|3(?:2[89]|86)|4(?:[06]8|3[5-9]|4[0-49]|5[5-79]|73|90)|63[68]|7(?:58|84)|800|938)\\d{4}"],["473(?:4(?:0[2-79]|1[04-9]|2[0-5]|58)|5(?:2[01]|3[3-8])|901)\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"GE":["995","00","(?:[3-57]\\d\\d|800)\\d{6}",[9],[["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["70"],"0$1"],["(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["32"],"0$1"],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[57]"]],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[348]"],"0$1"]],"0",0,0,0,0,0,[["(?:3(?:[256]\\d|4[124-9]|7[0-4])|4(?:1\\d|2[2-7]|3[1-79]|4[2-8]|7[239]|9[1-7]))\\d{6}"],["5(?:(?:0555|1177)[5-9]|757(?:7[7-9]|8[01]))\\d{3}|5(?:00(?:0\\d|50)|11(?:00|1\\d|2[0-4]|3[01])|5200|75(?:00|[57]5)|8(?:0(?:[01]\\d|2[0-4])|58[89]|8(?:55|88)))\\d{4}|5(?:0070|11(?:33|51)|[25]222|3333)[0-4]\\d{3}|(?:5(?:[14]4|5[0157-9]|68|7[0147-9]|9[1-35-9])|790)\\d{6}"],["800\\d{6}"],0,0,0,0,0,["70[67]\\d{6}"]]],"GF":["594","00","(?:[56]94|80\\d|976)\\d{6}",[9],[["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[569]"],"0$1"],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["8"],"0$1"]],"0",0,0,0,0,0,[["594(?:[023]\\d|1[01]|4[03-9]|5[6-9]|6[0-3]|80|9[0-8])\\d{4}"],["694(?:[0-249]\\d|3[0-48])\\d{4}"],["80[0-5]\\d{6}"],0,0,0,0,0,["976\\d{6}"]]],"GG":["44","00","(?:1481|[357-9]\\d{3})\\d{6}|8\\d{6}(?:\\d{2})?",[7,9,10],0,"0",0,"0|([25-9]\\d{5})$","1481$1",0,0,[["1481[25-9]\\d{5}",[10]],["7(?:(?:781|839)\\d|911[17])\\d{5}",[10]],["80[08]\\d{7}|800\\d{6}|8001111"],["(?:8(?:4[2-5]|7[0-3])|9(?:[01]\\d|8[0-3]))\\d{7}|845464\\d",[7,10]],["70\\d{8}",[10]],0,["(?:3[0347]|55)\\d{8}",[10]],["76(?:464|652)\\d{5}|76(?:0[0-2]|2[356]|34|4[01347]|5[49]|6[0-369]|77|8[14]|9[139])\\d{6}",[10]],["56\\d{8}",[10]]]],"GH":["233","00","(?:[235]\\d{3}|800)\\d{5}",[8,9],[["(\\d{3})(\\d{5})","$1 $2",["8"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[235]"],"0$1"]],"0",0,0,0,0,0,[["3082[0-5]\\d{4}|3(?:0(?:[237]\\d|8[01])|[167](?:2[0-6]|7\\d|80)|2(?:2[0-5]|7\\d|80)|3(?:2[0-3]|7\\d|80)|4(?:2[013-9]|3[01]|7\\d|80)|5(?:2[0-7]|7\\d|80)|8(?:2[0-2]|7\\d|80)|9(?:[28]0|7\\d))\\d{5}",[9]],["(?:2(?:[0346-8]\\d|5[67])|5(?:[0457]\\d|6[01]|9[1-9]))\\d{6}",[9]],["800\\d{5}",[8]]]],"GI":["350","00","(?:[25]\\d\\d|606)\\d{5}",[8],[["(\\d{3})(\\d{5})","$1 $2",["2"]]],0,0,0,0,0,0,[["21(?:6[24-7]\\d|90[0-2])\\d{3}|2(?:00|2[25])\\d{5}"],["(?:5[146-8]\\d|606)\\d{5}"]]],"GL":["299","00","(?:19|[2-689]\\d|70)\\d{4}",[6],[["(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3",["19|[2-9]"]]],0,0,0,0,0,0,[["(?:19|3[1-7]|6[14689]|70|8[14-79]|9\\d)\\d{4}"],["[245]\\d{5}"],["80\\d{4}"],0,0,0,0,0,["3[89]\\d{4}"]]],"GM":["220","00","[2-9]\\d{6}",[7],[["(\\d{3})(\\d{4})","$1 $2",["[2-9]"]]],0,0,0,0,0,0,[["(?:4(?:[23]\\d\\d|4(?:1[024679]|[6-9]\\d))|5(?:5(?:3\\d|4[0-7])|6[67]\\d|7(?:1[04]|2[035]|3[58]|48))|8\\d{3})\\d{3}"],["(?:[23679]\\d|5[0-389])\\d{5}"]]],"GN":["224","00","722\\d{6}|(?:3|6\\d)\\d{7}",[8,9],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["3"]],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[67]"]]],0,0,0,0,0,0,[["3(?:0(?:24|3[12]|4[1-35-7]|5[13]|6[189]|[78]1|9[1478])|1\\d\\d)\\d{4}",[8]],["6[0-356]\\d{7}",[9]],0,0,0,0,0,0,["722\\d{6}",[9]]]],"GP":["590","00","(?:590|(?:69|80)\\d|976)\\d{6}",[9],[["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[569]"],"0$1"],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["8"],"0$1"]],"0",0,0,0,0,0,[["590(?:0[1-68]|[14][0-24-9]|2[0-68]|3[1289]|5[3-579]|6[0189]|7[08]|8[0-689]|9\\d)\\d{4}"],["69(?:0\\d\\d|1(?:2[2-9]|3[0-5]))\\d{4}"],["80[0-5]\\d{6}"],0,0,0,0,0,["976[01]\\d{5}"]]],"GQ":["240","00","222\\d{6}|(?:3\\d|55|[89]0)\\d{7}",[9],[["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[235]"]],["(\\d{3})(\\d{6})","$1 $2",["[89]"]]],0,0,0,0,0,0,[["33[0-24-9]\\d[46]\\d{4}|3(?:33|5\\d)\\d[7-9]\\d{4}"],["(?:222|55\\d)\\d{6}"],["80\\d[1-9]\\d{5}"],["90\\d[1-9]\\d{5}"]]],"GR":["30","00","5005000\\d{3}|8\\d{9,11}|(?:[269]\\d|70)\\d{8}",[10,11,12],[["(\\d{2})(\\d{4})(\\d{4})","$1 $2 $3",["21|7"]],["(\\d{4})(\\d{6})","$1 $2",["2(?:2|3[2-57-9]|4[2-469]|5[2-59]|6[2-9]|7[2-69]|8[2-49])|5"]],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["[2689]"]],["(\\d{3})(\\d{3,4})(\\d{5})","$1 $2 $3",["8"]]],0,0,0,0,0,0,[["2(?:1\\d\\d|2(?:2[1-46-9]|[36][1-8]|4[1-7]|5[1-4]|7[1-5]|[89][1-9])|3(?:1\\d|2[1-57]|[35][1-3]|4[13]|7[1-7]|8[124-6]|9[1-79])|4(?:1\\d|2[1-8]|3[1-4]|4[13-5]|6[1-578]|9[1-5])|5(?:1\\d|[29][1-4]|3[1-5]|4[124]|5[1-6])|6(?:1\\d|[269][1-6]|3[1245]|4[1-7]|5[13-9]|7[14]|8[1-5])|7(?:1\\d|2[1-5]|3[1-6]|4[1-7]|5[1-57]|6[135]|9[125-7])|8(?:1\\d|2[1-5]|[34][1-4]|9[1-57]))\\d{6}",[10]],["68[57-9]\\d{7}|(?:69|94)\\d{8}",[10]],["800\\d{7,9}"],["90[19]\\d{7}",[10]],["70\\d{8}",[10]],0,["5005000\\d{3}",[10]],0,0,["8(?:0[16]|12|[27]5|50)\\d{7}",[10]]]],"GT":["502","00","(?:1\\d{3}|[2-7])\\d{7}",[8,11],[["(\\d{4})(\\d{4})","$1 $2",["[2-7]"]],["(\\d{4})(\\d{3})(\\d{4})","$1 $2 $3",["1"]]],0,0,0,0,0,0,[["[267][2-9]\\d{6}",[8]],["[3-5]\\d{7}",[8]],["18[01]\\d{8}",[11]],["19\\d{9}",[11]]]],"GU":["1","011","(?:[58]\\d\\d|671|900)\\d{7}",[10],0,"1",0,"1|([3-9]\\d{6})$","671$1",0,"671",[["671(?:3(?:00|3[39]|4[349]|55|6[26])|4(?:00|56|7[1-9]|8[0236-9])|5(?:55|6[2-5]|88)|6(?:3[2-578]|4[24-9]|5[34]|78|8[235-9])|7(?:[0479]7|2[0167]|3[45]|8[7-9])|8(?:[2-57-9]8|6[48])|9(?:2[29]|6[79]|7[1279]|8[7-9]|9[78]))\\d{4}"],[""],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"GW":["245","00","[49]\\d{8}|4\\d{6}",[7,9],[["(\\d{3})(\\d{4})","$1 $2",["40"]],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[49]"]]],0,0,0,0,0,0,[["443\\d{6}",[9]],["9(?:5\\d|6[569]|77)\\d{6}",[9]],0,0,0,0,0,0,["40\\d{5}",[7]]]],"GY":["592","001","9008\\d{3}|(?:[2-467]\\d\\d|862)\\d{4}",[7],[["(\\d{3})(\\d{4})","$1 $2",["[2-46-9]"]]],0,0,0,0,0,0,[["(?:2(?:1[6-9]|2[0-35-9]|3[1-4]|5[3-9]|6\\d|7[0-24-79])|3(?:2[25-9]|3\\d)|4(?:4[0-24]|5[56])|77[1-57])\\d{4}"],["(?:6\\d\\d|70[015-7])\\d{4}"],["(?:289|862)\\d{4}"],["9008\\d{3}"]]],"HK":["852","00(?:30|5[09]|[126-9]?)","8[0-46-9]\\d{6,7}|9\\d{4,7}|(?:[2-7]|9\\d{3})\\d{7}",[5,6,7,8,9,11],[["(\\d{3})(\\d{2,5})","$1 $2",["900","9003"]],["(\\d{4})(\\d{4})","$1 $2",["[2-7]|8[1-4]|9(?:0[1-9]|[1-8])"]],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["8"]],["(\\d{3})(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3 $4",["9"]]],0,0,0,0,0,0,[["(?:2(?:[13-9]\\d|2[013-9])\\d|3(?:(?:[1569][0-24-9]|4[0-246-9]|7[0-24-69])\\d|8(?:4[0-8]|5[0-5]|9\\d))|58(?:0[1-8]|1[2-9]))\\d{4}",[8]],["(?:4(?:44[5-9]|6(?:0[0-7]|1[0-6]|4[0-57-9]|6[0-4]|7[0-8]))|573[0-6]|6(?:26[013-8]|66[0-3])|70(?:7[1-5]|8[0-4])|848[015-9]|9(?:29[013-9]|59[0-4]))\\d{4}|(?:4(?:40|6[2358])|5(?:[1-59][0-46-9]|6[0-4689]|7[0-24679])|6(?:0[1-9]|[13-59]\\d|[268][0-57-9]|7[0-79])|84[09]|9(?:0[1-9]|1[02-9]|[2358][0-8]|[467]\\d))\\d{5}",[8]],["800\\d{6}",[9]],["900(?:[0-24-9]\\d{7}|3\\d{1,4})",[5,6,7,8,11]],["8(?:1[0-4679]\\d|2(?:[0-36]\\d|7[0-4])|3(?:[034]\\d|2[09]|70))\\d{4}",[8]],0,["30(?:0[1-9]|[15-7]\\d|2[047]|89)\\d{4}",[8]],["7(?:1(?:0[0-38]|1[0-3679]|3[013]|69|9[0136])|2(?:[02389]\\d|1[18]|7[27-9])|3(?:[0-38]\\d|7[0-369]|9[2357-9])|47\\d|5(?:[178]\\d|5[0-5])|6(?:0[0-7]|2[236-9]|[35]\\d)|7(?:[27]\\d|8[7-9])|8(?:[23689]\\d|7[1-9])|9(?:[025]\\d|6[0-246-8]|7[0-36-9]|8[238]))\\d{4}",[8]]],"00"],"HN":["504","00","8\\d{10}|[237-9]\\d{7}",[8,11],[["(\\d{4})(\\d{4})","$1-$2",["[237-9]"]]],0,0,0,0,0,0,[["2(?:2(?:0[0-39]|1[1-367]|[23]\\d|4[03-6]|5[57]|6[245]|7[0135689]|8[01346-9]|9[0-2])|4(?:0[78]|2[3-59]|3[13-9]|4[0-68]|5[1-35])|5(?:0[7-9]|16|4[03-5]|5\\d|6[014-6]|7[04]|80)|6(?:[056]\\d|17|2[067]|3[04]|4[0-378]|[78][0-8]|9[01])|7(?:6[46-9]|7[02-9]|8[034]|91)|8(?:79|8[0-357-9]|9[1-57-9]))\\d{4}",[8]],["[37-9]\\d{7}",[8]],["8002\\d{7}",[11]]]],"HR":["385","00","(?:[24-69]\\d|3[0-79])\\d{7}|80\\d{5,7}|[1-79]\\d{7}|6\\d{5,6}",[6,7,8,9],[["(\\d{2})(\\d{2})(\\d{2,3})","$1 $2 $3",["6[01]"],"0$1"],["(\\d{3})(\\d{2})(\\d{2,3})","$1 $2 $3",["8"],"0$1"],["(\\d)(\\d{4})(\\d{3})","$1 $2 $3",["1"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["[67]"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["9"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["[2-5]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["8"],"0$1"]],"0",0,0,0,0,0,[["1\\d{7}|(?:2[0-3]|3[1-5]|4[02-47-9]|5[1-3])\\d{6,7}",[8,9]],["98\\d{6,7}|975(?:1\\d|9[67])\\d{4}|9(?:0[1-9]|[1259]\\d|7[0679])\\d{6}",[8,9]],["80[01]\\d{4,6}",[7,8,9]],["6[01459]\\d{6}|6[01]\\d{4,5}",[6,7,8]],["7[45]\\d{6}",[8]],0,["62\\d{6,7}|72\\d{6}",[8,9]]]],"HT":["509","00","[2-489]\\d{7}",[8],[["(\\d{2})(\\d{2})(\\d{4})","$1 $2 $3",["[2-489]"]]],0,0,0,0,0,0,[["2(?:2\\d|5[1-5]|81|9[149])\\d{5}"],["[34]\\d{7}"],["8\\d{7}"],0,0,0,0,0,["9(?:[67][0-4]|8[0-3589]|9\\d)\\d{5}"]]],"HU":["36","00","[235-7]\\d{8}|[1-9]\\d{7}",[8,9],[["(\\d)(\\d{3})(\\d{4})","$1 $2 $3",["1"],"(06 $1)"],["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["[27][2-9]|3[2-7]|4[24-9]|5[2-79]|6|8[2-57-9]|9[2-69]"],"(06 $1)"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["[2-9]"],"06 $1"]],"06",0,0,0,0,0,[["(?:1\\d|[27][2-9]|3[2-7]|4[24-9]|5[2-79]|6[23689]|8[2-57-9]|9[2-69])\\d{6}",[8]],["(?:[257]0|3[01])\\d{7}",[9]],["(?:[48]0\\d|680[29])\\d{5}"],["9[01]\\d{6}",[8]],0,0,["38\\d{7}",[9]],0,["21\\d{7}",[9]]]],"ID":["62","00[89]","(?:(?:00[1-9]|8\\d)\\d{4}|[1-36])\\d{6}|00\\d{10}|[1-9]\\d{8,10}|[2-9]\\d{7}",[7,8,9,10,11,12,13],[["(\\d)(\\d{3})(\\d{3})","$1 $2 $3",["15"]],["(\\d{2})(\\d{5,9})","$1 $2",["2[124]|[36]1"],"(0$1)"],["(\\d{3})(\\d{5,7})","$1 $2",["800"],"0$1"],["(\\d{3})(\\d{5,8})","$1 $2",["[2-79]"],"(0$1)"],["(\\d{3})(\\d{3,4})(\\d{3})","$1-$2-$3",["8[1-35-9]"],"0$1"],["(\\d{3})(\\d{6,8})","$1 $2",["1"],"0$1"],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["804"],"0$1"],["(\\d{3})(\\d)(\\d{3})(\\d{3})","$1 $2 $3 $4",["80"],"0$1"],["(\\d{3})(\\d{4})(\\d{4,5})","$1-$2-$3",["8"],"0$1"]],"0",0,0,0,0,0,[["2[124]\\d{7,8}|619\\d{8}|2(?:1(?:14|500)|2\\d{3})\\d{3}|61\\d{5,8}|(?:2(?:[35][1-4]|6[0-8]|7[1-6]|8\\d|9[1-8])|3(?:1|[25][1-8]|3[1-68]|4[1-3]|6[1-3568]|7[0-469]|8\\d)|4(?:0[1-589]|1[01347-9]|2[0-36-8]|3[0-24-68]|43|5[1-378]|6[1-5]|7[134]|8[1245])|5(?:1[1-35-9]|2[25-8]|3[124-9]|4[1-3589]|5[1-46]|6[1-8])|6(?:[25]\\d|3[1-69]|4[1-6])|7(?:02|[125][1-9]|[36]\\d|4[1-8]|7[0-36-9])|9(?:0[12]|1[013-8]|2[0-479]|5[125-8]|6[23679]|7[159]|8[01346]))\\d{5,8}",[7,8,9,10,11]],["8[1-35-9]\\d{7,10}",[9,10,11,12]],["00[17]803\\d{7}|(?:177\\d|800)\\d{5,7}|001803\\d{6}",[8,9,10,11,12,13]],["809\\d{7}",[10]],0,0,["(?:1500|8071\\d{3})\\d{3}",[7,10]],0,0,["804\\d{7}",[10]]]],"IE":["353","00","(?:1\\d|[2569])\\d{6,8}|4\\d{6,9}|7\\d{8}|8\\d{8,9}",[7,8,9,10],[["(\\d{2})(\\d{5})","$1 $2",["2[24-9]|47|58|6[237-9]|9[35-9]"],"(0$1)"],["(\\d{3})(\\d{5})","$1 $2",["[45]0"],"(0$1)"],["(\\d)(\\d{3,4})(\\d{4})","$1 $2 $3",["1"],"(0$1)"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["[2569]|4[1-69]|7[14]"],"(0$1)"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["70"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["81"],"(0$1)"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[78]"],"0$1"],["(\\d{4})(\\d{3})(\\d{3})","$1 $2 $3",["1"]],["(\\d{2})(\\d{4})(\\d{4})","$1 $2 $3",["4"],"(0$1)"],["(\\d{2})(\\d)(\\d{3})(\\d{4})","$1 $2 $3 $4",["8"],"0$1"]],"0",0,0,0,0,0,[["(?:1\\d|21)\\d{6,7}|(?:2[24-9]|4(?:0[24]|5\\d|7)|5(?:0[45]|1\\d|8)|6(?:1\\d|[237-9])|9(?:1\\d|[35-9]))\\d{5}|(?:23|4(?:[1-469]|8\\d)|5[23679]|6[4-6]|7[14]|9[04])\\d{7}"],["8(?:22|[35-9]\\d)\\d{6}",[9]],["1800\\d{6}",[10]],["15(?:1[2-8]|[2-8]0|9[089])\\d{6}",[10]],["700\\d{6}",[9]],0,["818\\d{6}",[9]],0,["76\\d{7}",[9]],["18[59]0\\d{6}",[10]]]],"IL":["972","0(?:0|1[2-9])","1\\d{6}(?:\\d{3,5})?|[57]\\d{8}|[1-489]\\d{7}",[7,8,9,10,11,12],[["(\\d{4})(\\d{3})","$1-$2",["125"]],["(\\d{4})(\\d{2})(\\d{2})","$1-$2-$3",["121"]],["(\\d)(\\d{3})(\\d{4})","$1-$2-$3",["[2-489]"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1-$2-$3",["[57]"],"0$1"],["(\\d{4})(\\d{3})(\\d{3})","$1-$2-$3",["12"]],["(\\d{4})(\\d{6})","$1-$2",["159"]],["(\\d)(\\d{3})(\\d{3})(\\d{3})","$1-$2-$3-$4",["1[7-9]"]],["(\\d{3})(\\d{1,2})(\\d{3})(\\d{4})","$1-$2 $3-$4",["15"]]],"0",0,0,0,0,0,[["153\\d{8,9}|29[1-9]\\d{5}|(?:2[0-8]|[3489]\\d)\\d{6}",[8,11,12]],["5(?:(?:[02368]\\d|[19][2-9]|4[1-9])\\d|5(?:01|1[79]|2[2-9]|3[0-3]|4[34]|5[015689]|6[6-8]|7[0-267]|8[7-9]|9[1-9]))\\d{5}",[9]],["1(?:255|80[019]\\d{3})\\d{3}",[7,10]],["1212\\d{4}|1(?:200|9(?:0[0-2]|19))\\d{6}",[8,10]],0,0,["1599\\d{6}",[10]],0,["7(?:380|8(?:33|55|77|81))\\d{5}|7(?:18|2[23]|3[237]|47|6[258]|7\\d|82|9[2-9])\\d{6}",[9]],["1700\\d{6}",[10]]]],"IM":["44","00","1624\\d{6}|(?:[3578]\\d|90)\\d{8}",[10],0,"0",0,"0|([25-8]\\d{5})$","1624$1",0,"74576|(?:16|7[56])24",[["1624(?:230|[5-8]\\d\\d)\\d{3}"],["76245[06]\\d{4}|7(?:4576|[59]24\\d|624[0-4689])\\d{5}"],["808162\\d{4}"],["8(?:440[49]06|72299\\d)\\d{3}|(?:8(?:45|70)|90[0167])624\\d{4}"],["70\\d{8}"],0,["3440[49]06\\d{3}|(?:3(?:08162|3\\d{4}|45624|7(?:0624|2299))|55\\d{4})\\d{4}"],0,["56\\d{8}"]]],"IN":["91","00","(?:000800|[2-9]\\d\\d)\\d{7}|1\\d{7,12}",[8,9,10,11,12,13],[["(\\d{8})","$1",["5(?:0|2[23]|3[03]|[67]1|88)","5(?:0|2(?:21|3)|3(?:0|3[23])|616|717|888)","5(?:0|2(?:21|3)|3(?:0|3[23])|616|717|8888)"],0,1],["(\\d{4})(\\d{4,5})","$1 $2",["180","1800"],0,1],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["140"],0,1],["(\\d{2})(\\d{4})(\\d{4})","$1 $2 $3",["11|2[02]|33|4[04]|79[1-7]|80[2-46]","11|2[02]|33|4[04]|79(?:[1-6]|7[19])|80(?:[2-4]|6[0-589])","11|2[02]|33|4[04]|79(?:[124-6]|3(?:[02-9]|1[0-24-9])|7(?:1|9[1-6]))|80(?:[2-4]|6[0-589])"],"0$1",1],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["1(?:2[0-249]|3[0-25]|4[145]|[68]|7[1257])|2(?:1[257]|3[013]|4[01]|5[0137]|6[0158]|78|8[1568])|3(?:26|4[1-3]|5[34]|6[01489]|7[02-46]|8[159])|4(?:1[36]|2[1-47]|5[12]|6[0-26-9]|7[0-24-9]|8[013-57]|9[014-7])|5(?:1[025]|22|[36][25]|4[28]|5[12]|[78]1)|6(?:12|[2-4]1|5[17]|6[13]|80)|7(?:12|3[134]|4[47]|61|88)|8(?:16|2[014]|3[126]|6[136]|7[078]|8[34]|91)|(?:43|59|75)[15]|(?:1[59]|29|67|72)[14]","1(?:2[0-24]|3[0-25]|4[145]|[59][14]|6[1-9]|7[1257]|8[1-57-9])|2(?:1[257]|3[013]|4[01]|5[0137]|6[058]|78|8[1568]|9[14])|3(?:26|4[1-3]|5[34]|6[01489]|7[02-46]|8[159])|4(?:1[36]|2[1-47]|3[15]|5[12]|6[0-26-9]|7[0-24-9]|8[013-57]|9[014-7])|5(?:1[025]|22|[36][25]|4[28]|[578]1|9[15])|674|7(?:(?:2[14]|3[34]|5[15])[2-6]|61[346]|88[0-8])|8(?:70[2-6]|84[235-7]|91[3-7])|(?:1(?:29|60|8[06])|261|552|6(?:12|[2-47]1|5[17]|6[13]|80)|7(?:12|31|4[47])|8(?:16|2[014]|3[126]|6[136]|7[78]|83))[2-7]","1(?:2[0-24]|3[0-25]|4[145]|[59][14]|6[1-9]|7[1257]|8[1-57-9])|2(?:1[257]|3[013]|4[01]|5[0137]|6[058]|78|8[1568]|9[14])|3(?:26|4[1-3]|5[34]|6[01489]|7[02-46]|8[159])|4(?:1[36]|2[1-47]|3[15]|5[12]|6[0-26-9]|7[0-24-9]|8[013-57]|9[014-7])|5(?:1[025]|22|[36][25]|4[28]|[578]1|9[15])|6(?:12(?:[2-6]|7[0-8])|74[2-7])|7(?:(?:2[14]|5[15])[2-6]|3171|61[346]|88(?:[2-7]|82))|8(?:70[2-6]|84(?:[2356]|7[19])|91(?:[3-6]|7[19]))|73[134][2-6]|(?:74[47]|8(?:16|2[014]|3[126]|6[136]|7[78]|83))(?:[2-6]|7[19])|(?:1(?:29|60|8[06])|261|552|6(?:[2-4]1|5[17]|6[13]|7(?:1|4[0189])|80)|7(?:12|88[01]))[2-7]"],"0$1",1],["(\\d{4})(\\d{3})(\\d{3})","$1 $2 $3",["1(?:[2-479]|5[0235-9])|[2-5]|6(?:1[1358]|2[2457-9]|3[2-5]|4[235-7]|5[2-689]|6[24578]|7[235689]|8[1-6])|7(?:1[013-9]|28|3[129]|4[1-35689]|5[29]|6[02-5]|70)|807","1(?:[2-479]|5[0235-9])|[2-5]|6(?:1[1358]|2(?:[2457]|84|95)|3(?:[2-4]|55)|4[235-7]|5[2-689]|6[24578]|7[235689]|8[1-6])|7(?:1(?:[013-8]|9[6-9])|28[6-8]|3(?:17|2[0-49]|9[2-57])|4(?:1[2-4]|[29][0-7]|3[0-8]|[56]|8[0-24-7])|5(?:2[1-3]|9[0-6])|6(?:0[5689]|2[5-9]|3[02-8]|4|5[0-367])|70[13-7])|807[19]","1(?:[2-479]|5(?:[0236-9]|5[013-9]))|[2-5]|6(?:2(?:84|95)|355|83)|73179|807(?:1|9[1-3])|(?:1552|6(?:1[1358]|2[2457]|3[2-4]|4[235-7]|5[2-689]|6[24578]|7[235689]|8[124-6])\\d|7(?:1(?:[013-8]\\d|9[6-9])|28[6-8]|3(?:2[0-49]|9[2-57])|4(?:1[2-4]|[29][0-7]|3[0-8]|[56]\\d|8[0-24-7])|5(?:2[1-3]|9[0-6])|6(?:0[5689]|2[5-9]|3[02-8]|4\\d|5[0-367])|70[13-7]))[2-7]"],"0$1",1],["(\\d{5})(\\d{5})","$1 $2",["[6-9]"],"0$1",1],["(\\d{4})(\\d{2,4})(\\d{4})","$1 $2 $3",["1(?:6|8[06])","1(?:6|8[06]0)"],0,1],["(\\d{4})(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3 $4",["18"],0,1]],"0",0,0,0,0,0,[["2717(?:[2-7]\\d|95)\\d{4}|(?:271[0-689]|782[0-6])[2-7]\\d{5}|(?:170[24]|2(?:(?:[02][2-79]|90)\\d|80[13468])|(?:3(?:23|80)|683|79[1-7])\\d|4(?:20[24]|72[2-8])|552[1-7])\\d{6}|(?:11|33|4[04]|80)[2-7]\\d{7}|(?:342|674|788)(?:[0189][2-7]|[2-7]\\d)\\d{5}|(?:1(?:2[0-249]|3[0-25]|4[145]|[59][14]|6[014]|7[1257]|8[01346])|2(?:1[257]|3[013]|4[01]|5[0137]|6[0158]|78|8[1568]|9[14])|3(?:26|4[13]|5[34]|6[01489]|7[02-46]|8[159])|4(?:1[36]|2[1-47]|3[15]|5[12]|6[0-26-9]|7[014-9]|8[013-57]|9[014-7])|5(?:1[025]|22|[36][25]|4[28]|[578]1|9[15])|6(?:12|[2-47]1|5[17]|6[13]|80)|7(?:12|2[14]|3[134]|4[47]|5[15]|[67]1)|8(?:16|2[014]|3[126]|6[136]|7[078]|8[34]|91))[2-7]\\d{6}|(?:1(?:2[35-8]|3[346-9]|4[236-9]|[59][0235-9]|6[235-9]|7[34689]|8[257-9])|2(?:1[134689]|3[24-8]|4[2-8]|5[25689]|6[2-4679]|7[3-79]|8[2-479]|9[235-9])|3(?:01|1[79]|2[1245]|4[5-8]|5[125689]|6[235-7]|7[157-9]|8[2-46-8])|4(?:1[14578]|2[5689]|3[2-467]|5[4-7]|6[35]|73|8[2689]|9[2389])|5(?:[16][146-9]|2[14-8]|3[1346]|4[14-69]|5[46]|7[2-4]|8[2-8]|9[246])|6(?:1[1358]|2[2457]|3[2-4]|4[235-7]|5[2-689]|6[24578]|7[235689]|8[124-6])|7(?:1[013-9]|2[0235-9]|3[2679]|4[1-35689]|5[2-46-9]|[67][02-9]|8[013-7]|9[089])|8(?:1[1357-9]|2[235-8]|3[03-57-9]|4[0-24-9]|5\\d|6[2457-9]|7[1-6]|8[1256]|9[2-4]))\\d[2-7]\\d{5}",[10]],["(?:61279|7(?:887[02-9]|9(?:313|79[07-9]))|8(?:079[04-9]|(?:84|91)7[02-8]))\\d{5}|(?:6(?:12|[2-47]1|5[17]|6[13]|80)[0189]|7(?:1(?:2[0189]|9[0-5])|2(?:[14][017-9]|8[0-59])|3(?:2[5-8]|[34][017-9]|9[016-9])|4(?:1[015-9]|[29][89]|39|8[389])|5(?:[15][017-9]|2[04-9]|9[7-9])|6(?:0[0-47]|1[0-257-9]|2[0-4]|3[19]|5[4589])|70[0289]|88[089]|97[02-8])|8(?:0(?:6[67]|7[02-8])|70[017-9]|84[01489]|91[0-289]))\\d{6}|(?:7(?:31|4[47])|8(?:16|2[014]|3[126]|6[136]|7[78]|83))(?:[0189]\\d|7[02-8])\\d{5}|(?:6(?:[09]\\d|1[04679]|2[03689]|3[05-9]|4[0489]|50|6[069]|7[07]|8[7-9])|7(?:0\\d|2[0235-79]|3[05-8]|40|5[0346-8]|6[6-9]|7[1-9]|8[0-79]|9[089])|8(?:0[01589]|1[0-57-9]|2[235-9]|3[03-57-9]|[45]\\d|6[02457-9]|7[1-69]|8[0-25-9]|9[02-9])|9\\d\\d)\\d{7}|(?:6(?:(?:1[1358]|2[2457]|3[2-4]|4[235-7]|5[2-689]|6[24578]|8[124-6])\\d|7(?:[235689]\\d|4[0189]))|7(?:1(?:[013-8]\\d|9[6-9])|28[6-8]|3(?:2[0-49]|9[2-5])|4(?:1[2-4]|[29][0-7]|3[0-8]|[56]\\d|8[0-24-7])|5(?:2[1-3]|9[0-6])|6(?:0[5689]|2[5-9]|3[02-8]|4\\d|5[0-367])|70[13-7]|881))[0189]\\d{5}",[10]],["000800\\d{7}|1(?:600\\d{6}|80(?:0\\d{4,9}|3\\d{9}))"],["186[12]\\d{9}",[13]],0,0,["140\\d{7}",[10]],0,0,["1860\\d{7}",[11]]]],"IO":["246","00","3\\d{6}",[7],[["(\\d{3})(\\d{4})","$1 $2",["3"]]],0,0,0,0,0,0,[["37\\d{5}"],["38\\d{5}"]]],"IQ":["964","00","(?:1|7\\d\\d)\\d{7}|[2-6]\\d{7,8}",[8,9,10],[["(\\d)(\\d{3})(\\d{4})","$1 $2 $3",["1"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["[2-6]"],"0$1"],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["7"],"0$1"]],"0",0,0,0,0,0,[["1\\d{7}|(?:2[13-5]|3[02367]|4[023]|5[03]|6[026])\\d{6,7}",[8,9]],["7[3-9]\\d{8}",[10]]]],"IR":["98","00","[1-9]\\d{9}|(?:[1-8]\\d\\d|9)\\d{3,4}",[4,5,6,7,10],[["(\\d{4,5})","$1",["96"],"0$1"],["(\\d{2})(\\d{4,5})","$1 $2",["(?:1[137]|2[13-68]|3[1458]|4[145]|5[1468]|6[16]|7[1467]|8[13467])[12689]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3,4})","$1 $2 $3",["9"],"0$1"],["(\\d{2})(\\d{4})(\\d{4})","$1 $2 $3",["[1-8]"],"0$1"]],"0",0,0,0,0,0,[["(?:1[137]|2[13-68]|3[1458]|4[145]|5[1468]|6[16]|7[1467]|8[13467])(?:[03-57]\\d{7}|[16]\\d{3}(?:\\d{4})?|[289]\\d{3}(?:\\d(?:\\d{3})?)?)|94(?:000[09]|2(?:121|[2689]0\\d)|30[0-2]\\d|4(?:111|40\\d))\\d{4}",[6,7,10]],["9(?:(?:0(?:[0-35]\\d|4[4-6])|(?:[13]\\d|2[0-3])\\d)\\d|9(?:[0-46]\\d\\d|5[15]0|8(?:1\\d|88)|9(?:0[0-3]|[19]\\d|21|77|8[7-9])))\\d{5}",[10]],0,0,0,0,["96(?:0[12]|2[16-8]|3(?:08|[14]5|[23]|66)|4(?:0|80)|5[01]|6[89]|86|9[19])",[4,5]]]],"IS":["354","00|1(?:0(?:01|[12]0)|100)","(?:38\\d|[4-9])\\d{6}",[7,9],[["(\\d{3})(\\d{4})","$1 $2",["[4-9]"]],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["3"]]],0,0,0,0,0,0,[["(?:4(?:1[0-24-69]|2[0-7]|[37][0-8]|4[0-24589]|5[0-68]|6\\d|8[0-36-8])|5(?:05|[156]\\d|2[02578]|3[0-579]|4[03-7]|7[0-2578]|8[0-35-9]|9[013-689])|872)\\d{4}",[7]],["(?:38[589]\\d\\d|6(?:1[1-8]|2[0-6]|3[026-9]|4[014679]|5[0159]|6[0-69]|70|8[06-8]|9\\d)|7(?:5[057]|[6-9]\\d)|8(?:2[0-59]|[3-69]\\d|8[238]))\\d{4}"],["80[0-8]\\d{4}",[7]],["90(?:0\\d|1[5-79]|2[015-79]|3[135-79]|4[125-7]|5[25-79]|7[1-37]|8[0-35-7])\\d{3}",[7]],0,0,["809\\d{4}",[7]],0,["49[0-24-79]\\d{4}",[7]]],"00"],"IT":["39","00","0\\d{5,10}|1\\d{8,10}|3(?:[0-8]\\d{7,10}|9\\d{7,8})|(?:55|70)\\d{8}|8\\d{5}(?:\\d{2,4})?",[6,7,8,9,10,11],[["(\\d{2})(\\d{4,6})","$1 $2",["0[26]"]],["(\\d{3})(\\d{3,6})","$1 $2",["0[13-57-9][0159]|8(?:03|4[17]|9[2-5])","0[13-57-9][0159]|8(?:03|4[17]|9(?:2|3[04]|[45][0-4]))"]],["(\\d{4})(\\d{2,6})","$1 $2",["0(?:[13-579][2-46-8]|8[236-8])"]],["(\\d{4})(\\d{4})","$1 $2",["894"]],["(\\d{2})(\\d{3,4})(\\d{4})","$1 $2 $3",["0[26]|5"]],["(\\d{3})(\\d{3})(\\d{3,4})","$1 $2 $3",["1(?:44|[679])|[378]"]],["(\\d{3})(\\d{3,4})(\\d{4})","$1 $2 $3",["0[13-57-9][0159]|14"]],["(\\d{2})(\\d{4})(\\d{5})","$1 $2 $3",["0[26]"]],["(\\d{4})(\\d{3})(\\d{4})","$1 $2 $3",["0"]],["(\\d{3})(\\d{4})(\\d{4,5})","$1 $2 $3",["3"]]],0,0,0,0,0,0,[["0669[0-79]\\d{1,6}|0(?:1(?:[0159]\\d|[27][1-5]|31|4[1-4]|6[1356]|8[2-57])|2\\d\\d|3(?:[0159]\\d|2[1-4]|3[12]|[48][1-6]|6[2-59]|7[1-7])|4(?:[0159]\\d|[23][1-9]|4[245]|6[1-5]|7[1-4]|81)|5(?:[0159]\\d|2[1-5]|3[2-6]|4[1-79]|6[4-6]|7[1-578]|8[3-8])|6(?:[0-57-9]\\d|6[0-8])|7(?:[0159]\\d|2[12]|3[1-7]|4[2-46]|6[13569]|7[13-6]|8[1-59])|8(?:[0159]\\d|2[3-578]|3[1-356]|[6-8][1-5])|9(?:[0159]\\d|[238][1-5]|4[12]|6[1-8]|7[1-6]))\\d{2,7}"],["3[1-9]\\d{8}|3[2-9]\\d{7}",[9,10]],["80(?:0\\d{3}|3)\\d{3}",[6,9]],["(?:0878\\d{3}|89(?:2\\d|3[04]|4(?:[0-4]|[5-9]\\d\\d)|5[0-4]))\\d\\d|(?:1(?:44|6[346])|89(?:38|5[5-9]|9))\\d{6}",[6,8,9,10]],["1(?:78\\d|99)\\d{6}",[9,10]],0,0,0,["55\\d{8}",[10]],["84(?:[08]\\d{3}|[17])\\d{3}",[6,9]]]],"JE":["44","00","1534\\d{6}|(?:[3578]\\d|90)\\d{8}",[10],0,"0",0,"0|([0-24-8]\\d{5})$","1534$1",0,0,[["1534[0-24-8]\\d{5}"],["7(?:(?:(?:50|82)9|937)\\d|7(?:00[378]|97[7-9]))\\d{5}"],["80(?:07(?:35|81)|8901)\\d{4}"],["(?:8(?:4(?:4(?:4(?:05|42|69)|703)|5(?:041|800))|7(?:0002|1206))|90(?:066[59]|1810|71(?:07|55)))\\d{4}"],["701511\\d{4}"],0,["(?:3(?:0(?:07(?:35|81)|8901)|3\\d{4}|4(?:4(?:4(?:05|42|69)|703)|5(?:041|800))|7(?:0002|1206))|55\\d{4})\\d{4}"],["76(?:464|652)\\d{5}|76(?:0[0-2]|2[356]|34|4[01347]|5[49]|6[0-369]|77|8[14]|9[139])\\d{6}"],["56\\d{8}"]]],"JM":["1","011","(?:[58]\\d\\d|658|900)\\d{7}",[10],0,"1",0,0,0,0,"658|876",[["8766060\\d{3}|(?:658(?:2(?:[0-8]\\d|9[0-46-9])|[3-9]\\d\\d)|876(?:52[35]|6(?:0[1-3579]|1[02357-9]|[23]\\d|40|5[06]|6[2-589]|7[0257]|8[04]|9[4-9])|7(?:0[2-689]|[1-6]\\d|8[056]|9[45])|9(?:0[1-8]|1[02378]|[2-8]\\d|9[2-468])))\\d{4}"],["(?:658295|876(?:2(?:0[1-9]|[13-9]\\d|2[013-9])|[348]\\d\\d|5(?:0[1-9]|[1-9]\\d)|6(?:4[89]|6[67])|7(?:0[07]|7\\d|8[1-47-9]|9[0-36-9])|9(?:[01]9|9[0579])))\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"JO":["962","00","(?:(?:[2689]|7\\d)\\d|32|53)\\d{6}",[8,9],[["(\\d)(\\d{3})(\\d{4})","$1 $2 $3",["[2356]|87"],"(0$1)"],["(\\d{3})(\\d{5,6})","$1 $2",["[89]"],"0$1"],["(\\d{2})(\\d{7})","$1 $2",["70"],"0$1"],["(\\d)(\\d{4})(\\d{4})","$1 $2 $3",["7"],"0$1"]],"0",0,0,0,0,0,[["87(?:000|90[01])\\d{3}|(?:2(?:6(?:2[0-35-9]|3[0-578]|4[24-7]|5[0-24-8]|[6-8][023]|9[0-3])|7(?:0[1-79]|10|2[014-7]|3[0-689]|4[019]|5[0-3578]))|32(?:0[1-69]|1[1-35-7]|2[024-7]|3\\d|4[0-3]|[5-7][023])|53(?:0[0-3]|[13][023]|2[0-59]|49|5[0-35-9]|6[15]|7[45]|8[1-6]|9[0-36-9])|6(?:2(?:[05]0|22)|3(?:00|33)|4(?:0[0-25]|1[2-7]|2[0569]|[38][07-9]|4[025689]|6[0-589]|7\\d|9[0-2])|5(?:[01][056]|2[034]|3[0-57-9]|4[178]|5[0-69]|6[0-35-9]|7[1-379]|8[0-68]|9[0239]))|87(?:20|7[078]|99))\\d{4}",[8]],["7(?:[78][0-25-9]|9\\d)\\d{6}",[9]],["80\\d{6}",[8]],["9\\d{7}",[8]],["70\\d{7}",[9]],0,["8(?:10|8\\d)\\d{5}",[8]],["74(?:66|77)\\d{5}",[9]],0,["85\\d{6}",[8]]]],"JP":["81","010","00[1-9]\\d{6,14}|[257-9]\\d{9}|(?:00|[1-9]\\d\\d)\\d{6}",[8,9,10,11,12,13,14,15,16,17],[["(\\d{3})(\\d{3})(\\d{3})","$1-$2-$3",["(?:12|57|99)0"],"0$1"],["(\\d{4})(\\d)(\\d{4})","$1-$2-$3",["1(?:26|3[79]|4[56]|5[4-68]|6[3-5])|499|5(?:76|97)|746|8(?:3[89]|47|51|63)|9(?:80|9[16])","1(?:267|3(?:7[247]|9[278])|466|5(?:47|58|64)|6(?:3[245]|48|5[4-68]))|499[2468]|5(?:76|97)9|7468|8(?:3(?:8[7-9]|96)|477|51[2-9]|636)|9(?:802|9(?:1[23]|69))|1(?:45|58)[67]","1(?:267|3(?:7[247]|9[278])|466|5(?:47|58|64)|6(?:3[245]|48|5[4-68]))|499[2468]|5(?:769|979[2-69])|7468|8(?:3(?:8[7-9]|96[2457-9])|477|51[2-9]|636[457-9])|9(?:802|9(?:1[23]|69))|1(?:45|58)[67]"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1-$2-$3",["60"],"0$1"],["(\\d)(\\d{4})(\\d{4})","$1-$2-$3",["[36]|4(?:2[09]|7[01])","[36]|4(?:2(?:0|9[02-69])|7(?:0[019]|1))"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1-$2-$3",["1(?:1|5[45]|77|88|9[69])|2(?:2[1-37]|3[0-269]|4[59]|5|6[24]|7[1-358]|8[1369]|9[0-38])|4(?:[28][1-9]|3[0-57]|[45]|6[248]|7[2-579]|9[29])|5(?:2|3[045]|4[0-369]|5[29]|8[02389]|9[0-389])|7(?:2[02-46-9]|34|[58]|6[0249]|7[57]|9[2-6])|8(?:2[124589]|3[27-9]|49|51|6|7[0-468]|8[68]|9[019])|9(?:[23][1-9]|4[15]|5[138]|6[1-3]|7[156]|8[189]|9[1-489])","1(?:1|5(?:4[018]|5[017])|77|88|9[69])|2(?:2(?:[127]|3[014-9])|3[0-269]|4[59]|5(?:[1-3]|5[0-69]|9[19])|62|7(?:[1-35]|8[0189])|8(?:[16]|3[0134]|9[0-5])|9(?:[028]|17))|4(?:2(?:[13-79]|8[014-6])|3[0-57]|[45]|6[248]|7[2-47]|8[1-9])|5(?:2|3[045]|4[0-369]|8[02389]|9[0-3])|7(?:2[02-46-9]|34|[58]|6[0249]|7[57]|9(?:[23]|4[0-59]|5[01569]|6[0167]))|8(?:2(?:[1258]|4[0-39]|9[0-2469])|49|51|6(?:[0-24]|36|5[0-3589]|72|9[01459])|7[0-468]|8[68])|9(?:[23][1-9]|4[15]|5[138]|6[1-3]|7[156]|8[189]|9(?:[1289]|3[34]|4[0178]))|(?:49|55|83)[29]|(?:264|837)[016-9]|2(?:57|93)[015-9]|(?:25[0468]|422|838)[01]|(?:47[59]|59[89]|8(?:6[68]|9))[019]","1(?:1|5(?:4[018]|5[017])|77|88|9[69])|2(?:2[127]|3[0-269]|4[59]|5(?:[1-3]|5[0-69]|9(?:17|99))|6(?:2|4[016-9])|7(?:[1-35]|8[0189])|8(?:[16]|3[0134]|9[0-5])|9(?:[028]|17))|4(?:2(?:[13-79]|8[014-6])|3[0-57]|[45]|6[248]|7[2-47]|9[29])|5(?:2|3[045]|4[0-369]|5[29]|8[02389]|9[0-3])|7(?:2[02-46-9]|34|[58]|6[0249]|7[57]|9(?:[23]|4[0-59]|5[01569]|6[0167]))|8(?:2(?:[1258]|4[0-39]|9[0169])|3(?:[29]|7(?:[017-9]|6[6-8]))|49|51|6(?:[0-24]|36[23]|5(?:[0-389]|5[23])|6(?:[01]|9[178])|72|9[0145])|7[0-468]|8[68])|9(?:4[15]|5[138]|7[156]|8[189]|9(?:[1289]|3(?:31|4[357])|4[0178]))|(?:8294|96)[1-3]|2(?:57|93)[015-9]|(?:223|8699)[014-9]|(?:25[0468]|422|838)[01]|(?:48|8292|9[23])[1-9]|(?:47[59]|59[89]|8(?:68|9))[019]","1(?:1|5(?:4[018]|5[017])|77|88|9[69])|2(?:2[127]|3[0-269]|4[59]|5(?:[1-3]|5[0-69]|7[015-9]|9(?:17|99))|6(?:2|4[016-9])|7(?:[1-35]|8[0189])|8(?:[16]|3[0134]|9[0-5])|9(?:[028]|17|3[015-9]))|4(?:2(?:[13-79]|8[014-6])|3[0-57]|[45]|6[248]|7[2-47]|9[29])|5(?:2|3[045]|4[0-369]|5[29]|8[02389]|9[0-3])|7(?:2[02-46-9]|34|[58]|6[0249]|7[57]|9(?:[23]|4[0-59]|5[01569]|6[0167]))|8(?:2(?:[1258]|4[0-39]|9(?:[019]|4[1-3]|6(?:[0-47-9]|5[01346-9])))|3(?:[29]|7(?:[017-9]|6[6-8]))|49|51|6(?:[0-24]|36[23]|5(?:[0-389]|5[23])|6(?:[01]|9[178])|72|9[0145])|7[0-468]|8[68])|9(?:4[15]|5[138]|6[1-3]|7[156]|8[189]|9(?:[1289]|3(?:31|4[357])|4[0178]))|(?:223|8699)[014-9]|(?:25[0468]|422|838)[01]|(?:48|829(?:2|66)|9[23])[1-9]|(?:47[59]|59[89]|8(?:68|9))[019]"],"0$1"],["(\\d{3})(\\d{2})(\\d{4})","$1-$2-$3",["[14]|[289][2-9]|5[3-9]|7[2-4679]"],"0$1"],["(\\d{3})(\\d{3})(\\d{4})","$1-$2-$3",["800"],"0$1"],["(\\d{2})(\\d{4})(\\d{4})","$1-$2-$3",["[257-9]"],"0$1"]],"0",0,0,0,0,0,[["(?:1(?:1[235-8]|2[3-6]|3[3-9]|4[2-6]|[58][2-8]|6[2-7]|7[2-9]|9[1-9])|(?:2[2-9]|[36][1-9])\\d|4(?:[2-578]\\d|6[02-8]|9[2-59])|5(?:[2-589]\\d|6[1-9]|7[2-8])|7(?:[25-9]\\d|3[4-9]|4[02-9])|8(?:[2679]\\d|3[2-9]|4[5-9]|5[1-9]|8[03-9])|9(?:[2-58]\\d|[679][1-9]))\\d{6}",[9]],["[7-9]0[1-9]\\d{7}",[10]],["00777(?:[01]|5\\d)\\d\\d|(?:00(?:7778|882[1245])|(?:120|800\\d)\\d\\d)\\d{4}|00(?:37|66|78)\\d{6,13}"],["990\\d{6}",[9]],["60\\d{7}",[9]],0,["570\\d{6}",[9]],["20\\d{8}",[10]],["50[1-9]\\d{7}",[10]]]],"KE":["254","000","(?:[17]\\d\\d|900)\\d{6}|(?:2|80)0\\d{6,7}|[4-6]\\d{6,8}",[7,8,9,10],[["(\\d{2})(\\d{5,7})","$1 $2",["[24-6]"],"0$1"],["(\\d{3})(\\d{6})","$1 $2",["[17]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3,4})","$1 $2 $3",["[89]"],"0$1"]],"0",0,0,0,0,0,[["(?:4[245]|5[1-79]|6[01457-9])\\d{5,7}|(?:4[136]|5[08]|62)\\d{7}|(?:[24]0|66)\\d{6,7}",[7,8,9]],["(?:1(?:0[0-6]|1[0-5]|2[014])|7\\d\\d)\\d{6}",[9]],["800[2-8]\\d{5,6}",[9,10]],["900[02-9]\\d{5}",[9]]]],"KG":["996","00","8\\d{9}|(?:[235-8]\\d|99)\\d{7}",[9,10],[["(\\d{4})(\\d{5})","$1 $2",["3(?:1[346]|[24-79])"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[235-79]|88"],"0$1"],["(\\d{3})(\\d{3})(\\d)(\\d{2,3})","$1 $2 $3 $4",["8"],"0$1"]],"0",0,0,0,0,0,[["312(?:5[0-79]\\d|9(?:[0-689]\\d|7[0-24-9]))\\d{3}|(?:3(?:1(?:2[0-46-8]|3[1-9]|47|[56]\\d)|2(?:22|3[0-479]|6[0-7])|4(?:22|5[6-9]|6\\d)|5(?:22|3[4-7]|59|6\\d)|6(?:22|5[35-7]|6\\d)|7(?:22|3[468]|4[1-9]|59|[67]\\d)|9(?:22|4[1-8]|6\\d))|6(?:09|12|2[2-4])\\d)\\d{5}",[9]],["312(?:58\\d|973)\\d{3}|(?:2(?:0[0-35]|2\\d)|5[0-24-7]\\d|7(?:[07]\\d|55)|880|99[05-9])\\d{6}",[9]],["800\\d{6,7}"]]],"KH":["855","00[14-9]","1\\d{9}|[1-9]\\d{7,8}",[8,9,10],[["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["[1-9]"],"0$1"],["(\\d{4})(\\d{3})(\\d{3})","$1 $2 $3",["1"]]],"0",0,0,0,0,0,[["23(?:4(?:[2-4]|[56]\\d)|[568]\\d\\d)\\d{4}|23[236-9]\\d{5}|(?:2[4-6]|3[2-6]|4[2-4]|[5-7][2-5])(?:(?:[237-9]|4[56]|5\\d)\\d{5}|6\\d{5,6})",[8,9]],["(?:(?:1[28]|3[18]|9[67])\\d|6[016-9]|7(?:[07-9]|[16]\\d)|8(?:[013-79]|8\\d))\\d{6}|(?:1\\d|9[0-57-9])\\d{6}|(?:2[3-6]|3[2-6]|4[2-4]|[5-7][2-5])48\\d{5}",[8,9]],["1800(?:1\\d|2[019])\\d{4}",[10]],["1900(?:1\\d|2[09])\\d{4}",[10]]]],"KI":["686","00","(?:[37]\\d|6[0-79])\\d{6}|(?:[2-48]\\d|50)\\d{3}",[5,8],0,"0",0,0,0,0,0,[["(?:[24]\\d|3[1-9]|50|65(?:02[12]|12[56]|22[89]|[3-5]00)|7(?:27\\d\\d|3100|5(?:02[12]|12[56]|22[89]|[34](?:00|81)|500))|8[0-5])\\d{3}"],["(?:63\\d{3}|73(?:0[0-5]\\d|140))\\d{3}|[67]200[01]\\d{3}",[8]],0,0,0,0,0,0,["30(?:0[01]\\d\\d|12(?:11|20))\\d\\d",[8]]]],"KM":["269","00","[3478]\\d{6}",[7],[["(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3",["[3478]"]]],0,0,0,0,0,0,[["7[4-7]\\d{5}"],["[34]\\d{6}"],0,["8\\d{6}"]]],"KN":["1","011","(?:[58]\\d\\d|900)\\d{7}",[10],0,"1",0,"1|([2-7]\\d{6})$","869$1",0,"869",[["869(?:2(?:29|36)|302|4(?:6[015-9]|70)|56[5-7])\\d{4}"],["869(?:48[89]|55[6-8]|66\\d|76[02-7])\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"KP":["850","00|99","85\\d{6}|(?:19\\d|[2-7])\\d{7}",[8,10],[["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["8"],"0$1"],["(\\d)(\\d{3})(\\d{4})","$1 $2 $3",["[2-7]"],"0$1"],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["1"],"0$1"]],"0",0,0,0,0,0,[["(?:(?:195|2)\\d|3[19]|4[159]|5[37]|6[17]|7[39]|85)\\d{6}"],["19[1-3]\\d{7}",[10]]]],"KR":["82","00(?:[125689]|3(?:[46]5|91)|7(?:00|27|3|55|6[126]))","00[1-9]\\d{8,11}|(?:[12]|5\\d{3})\\d{7}|[13-6]\\d{9}|(?:[1-6]\\d|80)\\d{7}|[3-6]\\d{4,5}|(?:00|7)0\\d{8}",[5,6,8,9,10,11,12,13,14],[["(\\d{2})(\\d{3,4})","$1-$2",["(?:3[1-3]|[46][1-4]|5[1-5])1"],"0$1"],["(\\d{4})(\\d{4})","$1-$2",["1"]],["(\\d)(\\d{3,4})(\\d{4})","$1-$2-$3",["2"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1-$2-$3",["60|8"],"0$1"],["(\\d{2})(\\d{3,4})(\\d{4})","$1-$2-$3",["[1346]|5[1-5]"],"0$1"],["(\\d{2})(\\d{4})(\\d{4})","$1-$2-$3",["[57]"],"0$1"],["(\\d{2})(\\d{5})(\\d{4})","$1-$2-$3",["5"],"0$1"]],"0",0,"0(8(?:[1-46-8]|5\\d\\d))?",0,0,0,[["(?:2|3[1-3]|[46][1-4]|5[1-5])[1-9]\\d{6,7}|(?:3[1-3]|[46][1-4]|5[1-5])1\\d{2,3}",[5,6,8,9,10]],["1(?:05(?:[0-8]\\d|9[0-6])|22[13]\\d)\\d{4,5}|1(?:0[1-46-9]|[16-9]\\d|2[013-9])\\d{6,7}",[9,10]],["00(?:308\\d{6,7}|798\\d{7,9})|(?:00368|80)\\d{7}",[9,11,12,13,14]],["60[2-9]\\d{6}",[9]],["50\\d{8,9}",[10,11]],0,["1(?:5(?:22|33|44|66|77|88|99)|6(?:[07]0|44|6[168]|88)|8(?:00|33|55|77|99))\\d{4}",[8]],["15\\d{7,8}",[9,10]],["70\\d{8}",[10]]]],"KW":["965","00","18\\d{5}|(?:[2569]\\d|41)\\d{6}",[7,8],[["(\\d{4})(\\d{3,4})","$1 $2",["[169]|2(?:[235]|4[1-35-9])|52"]],["(\\d{3})(\\d{5})","$1 $2",["[245]"]]],0,0,0,0,0,0,[["2(?:[23]\\d\\d|4(?:[1-35-9]\\d|44)|5(?:0[034]|[2-46]\\d|5[1-3]|7[1-7]))\\d{4}",[8]],["(?:41\\d\\d|5(?:(?:[05]\\d|1[0-7]|6[56])\\d|2(?:22|5[25])|7(?:55|77)|88[58])|6(?:(?:0[034679]|5[015-9]|6\\d)\\d|111|222|333|444|7(?:0[013-9]|[67]\\d)|888|9(?:[069]\\d|3[039]))|9(?:(?:0[09]|22|[4679]\\d|8[057-9])\\d|1(?:1[01]|99)|3(?:00|33)|5(?:00|5\\d)))\\d{4}",[8]],["18\\d{5}",[7]]]],"KY":["1","011","(?:345|[58]\\d\\d|900)\\d{7}",[10],0,"1",0,"1|([2-9]\\d{6})$","345$1",0,"345",[["345(?:2(?:22|3[23]|44|66)|333|444|6(?:23|38|40)|7(?:30|4[35-79]|6[6-9]|77)|8(?:00|1[45]|[48]8)|9(?:14|4[035-9]))\\d{4}"],["345(?:32[1-9]|42[0-4]|5(?:1[67]|2[5-79]|4[6-9]|50|76)|649|82[56]|9(?:1[679]|2[2-9]|3[06-9]|90))\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["(?:345976|900[2-9]\\d\\d)\\d{4}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"],0,0,["345849\\d{4}"]]],"KZ":["7","810","(?:33622|8\\d{8})\\d{5}|[78]\\d{9}",[10,14],0,"8",0,0,0,0,"33|7",[["(?:33622|7(?:1(?:0(?:[23]\\d|4[0-3]|59|63)|1(?:[23]\\d|4[0-79]|59)|2(?:[23]\\d|59)|3(?:2\\d|3[0-79]|4[0-35-9]|59)|4(?:[24]\\d|3[013-9]|5[1-9])|5(?:2\\d|3[1-9]|4[0-7]|59)|6(?:[2-4]\\d|5[19]|61)|72\\d|8(?:[27]\\d|3[1-46-9]|4[0-5]))|2(?:1(?:[23]\\d|4[46-9]|5[3469])|2(?:2\\d|3[0679]|46|5[12679])|3(?:[2-4]\\d|5[139])|4(?:2\\d|3[1-35-9]|59)|5(?:[23]\\d|4[0-246-8]|59|61)|6(?:2\\d|3[1-9]|4[0-4]|59)|7(?:[2379]\\d|40|5[279])|8(?:[23]\\d|4[0-3]|59)|9(?:2\\d|3[124578]|59))))\\d{5}",[10]],["7(?:0[0-25-8]|47|6[0-4]|7[15-8]|85)\\d{7}",[10]],["8(?:00|108\\d{3})\\d{7}"],["809\\d{7}",[10]],["808\\d{7}",[10]],0,0,0,["751\\d{7}",[10]]],"8~10"],"LA":["856","00","[23]\\d{9}|3\\d{8}|(?:[235-8]\\d|41)\\d{6}",[8,9,10],[["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["2[13]|3[14]|[4-8]"],"0$1"],["(\\d{2})(\\d{2})(\\d{2})(\\d{3})","$1 $2 $3 $4",["30[013-9]"],"0$1"],["(\\d{2})(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3 $4",["[23]"],"0$1"]],"0",0,0,0,0,0,[["(?:2[13]|[35-7][14]|41|8[1468])\\d{6}",[8]],["(?:20(?:[239]\\d|5[24-9]|7[6-8]|88)|302\\d)\\d{6}",[10]],0,0,0,0,["30[013-9]\\d{6}",[9]]]],"LB":["961","00","[27-9]\\d{7}|[13-9]\\d{6}",[7,8],[["(\\d)(\\d{3})(\\d{3})","$1 $2 $3",["[13-69]|7(?:[2-57]|62|8[0-7]|9[04-9])|8[02-9]"],"0$1"],["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["[27-9]"]]],"0",0,0,0,0,0,[["7(?:62|8[0-7]|9[04-9])\\d{4}|(?:[14-69]\\d|2(?:[14-69]\\d|[78][1-9])|7[2-57]|8[02-9])\\d{5}"],["793(?:[01]\\d|2[0-4])\\d{3}|(?:(?:3|81)\\d|7(?:[01]\\d|6[013-9]|8[89]|9[12]))\\d{5}"],0,["9[01]\\d{6}",[8]],0,0,0,0,0,["80\\d{6}",[8]]]],"LC":["1","011","(?:[58]\\d\\d|758|900)\\d{7}",[10],0,"1",0,"1|([2-8]\\d{6})$","758$1",0,"758",[["758(?:234|4(?:30|5\\d|6[2-9]|8[0-2])|57[0-2]|(?:63|75)8)\\d{4}"],["758(?:28[4-7]|384|4(?:6[01]|8[4-9])|5(?:1[89]|20|84)|7(?:1[2-9]|2\\d|3[0-3])|812)\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"LI":["423","00","[68]\\d{8}|(?:[2378]\\d|90)\\d{5}",[7,9],[["(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3",["[2379]|8(?:0[09]|7)","[2379]|8(?:0(?:02|9)|7)"]],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["8"]],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["69"]],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["6"]]],"0",0,"0|(1001)",0,0,0,[["(?:2(?:01|1[27]|2[02]|3\\d|6[02-578]|96)|3(?:[24]0|33|7[0135-7]|8[048]|9[0269]))\\d{4}",[7]],["(?:6(?:(?:4[5-9]|5[0-4])\\d|6(?:[0245]\\d|[17]0|3[7-9]))\\d|7(?:[37-9]\\d|42|56))\\d{4}"],["8002[28]\\d\\d|80(?:05\\d|9)\\d{4}"],["90(?:02[258]|1(?:23|3[14])|66[136])\\d\\d",[7]],0,0,["870(?:28|87)\\d\\d",[7]]]],"LK":["94","00","[1-9]\\d{8}",[9],[["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["7"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[1-689]"],"0$1"]],"0",0,0,0,0,0,[["(?:12[2-9]|602|8[12]\\d|9(?:1\\d|22|9[245]))\\d{6}|(?:11|2[13-7]|3[1-8]|4[157]|5[12457]|6[35-7])[2-57]\\d{6}"],["7(?:[0-25-8]\\d|4[0-4])\\d{6}"],0,0,0,0,["1973\\d{5}"]]],"LR":["231","00","(?:2|33|5\\d|77|88)\\d{7}|[4-6]\\d{6}",[7,8,9],[["(\\d)(\\d{3})(\\d{3})","$1 $2 $3",["[4-6]"],"0$1"],["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["2"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[3578]"],"0$1"]],"0",0,0,0,0,0,[["(?:2\\d{3}|33333)\\d{4}",[8,9]],["(?:(?:330|555|(?:77|88)\\d)\\d|4[67])\\d{5}|[56]\\d{6}",[7,9]],0,["332(?:02|[34]\\d)\\d{4}",[9]]]],"LS":["266","00","(?:[256]\\d\\d|800)\\d{5}",[8],[["(\\d{4})(\\d{4})","$1 $2",["[2568]"]]],0,0,0,0,0,0,[["2\\d{7}"],["[56]\\d{7}"],["800[256]\\d{4}"]]],"LT":["370","00","(?:[3469]\\d|52|[78]0)\\d{6}",[8],[["(\\d)(\\d{3})(\\d{4})","$1 $2 $3",["52[0-7]"],"(8-$1)",1],["(\\d{3})(\\d{2})(\\d{3})","$1 $2 $3",["[7-9]"],"8 $1",1],["(\\d{2})(\\d{6})","$1 $2",["37|4(?:[15]|6[1-8])"],"(8-$1)",1],["(\\d{3})(\\d{5})","$1 $2",["[3-6]"],"(8-$1)",1]],"8",0,"[08]",0,0,0,[["(?:3[1478]|4[124-6]|52)\\d{6}"],["6\\d{7}"],["80[02]\\d{5}"],["9(?:0[0239]|10)\\d{5}"],["70[05]\\d{5}"],0,["70[67]\\d{5}"],0,["[89]01\\d{5}"],["808\\d{5}"]]],"LU":["352","00","35[013-9]\\d{4,8}|6\\d{8}|35\\d{2,4}|(?:[2457-9]\\d|3[0-46-9])\\d{2,9}",[4,5,6,7,8,9,10,11],[["(\\d{2})(\\d{3})","$1 $2",["2(?:0[2-689]|[2-9])|[3-57]|8(?:0[2-9]|[13-9])|9(?:0[89]|[2-579])"]],["(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3",["2(?:0[2-689]|[2-9])|[3-57]|8(?:0[2-9]|[13-9])|9(?:0[89]|[2-579])"]],["(\\d{2})(\\d{2})(\\d{3})","$1 $2 $3",["20[2-689]"]],["(\\d{2})(\\d{2})(\\d{2})(\\d{1,2})","$1 $2 $3 $4",["2(?:[0367]|4[3-8])"]],["(\\d{3})(\\d{2})(\\d{3})","$1 $2 $3",["80[01]|90[015]"]],["(\\d{2})(\\d{2})(\\d{2})(\\d{3})","$1 $2 $3 $4",["20"]],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["6"]],["(\\d{2})(\\d{2})(\\d{2})(\\d{2})(\\d{1,2})","$1 $2 $3 $4 $5",["2(?:[0367]|4[3-8])"]],["(\\d{2})(\\d{2})(\\d{2})(\\d{1,5})","$1 $2 $3 $4",["[3-57]|8[13-9]|9(?:0[89]|[2-579])|(?:2|80)[2-9]"]]],0,0,"(15(?:0[06]|1[12]|[35]5|4[04]|6[26]|77|88|99)\\d)",0,0,0,[["(?:35[013-9]|80[2-9]|90[89])\\d{1,8}|(?:2[2-9]|3[0-46-9]|[457]\\d|8[13-9]|9[2-579])\\d{2,9}"],["6(?:[269][18]|5[1568]|7[189]|81)\\d{6}",[9]],["800\\d{5}",[8]],["90[015]\\d{5}",[8]],0,0,0,0,["20(?:1\\d{5}|[2-689]\\d{1,7})",[4,5,6,7,8,9,10]],["801\\d{5}",[8]]]],"LV":["371","00","(?:[268]\\d|90)\\d{6}",[8],[["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["[269]|8[01]"]]],0,0,0,0,0,0,[["6\\d{7}"],["2\\d{7}"],["80\\d{6}"],["90\\d{6}"],0,0,0,0,0,["81\\d{6}"]]],"LY":["218","00","[2-9]\\d{8}",[9],[["(\\d{2})(\\d{7})","$1-$2",["[2-9]"],"0$1"]],"0",0,0,0,0,0,[["(?:2(?:0[56]|[1-6]\\d|7[124579]|8[124])|3(?:1\\d|2[2356])|4(?:[17]\\d|2[1-357]|5[2-4]|8[124])|5(?:[1347]\\d|2[1-469]|5[13-5]|8[1-4])|6(?:[1-479]\\d|5[2-57]|8[1-5])|7(?:[13]\\d|2[13-79])|8(?:[124]\\d|5[124]|84))\\d{6}"],["9[1-6]\\d{7}"]]],"MA":["212","00","[5-8]\\d{8}",[9],[["(\\d{5})(\\d{4})","$1-$2",["5(?:29|38)","5(?:29[89]|389)","5(?:29[89]|389)0"],"0$1"],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["5[45]"],"0$1"],["(\\d{4})(\\d{5})","$1-$2",["5(?:2[2-489]|3[5-9]|9)|892","5(?:2(?:[2-49]|8[235-9])|3[5-9]|9)|892"],"0$1"],["(\\d{2})(\\d{7})","$1-$2",["8"],"0$1"],["(\\d{3})(\\d{6})","$1-$2",["[5-7]"],"0$1"]],"0",0,0,0,0,0,[["5(?:29(?:[189][05]|2[29]|3[01])|389[05])\\d{4}|5(?:2(?:[0-25-7]\\d|3[1-578]|4[02-46-8]|8[0235-7]|90)|3(?:[0-47]\\d|5[02-9]|6[02-8]|8[08]|9[3-9])|(?:4[067]|5[03])\\d)\\d{5}"],["(?:6(?:[0-79]\\d|8[0-247-9])|7(?:[017]\\d|2[0-2]|6[0-367]))\\d{6}"],["80\\d{7}"],["89\\d{7}"],0,0,0,0,["592(?:4[0-2]|93)\\d{4}"]]],"MC":["377","00","(?:[3489]|6\\d)\\d{7}",[8,9],[["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["4"],"0$1"],["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[389]"]],["(\\d)(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4 $5",["6"],"0$1"]],"0",0,0,0,0,0,[["(?:870|9[2-47-9]\\d)\\d{5}",[8]],["4(?:[46]\\d|5[1-9])\\d{5}|(?:3|6\\d)\\d{7}"],["(?:800|90\\d)\\d{5}",[8]]]],"MD":["373","00","(?:[235-7]\\d|[89]0)\\d{6}",[8],[["(\\d{3})(\\d{5})","$1 $2",["[89]"],"0$1"],["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["22|3"],"0$1"],["(\\d{3})(\\d{2})(\\d{3})","$1 $2 $3",["[25-7]"],"0$1"]],"0",0,0,0,0,0,[["(?:(?:2[1-9]|3[1-79])\\d|5(?:33|5[257]))\\d{5}"],["562\\d{5}|(?:6\\d|7[16-9])\\d{6}"],["800\\d{5}"],["90[056]\\d{5}"],0,0,["803\\d{5}"],0,["3[08]\\d{6}"],["808\\d{5}"]]],"ME":["382","00","(?:20|[3-79]\\d)\\d{6}|80\\d{6,7}",[8,9],[["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["[2-9]"],"0$1"]],"0",0,0,0,0,0,[["(?:20[2-8]|3(?:[0-2][2-7]|3[24-7])|4(?:0[2-467]|1[2467])|5(?:0[2467]|1[24-7]|2[2-467]))\\d{5}",[8]],["6(?:[07-9]\\d|3[024]|6[0-25])\\d{5}",[8]],["80(?:[0-2578]|9\\d)\\d{5}"],["9(?:4[1568]|5[178])\\d{5}",[8]],0,0,["77[1-9]\\d{5}",[8]],0,["78[1-49]\\d{5}",[8]]]],"MF":["590","00","(?:590|(?:69|80)\\d|976)\\d{6}",[9],0,"0",0,0,0,0,0,[["590(?:0[079]|[14]3|[27][79]|30|5[0-268]|87)\\d{4}"],["69(?:0\\d\\d|1(?:2[2-9]|3[0-5]))\\d{4}"],["80[0-5]\\d{6}"],0,0,0,0,0,["976[01]\\d{5}"]]],"MG":["261","00","[23]\\d{8}",[9],[["(\\d{2})(\\d{2})(\\d{3})(\\d{2})","$1 $2 $3 $4",["[23]"],"0$1"]],"0",0,"0|([24-9]\\d{6})$","20$1",0,0,[["2072[29]\\d{4}|20(?:2\\d|4[47]|5[3467]|6[279]|7[35]|8[268]|9[245])\\d{5}"],["3[2-489]\\d{7}"],0,0,0,0,0,0,["22\\d{7}"]]],"MH":["692","011","329\\d{4}|(?:[256]\\d|45)\\d{5}",[7],[["(\\d{3})(\\d{4})","$1-$2",["[2-6]"]]],"1",0,0,0,0,0,[["(?:247|528|625)\\d{4}"],["(?:(?:23|54)5|329|45[356])\\d{4}"],0,0,0,0,0,0,["635\\d{4}"]]],"MK":["389","00","[2-578]\\d{7}",[8],[["(\\d)(\\d{3})(\\d{4})","$1 $2 $3",["2|34[47]|4(?:[37]7|5[47]|64)"],"0$1"],["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["[347]"],"0$1"],["(\\d{3})(\\d)(\\d{2})(\\d{2})","$1 $2 $3 $4",["[58]"],"0$1"]],"0",0,0,0,0,0,[["(?:(?:2(?:62|77)0|3444)\\d|4[56]440)\\d{3}|(?:34|4[357])700\\d{3}|(?:2(?:[23]\\d|5[0-578]|6[01]|82)|3(?:1[3-68]|[23][2-68]|4[23568])|4(?:[23][2-68]|4[3-68]|5[2568]|6[25-8]|7[24-68]|8[4-68]))\\d{5}"],["7(?:3555|4(?:60\\d|747)|94(?:[01]\\d|2[0-4]))\\d{3}|7(?:[0-25-8]\\d|3[1-4]|42|9[23])\\d{5}"],["800\\d{5}"],["5[02-9]\\d{6}"],0,0,0,0,0,["8(?:0[1-9]|[1-9]\\d)\\d{5}"]]],"ML":["223","00","[24-9]\\d{7}",[8],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[24-9]"]]],0,0,0,0,0,0,[["2(?:07[0-8]|12[67])\\d{4}|(?:2(?:02|1[4-689])|4(?:0[0-4]|4[1-39]))\\d{5}"],["2(?:0(?:01|79)|17\\d)\\d{4}|(?:5[01]|[679]\\d|8[239])\\d{6}"],["80\\d{6}"]]],"MM":["95","00","1\\d{5,7}|95\\d{6}|(?:[4-7]|9[0-46-9])\\d{6,8}|(?:2|8\\d)\\d{5,8}",[6,7,8,9,10],[["(\\d)(\\d{2})(\\d{3})","$1 $2 $3",["16|2"],"0$1"],["(\\d{2})(\\d{2})(\\d{3})","$1 $2 $3",["[45]|6(?:0[23]|[1-689]|7[235-7])|7(?:[0-4]|5[2-7])|8[1-6]"],"0$1"],["(\\d)(\\d{3})(\\d{3,4})","$1 $2 $3",["[12]"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["[4-7]|8[1-35]"],"0$1"],["(\\d)(\\d{3})(\\d{4,6})","$1 $2 $3",["9(?:2[0-4]|[35-9]|4[137-9])"],"0$1"],["(\\d)(\\d{4})(\\d{4})","$1 $2 $3",["2"],"0$1"],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["8"],"0$1"],["(\\d)(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3 $4",["92"],"0$1"],["(\\d)(\\d{5})(\\d{4})","$1 $2 $3",["9"],"0$1"]],"0",0,0,0,0,0,[["(?:1(?:(?:2\\d|3[56]|[89][0-6])\\d|4(?:2[2-469]|39|46|6[25]|7[0-3]|83)|6)|2(?:2(?:00|8[34])|4(?:0\\d|2[246]|39|46|62|7[0-3]|83)|51\\d\\d)|4(?:2(?:2\\d\\d|48[0-3])|3(?:20\\d|4(?:70|83)|56)|420\\d|5470)|6(?:0(?:[23]|88\\d)|(?:124|[56]2\\d)\\d|247[23]|3(?:20\\d|470)|4(?:2[04]\\d|47[23])|7(?:(?:3\\d|8[01459])\\d|4(?:39|60|7[013]))))\\d{4}|5(?:2(?:2\\d{5,6}|47[023]\\d{4})|(?:347[23]|4(?:2(?:1|86)|470)|522\\d|6(?:20\\d|483)|7(?:20\\d|48[0-2])|8(?:20\\d|47[02])|9(?:20\\d|47[01]))\\d{4})|7(?:(?:0470|4(?:25\\d|470)|5(?:202|470|96\\d))\\d{4}|1(?:20\\d{4,5}|4(?:70|83)\\d{4}))|8(?:1(?:2\\d{5,6}|4(?:10|7[01]\\d)\\d{3})|2(?:2\\d{5,6}|(?:320|490\\d)\\d{3})|(?:3(?:2\\d\\d|470)|4[24-7]|5(?:2\\d|4[1-9]|51)\\d|6[23])\\d{4})|(?:1[2-6]\\d|4(?:2[24-8]|3[2-7]|[46][2-6]|5[3-5])|5(?:[27][2-8]|3[2-68]|4[24-8]|5[23]|6[2-4]|8[24-7]|9[2-7])|6(?:[19]20|42[03-6]|(?:52|7[45])\\d)|7(?:[04][24-8]|[15][2-7]|22|3[2-4])|8(?:1[2-689]|2[2-8]|[35]2\\d))\\d{4}|25\\d{5,6}|(?:2[2-9]|6(?:1[2356]|[24][2-6]|3[24-6]|5[2-4]|6[2-8]|7[235-7]|8[245]|9[24])|8(?:3[24]|5[245]))\\d{4}",[6,7,8,9]],["(?:17[01]|9(?:2(?:[0-4]|[56]\\d\\d)|(?:3(?:[0-36]|4\\d)|(?:6\\d|8[89]|9[4-8])\\d|7(?:3|40|[5-9]\\d))\\d|4(?:(?:[0245]\\d|[1379])\\d|88)|5[0-6])\\d)\\d{4}|9[69]1\\d{6}|9(?:[68]\\d|9[089])\\d{5}",[7,8,9,10]],["80080(?:[01][1-9]|2\\d)\\d{3}",[10]],0,0,0,0,0,["1333\\d{4}|[12]468\\d{4}",[8]]]],"MN":["976","001","[12]\\d{7,9}|[57-9]\\d{7}",[8,9,10],[["(\\d{2})(\\d{2})(\\d{4})","$1 $2 $3",["[12]1"],"0$1"],["(\\d{4})(\\d{4})","$1 $2",["[57-9]"]],["(\\d{3})(\\d{5,6})","$1 $2",["[12]2[1-3]"],"0$1"],["(\\d{4})(\\d{5,6})","$1 $2",["[12](?:27|3[2-8]|4[2-68]|5[1-4689])","[12](?:27|3[2-8]|4[2-68]|5[1-4689])[0-3]"],"0$1"],["(\\d{5})(\\d{4,5})","$1 $2",["[12]"],"0$1"]],"0",0,0,0,0,0,[["[12]2[1-3]\\d{5,6}|7(?:0[0-5]\\d|128)\\d{4}|(?:[12](?:1|27)|5[368])\\d{6}|[12](?:3[2-8]|4[2-68]|5[1-4689])\\d{6,7}"],["(?:83[01]|920)\\d{5}|(?:5[05]|8[05689]|9[013-9])\\d{6}",[8]],0,0,0,0,0,0,["712[0-79]\\d{4}|7(?:1[013-9]|[25-8]\\d)\\d{5}",[8]]]],"MO":["853","00","0800\\d{3}|(?:28|[68]\\d)\\d{6}",[7,8],[["(\\d{4})(\\d{3})","$1 $2",["0"]],["(\\d{4})(\\d{4})","$1 $2",["[268]"]]],0,0,0,0,0,0,[["(?:28[2-9]|8(?:11|[2-57-9]\\d))\\d{5}",[8]],["6800[0-79]\\d{3}|6(?:[235]\\d\\d|6(?:0[0-5]|[1-9]\\d)|8(?:0[1-9]|[14-8]\\d|2[5-9]|[39][0-4]))\\d{4}",[8]],["0800\\d{3}",[7]]]],"MP":["1","011","[58]\\d{9}|(?:67|90)0\\d{7}",[10],0,"1",0,"1|([2-9]\\d{6})$","670$1",0,"670",[["670(?:2(?:3[3-7]|56|8[4-8])|32[1-38]|4(?:33|8[348])|5(?:32|55|88)|6(?:64|70|82)|78[3589]|8[3-9]8|989)\\d{4}"],[""],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"MQ":["596","00","(?:69|80)\\d{7}|(?:59|97)6\\d{6}",[9],[["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[569]"],"0$1"],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["8"],"0$1"]],"0",0,0,0,0,0,[["596(?:[04-7]\\d|10|2[7-9]|3[014-9]|8[09]|9[4-9])\\d{4}"],["69(?:6(?:[0-46-9]\\d|5[0-6])|727)\\d{4}"],["80[0-5]\\d{6}"],0,0,0,0,0,["976(?:6\\d|7[0-367])\\d{4}"]]],"MR":["222","00","(?:[2-4]\\d\\d|800)\\d{5}",[8],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[2-48]"]]],0,0,0,0,0,0,[["(?:25[08]|35\\d|45[1-7])\\d{5}"],["[2-4][0-46-9]\\d{6}"],["800\\d{5}"]]],"MS":["1","011","(?:[58]\\d\\d|664|900)\\d{7}",[10],0,"1",0,"1|([34]\\d{6})$","664$1",0,"664",[["6644(?:1[0-3]|91)\\d{4}"],["664(?:3(?:49|9[1-6])|49[2-6])\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"MT":["356","00","3550\\d{4}|(?:[2579]\\d\\d|800)\\d{5}",[8],[["(\\d{4})(\\d{4})","$1 $2",["[2357-9]"]]],0,0,0,0,0,0,[["20(?:3[1-4]|6[059])\\d{4}|2(?:0[19]|[1-357]\\d|60)\\d{5}"],["(?:7(?:210|[79]\\d\\d)|9(?:[29]\\d\\d|69[67]|8(?:1[1-3]|89|97)))\\d{4}"],["800(?:02|[3467]\\d)\\d{3}"],["5(?:0(?:0(?:37|43)|(?:6\\d|70|9[0168])\\d)|[12]\\d0[1-5])\\d{3}"],0,0,["501\\d{5}"],["7117\\d{4}"],["3550\\d{4}"]]],"MU":["230","0(?:0|[24-7]0|3[03])","(?:5|8\\d\\d)\\d{7}|[2-468]\\d{6}",[7,8,10],[["(\\d{3})(\\d{4})","$1 $2",["[2-46]|8[013]"]],["(\\d{4})(\\d{4})","$1 $2",["5"]],["(\\d{5})(\\d{5})","$1 $2",["8"]]],0,0,0,0,0,0,[["(?:2(?:[0346-8]\\d|1[0-7])|4(?:[013568]\\d|2[4-7])|54(?:[3-5]\\d|71)|6\\d\\d|8(?:14|3[129]))\\d{4}",[7,8]],["5(?:4(?:2[1-389]|7[1-9])|87[15-8])\\d{4}|5(?:2[5-9]|4[3-689]|[57]\\d|8[0-689]|9[0-8])\\d{5}",[8]],["802\\d{7}|80[0-2]\\d{4}",[7,10]],["30\\d{5}",[7]],0,0,0,0,["3(?:20|9\\d)\\d{4}",[7]]],"020"],"MV":["960","0(?:0|19)","(?:800|9[0-57-9]\\d)\\d{7}|[34679]\\d{6}",[7,10],[["(\\d{3})(\\d{4})","$1-$2",["[3467]|9[13-9]"]],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["[89]"]]],0,0,0,0,0,0,[["(?:3(?:0[0-3]|3[0-59])|6(?:[57][02468]|6[024-68]|8[024689]))\\d{4}",[7]],["46[46]\\d{4}|(?:7\\d|9[13-9])\\d{5}",[7]],["800\\d{7}",[10]],["900\\d{7}",[10]],0,0,["4(?:0[01]|50)\\d{4}",[7]]],"00"],"MW":["265","00","(?:[129]\\d|31|77|88)\\d{7}|1\\d{6}",[7,9],[["(\\d)(\\d{3})(\\d{3})","$1 $2 $3",["1[2-9]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["2"],"0$1"],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[137-9]"],"0$1"]],"0",0,0,0,0,0,[["(?:1[2-9]|2[12]\\d\\d)\\d{5}"],["111\\d{6}|(?:31|77|88|9[89])\\d{7}",[9]]]],"MX":["52","0[09]","1(?:(?:44|99)[1-9]|65[0-689])\\d{7}|(?:1(?:[017]\\d|[235][1-9]|4[0-35-9]|6[0-46-9]|8[1-79]|9[1-8])|[2-9]\\d)\\d{8}",[10,11],[["(\\d{2})(\\d{4})(\\d{4})","$1 $2 $3",["33|5[56]|81"],0,1],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["[2-9]"],0,1],["(\\d)(\\d{2})(\\d{4})(\\d{4})","$2 $3 $4",["1(?:33|5[56]|81)"],0,1],["(\\d)(\\d{3})(\\d{3})(\\d{4})","$2 $3 $4",["1"],0,1]],"01",0,"0(?:[12]|4[45])|1",0,0,0,[["6571\\d{6}|(?:2(?:0[01]|2[1-9]|3[1-35-8]|4[13-9]|7[1-689]|8[1-578]|9[467])|3(?:1[1-79]|[2458][1-9]|3\\d|7[1-8]|9[1-5])|4(?:1[1-57-9]|[25-7][1-9]|3[1-8]|4\\d|8[1-35-9]|9[2-689])|5(?:[56]\\d|88|9[1-79])|6(?:1[2-68]|[2-4][1-9]|5[1-3689]|6[1-57-9]|7[1-7]|8[67]|9[4-8])|7(?:[1-467][1-9]|5[13-9]|8[1-69]|9[17])|8(?:1\\d|2[13-689]|3[1-6]|4[124-6]|6[1246-9]|7[1-378]|9[12479])|9(?:1[346-9]|2[1-4]|3[2-46-8]|5[1348]|6[1-9]|7[12]|8[1-8]|9\\d))\\d{7}",[10]],["6571\\d{6}|(?:1(?:2(?:2[1-9]|3[1-35-8]|4[13-9]|7[1-689]|8[1-578]|9[467])|3(?:1[1-79]|[2458][1-9]|3\\d|7[1-8]|9[1-5])|4(?:1[1-57-9]|[24-7][1-9]|3[1-8]|8[1-35-9]|9[2-689])|5(?:[56]\\d|88|9[1-79])|6(?:1[2-68]|[2-4][1-9]|5[1-3689]|6[1-57-9]|7[1-7]|8[67]|9[4-8])|7(?:[1-467][1-9]|5[13-9]|8[1-69]|9[17])|8(?:1\\d|2[13-689]|3[1-6]|4[124-6]|6[1246-9]|7[1-378]|9[12479])|9(?:1[346-9]|2[1-4]|3[2-46-8]|5[1348]|[69][1-9]|7[12]|8[1-8]))|2(?:2[1-9]|3[1-35-8]|4[13-9]|7[1-689]|8[1-578]|9[467])|3(?:1[1-79]|[2458][1-9]|3\\d|7[1-8]|9[1-5])|4(?:1[1-57-9]|[25-7][1-9]|3[1-8]|4\\d|8[1-35-9]|9[2-689])|5(?:[56]\\d|88|9[1-79])|6(?:1[2-68]|[2-4][1-9]|5[1-3689]|6[1-57-9]|7[1-7]|8[67]|9[4-8])|7(?:[1-467][1-9]|5[13-9]|8[1-69]|9[17])|8(?:1\\d|2[13-689]|3[1-6]|4[124-6]|6[1246-9]|7[1-378]|9[12479])|9(?:1[346-9]|2[1-4]|3[2-46-8]|5[1348]|6[1-9]|7[12]|8[1-8]|9\\d))\\d{7}"],["8(?:00|88)\\d{7}",[10]],["900\\d{7}",[10]],["500\\d{7}",[10]],0,0,0,0,["300\\d{7}",[10]]],"00"],"MY":["60","00","1\\d{8,9}|(?:3\\d|[4-9])\\d{7}",[8,9,10],[["(\\d)(\\d{3})(\\d{4})","$1-$2 $3",["[4-79]"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,4})","$1-$2 $3",["1(?:[02469]|[378][1-9])|8"],"0$1"],["(\\d)(\\d{4})(\\d{4})","$1-$2 $3",["3"],"0$1"],["(\\d)(\\d{3})(\\d{2})(\\d{4})","$1-$2-$3-$4",["1[36-8]"]],["(\\d{3})(\\d{3})(\\d{4})","$1-$2 $3",["15"],"0$1"],["(\\d{2})(\\d{4})(\\d{4})","$1-$2 $3",["1"],"0$1"]],"0",0,0,0,0,0,[["(?:3(?:2[0-36-9]|3[0-368]|4[0-278]|5[0-24-8]|6[0-467]|7[1246-9]|8\\d|9[0-57])\\d|4(?:2[0-689]|[3-79]\\d|8[1-35689])|5(?:2[0-589]|[3468]\\d|5[0-489]|7[1-9]|9[23])|6(?:2[2-9]|3[1357-9]|[46]\\d|5[0-6]|7[0-35-9]|85|9[015-8])|7(?:[2579]\\d|3[03-68]|4[0-8]|6[5-9]|8[0-35-9])|8(?:[24][2-8]|3[2-5]|5[2-7]|6[2-589]|7[2-578]|[89][2-9])|9(?:0[57]|13|[25-7]\\d|[3489][0-8]))\\d{5}",[8,9]],["1(?:1888[69]|4400|8(?:47|8[27])[0-4])\\d{4}|1(?:0(?:[23568]\\d|4[0-6]|7[016-9]|9[0-8])|1(?:[1-5]\\d\\d|6(?:0[5-9]|[1-9]\\d)|7(?:[0134]\\d|2[1-9]|5[0-6]))|(?:(?:[269]|59)\\d|[37][1-9]|4[235-9])\\d|8(?:1[23]|[236]\\d|4[06]|5[7-9]|7[016-9]|8[01]|9[0-8]))\\d{5}",[9,10]],["1[378]00\\d{6}",[10]],["1600\\d{6}",[10]],0,0,0,0,["15(?:4(?:6[0-4]\\d|8(?:0[125]|[17]\\d|21|3[01]|4[01589]|5[014]|6[02]))|6(?:32[0-6]|78\\d))\\d{4}",[10]]]],"MZ":["258","00","(?:2|8\\d)\\d{7}",[8,9],[["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["2|8[2-79]"]],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["8"]]],0,0,0,0,0,0,[["2(?:[1346]\\d|5[0-2]|[78][12]|93)\\d{5}",[8]],["8[2-79]\\d{7}",[9]],["800\\d{6}",[9]]]],"NA":["264","00","[68]\\d{7,8}",[8,9],[["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["88"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["6"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["87"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["8"],"0$1"]],"0",0,0,0,0,0,[["64426\\d{3}|6(?:1(?:2[2-7]|3[01378]|4[0-4])|254|32[0237]|4(?:27|41|5[25])|52[236-8]|626|7(?:2[2-4]|30))\\d{4,5}|6(?:1(?:(?:0\\d|2[0189]|3[24-69]|4[5-9])\\d|17|69|7[014])|2(?:17|5[0-36-8]|69|70)|3(?:17|2[14-689]|34|6[289]|7[01]|81)|4(?:17|2[0-2]|4[06]|5[0137]|69|7[01])|5(?:17|2[0459]|69|7[01])|6(?:17|25|38|42|69|7[01])|7(?:17|2[569]|3[13]|6[89]|7[01]))\\d{4}"],["(?:60|8[1245])\\d{7}",[9]],["80\\d{7}",[9]],["8701\\d{5}",[9]],0,0,0,0,["8(?:3\\d\\d|86)\\d{5}"]]],"NC":["687","00","(?:050|[2-57-9]\\d\\d)\\d{3}",[6],[["(\\d{2})(\\d{2})(\\d{2})","$1.$2.$3",["[02-57-9]"]]],0,0,0,0,0,0,[["(?:2[03-9]|3[0-5]|4[1-7]|88)\\d{4}"],["(?:5[0-4]|[79]\\d|8[0-79])\\d{4}"],["050\\d{3}"],["36\\d{4}"]]],"NE":["227","00","[027-9]\\d{7}",[8],[["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["08"]],["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[089]|2[013]|7[04]"]]],0,0,0,0,0,0,[["2(?:0(?:20|3[1-8]|4[13-5]|5[14]|6[14578]|7[1-578])|1(?:4[145]|5[14]|6[14-68]|7[169]|88))\\d{4}"],["(?:23|7[04]|[89]\\d)\\d{6}"],["08\\d{6}"],["09\\d{6}"]]],"NF":["672","00","[13]\\d{5}",[6],[["(\\d{2})(\\d{4})","$1 $2",["1[0-3]"]],["(\\d)(\\d{5})","$1 $2",["[13]"]]],0,0,"([0-258]\\d{4})$","3$1",0,0,[["(?:1(?:06|17|28|39)|3[0-2]\\d)\\d{3}"],["(?:14|3[58])\\d{4}"]]],"NG":["234","009","(?:[124-7]|9\\d{3})\\d{6}|[1-9]\\d{7}|[78]\\d{9,13}",[7,8,10,11,12,13,14],[["(\\d{2})(\\d{2})(\\d{3})","$1 $2 $3",["78"],"0$1"],["(\\d)(\\d{3})(\\d{3,4})","$1 $2 $3",["[12]|9(?:0[3-9]|[1-9])"],"0$1"],["(\\d{2})(\\d{3})(\\d{2,3})","$1 $2 $3",["[3-7]|8[2-9]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3,4})","$1 $2 $3",["[7-9]"],"0$1"],["(\\d{3})(\\d{4})(\\d{4,5})","$1 $2 $3",["[78]"],"0$1"],["(\\d{3})(\\d{5})(\\d{5,6})","$1 $2 $3",["[78]"],"0$1"]],"0",0,0,0,0,0,[["(?:(?:[1-356]\\d|4[02-8]|8[2-9])\\d|9(?:0[3-9]|[1-9]\\d))\\d{5}|7(?:0(?:[013-689]\\d|2[0-24-9])\\d{3,4}|[1-79]\\d{6})|(?:[12]\\d|4[147]|5[14579]|6[1578]|7[1-3578])\\d{5}",[7,8]],["(?:702[0-24-9]|8(?:01|19)[01])\\d{6}|(?:70[13-689]|8(?:0[2-9]|1[0-8])|9(?:0[1-9]|1[2356]))\\d{7}",[10]],["800\\d{7,11}",[10,11,12,13,14]],0,0,0,["700\\d{7,11}",[10,11,12,13,14]]]],"NI":["505","00","(?:1800|[25-8]\\d{3})\\d{4}",[8],[["(\\d{4})(\\d{4})","$1 $2",["[125-8]"]]],0,0,0,0,0,0,[["2\\d{7}"],["(?:5(?:5[0-7]|[78]\\d)|6(?:20|3[035]|4[045]|5[05]|77|8[1-9]|9[059])|(?:7[5-8]|8\\d)\\d)\\d{5}"],["1800\\d{4}"]]],"NL":["31","00","(?:[124-7]\\d\\d|3(?:[02-9]\\d|1[0-8]))\\d{6}|8\\d{6,9}|9\\d{6,10}|1\\d{4,5}",[5,6,7,8,9,10,11],[["(\\d{3})(\\d{4,7})","$1 $2",["[89]0"],"0$1"],["(\\d{2})(\\d{7})","$1 $2",["66"],"0$1"],["(\\d)(\\d{8})","$1 $2",["6"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["1[16-8]|2[259]|3[124]|4[17-9]|5[124679]"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[1-578]|91"],"0$1"],["(\\d{3})(\\d{3})(\\d{5})","$1 $2 $3",["9"],"0$1"]],"0",0,0,0,0,0,[["(?:1(?:[035]\\d|1[13-578]|6[124-8]|7[24]|8[0-467])|2(?:[0346]\\d|2[2-46-9]|5[125]|9[479])|3(?:[03568]\\d|1[3-8]|2[01]|4[1-8])|4(?:[0356]\\d|1[1-368]|7[58]|8[15-8]|9[23579])|5(?:[0358]\\d|[19][1-9]|2[1-57-9]|4[13-8]|6[126]|7[0-3578])|7\\d\\d)\\d{6}",[9]],["(?:6[1-58]|970\\d)\\d{7}",[9,11]],["800\\d{4,7}",[7,8,9,10]],["90[069]\\d{4,7}",[7,8,9,10]],0,0,["140(?:1[035]|2[0346]|3[03568]|4[0356]|5[0358]|8[458])|(?:140(?:1[16-8]|2[259]|3[124]|4[17-9]|5[124679]|7)|8[478]\\d{6})\\d",[5,6,9]],["66\\d{7}",[9]],["(?:85|91)\\d{7}",[9]]]],"NO":["47","00","(?:0|[2-9]\\d{3})\\d{4}",[5,8],[["(\\d{3})(\\d{2})(\\d{3})","$1 $2 $3",["[489]|59"]],["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[235-7]"]]],0,0,0,0,0,"[02-689]|7[0-8]",[["(?:2[1-4]|3[1-3578]|5[1-35-7]|6[1-4679]|7[0-8])\\d{6}",[8]],["(?:4[015-8]|59|9\\d)\\d{6}",[8]],["80[01]\\d{5}",[8]],["82[09]\\d{5}",[8]],["880\\d{5}",[8]],0,["(?:0[2-9]|81(?:0(?:0[7-9]|1\\d)|5\\d\\d))\\d{3}"],0,["85[0-5]\\d{5}",[8]],["810(?:0[0-6]|[2-8]\\d)\\d{3}",[8]]]],"NP":["977","00","(?:1\\d|9)\\d{9}|[1-9]\\d{7}",[8,10,11],[["(\\d)(\\d{7})","$1-$2",["1[2-6]"],"0$1"],["(\\d{2})(\\d{6})","$1-$2",["1[01]|[2-8]|9(?:[1-579]|6[2-6])"],"0$1"],["(\\d{3})(\\d{7})","$1-$2",["9"]]],"0",0,0,0,0,0,[["(?:1[0-6]\\d|99[02-6])\\d{5}|(?:2[13-79]|3[135-8]|4[146-9]|5[135-7]|6[13-9]|7[15-9]|8[1-46-9]|9[1-7])[2-6]\\d{5}",[8]],["9(?:6[0-3]|7[24-6]|8[0-24-68])\\d{7}",[10]],["1(?:66001|800\\d\\d)\\d{5}",[11]]]],"NR":["674","00","(?:444|(?:55|8\\d)\\d|666)\\d{4}",[7],[["(\\d{3})(\\d{4})","$1 $2",["[4-68]"]]],0,0,0,0,0,0,[["444\\d{4}"],["(?:55[3-9]|666|8\\d\\d)\\d{4}"]]],"NU":["683","00","(?:[47]|888\\d)\\d{3}",[4,7],[["(\\d{3})(\\d{4})","$1 $2",["8"]]],0,0,0,0,0,0,[["[47]\\d{3}",[4]],["888[4-9]\\d{3}",[7]]]],"NZ":["64","0(?:0|161)","[29]\\d{7,9}|50\\d{5}(?:\\d{2,3})?|6[0-35-9]\\d{6}|7\\d{7,8}|8\\d{4,9}|(?:11\\d|[34])\\d{7}",[5,6,7,8,9,10],[["(\\d{2})(\\d{3,8})","$1 $2",["8[1-579]"],"0$1"],["(\\d{3})(\\d{2})(\\d{2,3})","$1 $2 $3",["50[036-8]|[89]0","50(?:[0367]|88)|[89]0"],"0$1"],["(\\d)(\\d{3})(\\d{4})","$1-$2 $3",["24|[346]|7[2-57-9]|9[2-9]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3,4})","$1 $2 $3",["2(?:10|74)|[59]|80"],"0$1"],["(\\d{2})(\\d{3,4})(\\d{4})","$1 $2 $3",["1|2[028]"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,5})","$1 $2 $3",["2(?:[169]|7[0-35-9])|7|86"],"0$1"]],"0",0,0,0,0,0,[["24099\\d{3}|(?:3[2-79]|[49][2-9]|6[235-9]|7[2-57-9])\\d{6}",[8]],["2[0-27-9]\\d{7,8}|21\\d{6}",[8,9,10]],["508\\d{6,7}|80\\d{6,8}",[8,9,10]],["(?:11\\d{5}|50(?:0[08]|30|66|77|88))\\d{3}|90\\d{6,8}",[7,8,9,10]],["70\\d{7}",[9]],0,["8(?:1[6-9]|22|3\\d|4[045]|5[459]|7[0-3579]|90)\\d{2,7}"],["[28]6\\d{6,7}",[8,9]]],"00"],"OM":["968","00","(?:1505|[279]\\d{3}|500)\\d{4}|800\\d{5,6}",[7,8,9],[["(\\d{3})(\\d{4,6})","$1 $2",["[58]"]],["(\\d{2})(\\d{6})","$1 $2",["2"]],["(\\d{4})(\\d{4})","$1 $2",["[179]"]]],0,0,0,0,0,0,[["2[2-6]\\d{6}",[8]],["1505\\d{4}|(?:7(?:[1289]\\d|7[0-4])|9(?:0[1-9]|[1-9]\\d))\\d{5}",[8]],["8007\\d{4,5}|(?:500|800[05])\\d{4}"],["900\\d{5}",[8]]]],"PA":["507","00","(?:00800|8\\d{3})\\d{6}|[68]\\d{7}|[1-57-9]\\d{6}",[7,8,10,11],[["(\\d{3})(\\d{4})","$1-$2",["[1-57-9]"]],["(\\d{4})(\\d{4})","$1-$2",["[68]"]],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["8"]]],0,0,0,0,0,0,[["(?:1(?:0\\d|1[479]|2[37]|3[0137]|4[17]|5[05]|6[58]|7[0167]|8[258]|9[1389])|2(?:[0235-79]\\d|1[0-7]|4[013-9]|8[02-9])|3(?:[089]\\d|1[0-7]|2[0-5]|33|4[0-79]|5[0-35]|6[068]|7[0-8])|4(?:00|3[0-579]|4\\d|7[0-57-9])|5(?:[01]\\d|2[0-7]|[56]0|79)|7(?:0[09]|2[0-26-8]|3[03]|4[04]|5[05-9]|6[056]|7[0-24-9]|8[5-9]|90)|8(?:09|2[89]|3\\d|4[0-24-689]|5[014]|8[02])|9(?:0[5-9]|1[0135-8]|2[036-9]|3[35-79]|40|5[0457-9]|6[05-9]|7[04-9]|8[35-8]|9\\d))\\d{4}",[7]],["(?:1[16]1|21[89]|6\\d{3}|8(?:1[01]|7[23]))\\d{4}",[7,8]],["800\\d{4,5}|(?:00800|800\\d)\\d{6}"],["(?:8(?:22|55|60|7[78]|86)|9(?:00|81))\\d{4}",[7]]]],"PE":["51","19(?:1[124]|77|90)00","(?:[14-8]|9\\d)\\d{7}",[8,9],[["(\\d{3})(\\d{5})","$1 $2",["80"],"(0$1)"],["(\\d)(\\d{7})","$1 $2",["1"],"(0$1)"],["(\\d{2})(\\d{6})","$1 $2",["[4-8]"],"(0$1)"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["9"]]],"0",0,0,0,0,0,[["(?:(?:4[34]|5[14])[0-8]\\d|7(?:173|3[0-8]\\d)|8(?:10[05689]|6(?:0[06-9]|1[6-9]|29)|7(?:0[569]|[56]0)))\\d{4}|(?:1[0-8]|4[12]|5[236]|6[1-7]|7[246]|8[2-4])\\d{6}",[8]],["9\\d{8}",[9]],["800\\d{5}",[8]],["805\\d{5}",[8]],["80[24]\\d{5}",[8]],0,0,0,0,["801\\d{5}",[8]]],0," Anexo "],"PF":["689","00","4\\d{5}(?:\\d{2})?|8\\d{7,8}",[6,8,9],[["(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3",["44"]],["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["4|8[7-9]"]],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["8"]]],0,0,0,0,0,0,[["4(?:0[4-689]|9[4-68])\\d{5}",[8]],["8[7-9]\\d{6}",[8]],["80[0-5]\\d{6}",[9]],0,0,0,["44\\d{4}",[6]],0,["499\\d{5}",[8]]]],"PG":["675","00|140[1-3]","(?:180|[78]\\d{3})\\d{4}|(?:[2-589]\\d|64)\\d{5}",[7,8],[["(\\d{3})(\\d{4})","$1 $2",["18|[2-69]|85"]],["(\\d{4})(\\d{4})","$1 $2",["[78]"]]],0,0,0,0,0,0,[["(?:(?:3[0-2]|4[257]|5[34]|9[78])\\d|64[1-9]|85[02-46-9])\\d{4}",[7]],["(?:7\\d|8[128])\\d{6}",[8]],["180\\d{4}",[7]],0,0,0,0,["27[01]\\d{4}",[7]],["2(?:0[0-47]|7[568])\\d{4}",[7]]],"00"],"PH":["63","00","(?:[2-7]|9\\d)\\d{8}|2\\d{5}|(?:1800|8)\\d{7,9}",[6,8,9,10,11,12,13],[["(\\d)(\\d{5})","$1 $2",["2"],"(0$1)"],["(\\d{4})(\\d{4,6})","$1 $2",["3(?:23|39|46)|4(?:2[3-6]|[35]9|4[26]|76)|544|88[245]|(?:52|64|86)2","3(?:230|397|461)|4(?:2(?:35|[46]4|51)|396|4(?:22|63)|59[347]|76[15])|5(?:221|446)|642[23]|8(?:622|8(?:[24]2|5[13]))"],"(0$1)"],["(\\d{5})(\\d{4})","$1 $2",["346|4(?:27|9[35])|883","3469|4(?:279|9(?:30|56))|8834"],"(0$1)"],["(\\d)(\\d{4})(\\d{4})","$1 $2 $3",["2"],"(0$1)"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[3-7]|8[2-8]"],"(0$1)"],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["[89]"],"0$1"],["(\\d{4})(\\d{3})(\\d{4})","$1 $2 $3",["1"]],["(\\d{4})(\\d{1,2})(\\d{3})(\\d{4})","$1 $2 $3 $4",["1"]]],"0",0,0,0,0,0,[["(?:(?:2[3-8]|3[2-68]|4[2-9]|5[2-6]|6[2-58]|7[24578])\\d{3}|88(?:22\\d\\d|42))\\d{4}|(?:2|8[2-8]\\d\\d)\\d{5}",[6,8,9,10]],["(?:8(?:1[37]|9[5-8])|9(?:0[5-9]|1[0-24-9]|[235-7]\\d|4[2-9]|8[135-9]|9[1-9]))\\d{7}",[10]],["1800\\d{7,9}",[11,12,13]]]],"PK":["92","00","122\\d{6}|[24-8]\\d{10,11}|9(?:[013-9]\\d{8,10}|2(?:[01]\\d\\d|2(?:[06-8]\\d|1[01]))\\d{7})|(?:[2-8]\\d{3}|92(?:[0-7]\\d|8[1-9]))\\d{6}|[24-9]\\d{8}|[89]\\d{7}",[8,9,10,11,12],[["(\\d{3})(\\d{3})(\\d{2,7})","$1 $2 $3",["[89]0"],"0$1"],["(\\d{4})(\\d{5})","$1 $2",["1"]],["(\\d{3})(\\d{6,7})","$1 $2",["2(?:3[2358]|4[2-4]|9[2-8])|45[3479]|54[2-467]|60[468]|72[236]|8(?:2[2-689]|3[23578]|4[3478]|5[2356])|9(?:2[2-8]|3[27-9]|4[2-6]|6[3569]|9[25-8])","9(?:2[3-8]|98)|(?:2(?:3[2358]|4[2-4]|9[2-8])|45[3479]|54[2-467]|60[468]|72[236]|8(?:2[2-689]|3[23578]|4[3478]|5[2356])|9(?:22|3[27-9]|4[2-6]|6[3569]|9[25-7]))[2-9]"],"(0$1)"],["(\\d{2})(\\d{7,8})","$1 $2",["(?:2[125]|4[0-246-9]|5[1-35-7]|6[1-8]|7[14]|8[16]|91)[2-9]"],"(0$1)"],["(\\d{5})(\\d{5})","$1 $2",["58"],"(0$1)"],["(\\d{3})(\\d{7})","$1 $2",["3"],"0$1"],["(\\d{2})(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3 $4",["2[125]|4[0-246-9]|5[1-35-7]|6[1-8]|7[14]|8[16]|91"],"(0$1)"],["(\\d{3})(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3 $4",["[24-9]"],"(0$1)"]],"0",0,0,0,0,0,[["(?:(?:21|42)[2-9]|58[126])\\d{7}|(?:2[25]|4[0146-9]|5[1-35-7]|6[1-8]|7[14]|8[16]|91)[2-9]\\d{6,7}|(?:2(?:3[2358]|4[2-4]|9[2-8])|45[3479]|54[2-467]|60[468]|72[236]|8(?:2[2-689]|3[23578]|4[3478]|5[2356])|9(?:2[2-8]|3[27-9]|4[2-6]|6[3569]|9[25-8]))[2-9]\\d{5,6}",[9,10]],["3(?:[0-24]\\d|3[0-7]|55|64)\\d{7}",[10]],["800\\d{5}(?:\\d{3})?",[8,11]],["900\\d{5}",[8]],["122\\d{6}",[9]],0,["(?:2(?:[125]|3[2358]|4[2-4]|9[2-8])|4(?:[0-246-9]|5[3479])|5(?:[1-35-7]|4[2-467])|6(?:0[468]|[1-8])|7(?:[14]|2[236])|8(?:[16]|2[2-689]|3[23578]|4[3478]|5[2356])|9(?:1|22|3[27-9]|4[2-6]|6[3569]|9[2-7]))111\\d{6}",[11,12]]]],"PL":["48","00","6\\d{5}(?:\\d{2})?|8\\d{9}|[1-9]\\d{6}(?:\\d{2})?",[6,7,8,9,10],[["(\\d{5})","$1",["19"]],["(\\d{3})(\\d{3})","$1 $2",["11|64"]],["(\\d{2})(\\d{2})(\\d{3})","$1 $2 $3",["(?:1[2-8]|2[2-69]|3[2-4]|4[1-468]|5[24-689]|6[1-3578]|7[14-7]|8[1-79]|9[145])1","(?:1[2-8]|2[2-69]|3[2-4]|4[1-468]|5[24-689]|6[1-3578]|7[14-7]|8[1-79]|9[145])19"]],["(\\d{3})(\\d{2})(\\d{2,3})","$1 $2 $3",["64"]],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["21|39|45|5[0137]|6[0469]|7[02389]|8(?:0[14]|8)"]],["(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["1[2-8]|[2-7]|8[1-79]|9[145]"]],["(\\d{3})(\\d{3})(\\d{3,4})","$1 $2 $3",["8"]]],0,0,0,0,0,0,[["47\\d{7}|(?:1[2-8]|2[2-69]|3[2-4]|4[1-468]|5[24-689]|6[1-3578]|7[14-7]|8[1-79]|9[145])(?:[02-9]\\d{6}|1(?:[0-8]\\d{5}|9\\d{3}(?:\\d{2})?))",[7,9]],["21(?:1(?:[145]\\d|3[1-5])|2[0-4]\\d)\\d{4}|(?:45|5[0137]|6[069]|7[2389]|88)\\d{7}",[9]],["800\\d{6,7}",[9,10]],["70[01346-8]\\d{6}",[9]],0,0,["804\\d{6}",[9]],["64\\d{4,7}",[6,7,8,9]],["39\\d{7}",[9]],["801\\d{6}",[9]]]],"PM":["508","00","(?:[45]|80\\d\\d)\\d{5}",[6,9],[["(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3",["[45]"],"0$1"],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["8"],"0$1"]],"0",0,0,0,0,0,[["(?:4[1-356]|50)\\d{4}",[6]],["(?:4[02-4]|5[056])\\d{4}",[6]],["80[0-5]\\d{6}",[9]]]],"PR":["1","011","(?:[589]\\d\\d|787)\\d{7}",[10],0,"1",0,0,0,0,"787|939",[["(?:787|939)[2-9]\\d{6}"],[""],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"PS":["970","00","[2489]2\\d{6}|(?:1\\d|5)\\d{8}",[8,9,10],[["(\\d)(\\d{3})(\\d{4})","$1 $2 $3",["[2489]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["5"],"0$1"],["(\\d{4})(\\d{3})(\\d{3})","$1 $2 $3",["1"]]],"0",0,0,0,0,0,[["(?:22[2-47-9]|42[45]|82[014-68]|92[3569])\\d{5}",[8]],["5[69]\\d{7}",[9]],["1800\\d{6}",[10]],0,0,0,0,0,0,["1700\\d{6}",[10]]]],"PT":["351","00","1693\\d{5}|(?:[26-9]\\d|30)\\d{7}",[9],[["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["2[12]"]],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["16|[236-9]"]]],0,0,0,0,0,0,[["2(?:[12]\\d|[35][1-689]|4[1-59]|6[1-35689]|7[1-9]|8[1-69]|9[1256])\\d{6}"],["6[0356]92(?:30|9\\d)\\d{3}|(?:(?:16|6[0356])93|9(?:[1-36]\\d\\d|480))\\d{5}"],["80[02]\\d{6}"],["(?:6(?:0[178]|4[68])\\d|76(?:0[1-57]|1[2-47]|2[237]))\\d{5}"],["884[0-4689]\\d{5}"],0,["70(?:7\\d|8[17])\\d{5}"],0,["30\\d{7}"],["80(?:8\\d|9[1579])\\d{5}"]]],"PW":["680","01[12]","(?:[24-8]\\d\\d|345|900)\\d{4}",[7],[["(\\d{3})(\\d{4})","$1 $2",["[2-9]"]]],0,0,0,0,0,0,[["(?:2(?:55|77)|345|488|5(?:35|44|87)|6(?:22|54|79)|7(?:33|47)|8(?:24|55|76)|900)\\d{4}"],["(?:(?:46|83)[0-5]|6[2-4689]0)\\d{4}|(?:45|77|88)\\d{5}"]]],"PY":["595","00","59\\d{4,6}|9\\d{5,10}|(?:[2-46-8]\\d|5[0-8])\\d{4,7}",[6,7,8,9,10,11],[["(\\d{3})(\\d{3,6})","$1 $2",["[2-9]0"],"0$1"],["(\\d{2})(\\d{5})","$1 $2",["[26]1|3[289]|4[1246-8]|7[1-3]|8[1-36]"],"(0$1)"],["(\\d{3})(\\d{4,5})","$1 $2",["2[279]|3[13-5]|4[359]|5|6(?:[34]|7[1-46-8])|7[46-8]|85"],"(0$1)"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["2[14-68]|3[26-9]|4[1246-8]|6(?:1|75)|7[1-35]|8[1-36]"],"(0$1)"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["87"]],["(\\d{3})(\\d{6})","$1 $2",["9(?:[5-79]|8[1-6])"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[2-8]"],"0$1"],["(\\d{4})(\\d{3})(\\d{4})","$1 $2 $3",["9"]]],"0",0,0,0,0,0,[["(?:[26]1|3[289]|4[1246-8]|7[1-3]|8[1-36])\\d{5,7}|(?:2(?:2[4-68]|[4-68]\\d|7[15]|9[1-5])|3(?:18|3[167]|4[2357]|51|[67]\\d)|4(?:3[12]|5[13]|9[1-47])|5(?:[1-4]\\d|5[02-4])|6(?:3[1-3]|44|7[1-8])|7(?:4[0-4]|5\\d|6[1-578]|75|8[0-8])|858)\\d{5,6}",[7,8,9]],["9(?:51|6[129]|[78][1-6]|9[1-5])\\d{6}",[9]],["9800\\d{5,7}",[9,10,11]],0,0,0,["[2-9]0\\d{4,7}",[6,7,8,9]],0,["8700[0-4]\\d{4}",[9]]]],"QA":["974","00","[2-7]\\d{7}|800\\d{4}(?:\\d{2})?|2\\d{6}",[7,8,9],[["(\\d{3})(\\d{4})","$1 $2",["2[126]|8"]],["(\\d{4})(\\d{4})","$1 $2",["[2-7]"]]],0,0,0,0,0,0,[["4141\\d{4}|(?:23|4[04])\\d{6}",[8]],["(?:2[89]|[35-7]\\d)\\d{6}",[8]],["800\\d{4}(?:\\d{2})?",[7,9]],0,0,0,0,["2(?:[12]\\d|61)\\d{4}",[7]]]],"RE":["262","00","9769\\d{5}|(?:26|[68]\\d)\\d{7}",[9],[["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[2689]"],"0$1"]],"0",0,0,0,0,"26[23]|69|[89]",[["26(?:2\\d\\d|30[0-5])\\d{4}"],["(?:69(?:2\\d\\d|3(?:0[0-46]|1[013]|2[0-2]|3[0-39]|4\\d|5[0-5]|6[0-6]|7[0-27]|8[0-8]|9[0-479]))|9769\\d)\\d{4}"],["80\\d{7}"],["89[1-37-9]\\d{6}"],0,0,0,0,0,["8(?:1[019]|2[0156]|84|90)\\d{6}"]]],"RO":["40","00","(?:[2378]\\d|90)\\d{7}|[23]\\d{5}",[6,9],[["(\\d{3})(\\d{3})","$1 $2",["2[3-6]","2[3-6]\\d9"],"0$1"],["(\\d{2})(\\d{4})","$1 $2",["219|31"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[23]1"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[237-9]"],"0$1"]],"0",0,0,0,0,0,[["[23][13-6]\\d{7}|(?:2(?:19\\d|[3-6]\\d9)|31\\d\\d)\\d\\d"],["7020\\d{5}|7(?:0[013-9]|1[0-3]|[2-7]\\d|8[03-8]|9[019])\\d{6}",[9]],["800\\d{6}",[9]],["90[0136]\\d{6}",[9]],0,0,["(?:37\\d|80[578])\\d{6}",[9]],0,0,["801\\d{6}",[9]]],0," int "],"RS":["381","00","38[02-9]\\d{6,9}|6\\d{7,9}|90\\d{4,8}|38\\d{5,6}|(?:7\\d\\d|800)\\d{3,9}|(?:[12]\\d|3[0-79])\\d{5,10}",[6,7,8,9,10,11,12],[["(\\d{3})(\\d{3,9})","$1 $2",["(?:2[389]|39)0|[7-9]"],"0$1"],["(\\d{2})(\\d{5,10})","$1 $2",["[1-36]"],"0$1"]],"0",0,0,0,0,0,[["(?:11[1-9]\\d|(?:2[389]|39)(?:0[2-9]|[2-9]\\d))\\d{3,8}|(?:1[02-9]|2[0-24-7]|3[0-8])[2-9]\\d{4,9}",[7,8,9,10,11,12]],["6(?:[0-689]|7\\d)\\d{6,7}",[8,9,10]],["800\\d{3,9}"],["(?:78\\d|90[0169])\\d{3,7}",[6,7,8,9,10]],0,0,["7[06]\\d{4,10}"]]],"RU":["7","810","8\\d{13}|[347-9]\\d{9}",[10,14],[["(\\d{4})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["7(?:1[0-8]|2[1-9])","7(?:1(?:[0-6]2|7|8[27])|2(?:1[23]|[2-9]2))","7(?:1(?:[0-6]2|7|8[27])|2(?:13[03-69]|62[013-9]))|72[1-57-9]2"],"8 ($1)",1],["(\\d{5})(\\d)(\\d{2})(\\d{2})","$1 $2 $3 $4",["7(?:1[0-68]|2[1-9])","7(?:1(?:[06][3-6]|[18]|2[35]|[3-5][3-5])|2(?:[13][3-5]|[24-689]|7[457]))","7(?:1(?:0(?:[356]|4[023])|[18]|2(?:3[013-9]|5)|3[45]|43[013-79]|5(?:3[1-8]|4[1-7]|5)|6(?:3[0-35-9]|[4-6]))|2(?:1(?:3[178]|[45])|[24-689]|3[35]|7[457]))|7(?:14|23)4[0-8]|71(?:33|45)[1-79]"],"8 ($1)",1],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["7"],"8 ($1)",1],["(\\d{3})(\\d{3})(\\d{2})(\\d{2})","$1 $2-$3-$4",["[349]|8(?:[02-7]|1[1-8])"],"8 ($1)",1],["(\\d{4})(\\d{4})(\\d{3})(\\d{3})","$1 $2 $3 $4",["8"],"8 ($1)"]],"8",0,0,0,0,"3[04-689]|[489]",[["(?:3(?:0[12]|4[1-35-79]|5[1-3]|65|8[1-58]|9[0145])|4(?:01|1[1356]|2[13467]|7[1-5]|8[1-7]|9[1-689])|8(?:1[1-8]|2[01]|3[13-6]|4[0-8]|5[15]|6[1-35-79]|7[1-37-9]))\\d{7}",[10]],["9\\d{9}",[10]],["8(?:0[04]|108\\d{3})\\d{7}"],["80[39]\\d{7}",[10]],["808\\d{7}",[10]]],"8~10"],"RW":["250","00","(?:06|[27]\\d\\d|[89]00)\\d{6}",[8,9],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["0"]],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[7-9]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["2"]]],"0",0,0,0,0,0,[["(?:06|2[23568]\\d)\\d{6}"],["7[2389]\\d{7}",[9]],["800\\d{6}",[9]],["900\\d{6}",[9]]]],"SA":["966","00","92\\d{7}|(?:[15]|8\\d)\\d{8}",[9,10],[["(\\d{4})(\\d{5})","$1 $2",["9"]],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["1"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["5"],"0$1"],["(\\d{3})(\\d{3})(\\d{3,4})","$1 $2 $3",["81"],"0$1"],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["8"]]],"0",0,0,0,0,0,[["1(?:1\\d|2[24-8]|3[35-8]|4[3-68]|6[2-5]|7[235-7])\\d{6}",[9]],["579[01]\\d{5}|5(?:[013-689]\\d|7[0-35-8])\\d{6}",[9]],["800\\d{7}",[10]],["925\\d{6}",[9]],0,0,["811\\d{7}",[10]],0,0,["920\\d{6}",[9]]]],"SB":["677","0[01]","(?:[1-6]|[7-9]\\d\\d)\\d{4}",[5,7],[["(\\d{2})(\\d{5})","$1 $2",["7|8[4-9]|9(?:[1-8]|9[0-8])"]]],0,0,0,0,0,0,[["(?:1[4-79]|[23]\\d|4[0-2]|5[03]|6[0-37])\\d{3}",[5]],["48\\d{3}|(?:(?:7[1-9]|8[4-9])\\d|9(?:1[2-9]|2[013-9]|3[0-2]|[46]\\d|5[0-46-9]|7[0-689]|8[0-79]|9[0-8]))\\d{4}"],["1[38]\\d{3}",[5]],0,0,0,0,0,["5[12]\\d{3}",[5]]]],"SC":["248","010|0[0-2]","800\\d{4}|(?:[249]\\d|64)\\d{5}",[7],[["(\\d)(\\d{3})(\\d{3})","$1 $2 $3",["[246]|9[57]"]]],0,0,0,0,0,0,[["4[2-46]\\d{5}"],["2[125-8]\\d{5}"],["800[08]\\d{3}"],0,0,0,0,0,["971\\d{4}|(?:64|95)\\d{5}"]],"00"],"SD":["249","00","[19]\\d{8}",[9],[["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[19]"],"0$1"]],"0",0,0,0,0,0,[["1(?:5\\d|8[35-7])\\d{6}"],["(?:1[0-2]|9[0-3569])\\d{7}"]]],"SE":["46","00","(?:[26]\\d\\d|9)\\d{9}|[1-9]\\d{8}|[1-689]\\d{7}|[1-4689]\\d{6}|2\\d{5}",[6,7,8,9,10],[["(\\d{2})(\\d{2,3})(\\d{2})","$1-$2 $3",["20"],"0$1",0,"$1 $2 $3"],["(\\d{3})(\\d{4})","$1-$2",["9(?:00|39|44|9)"],"0$1",0,"$1 $2"],["(\\d{2})(\\d{3})(\\d{2})","$1-$2 $3",["[12][136]|3[356]|4[0246]|6[03]|90[1-9]"],"0$1",0,"$1 $2 $3"],["(\\d)(\\d{2,3})(\\d{2})(\\d{2})","$1-$2 $3 $4",["8"],"0$1",0,"$1 $2 $3 $4"],["(\\d{3})(\\d{2,3})(\\d{2})","$1-$2 $3",["1[2457]|2(?:[247-9]|5[0138])|3[0247-9]|4[1357-9]|5[0-35-9]|6(?:[125689]|4[02-57]|7[0-2])|9(?:[125-8]|3[02-5]|4[0-3])"],"0$1",0,"$1 $2 $3"],["(\\d{3})(\\d{2,3})(\\d{3})","$1-$2 $3",["9(?:00|39|44)"],"0$1",0,"$1 $2 $3"],["(\\d{2})(\\d{2,3})(\\d{2})(\\d{2})","$1-$2 $3 $4",["1[13689]|2[0136]|3[1356]|4[0246]|54|6[03]|90[1-9]"],"0$1",0,"$1 $2 $3 $4"],["(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1-$2 $3 $4",["10|7"],"0$1",0,"$1 $2 $3 $4"],["(\\d)(\\d{3})(\\d{3})(\\d{2})","$1-$2 $3 $4",["8"],"0$1",0,"$1 $2 $3 $4"],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1-$2 $3 $4",["[13-5]|2(?:[247-9]|5[0138])|6(?:[124-689]|7[0-2])|9(?:[125-8]|3[02-5]|4[0-3])"],"0$1",0,"$1 $2 $3 $4"],["(\\d{3})(\\d{2})(\\d{2})(\\d{3})","$1-$2 $3 $4",["9"],"0$1",0,"$1 $2 $3 $4"],["(\\d{3})(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1-$2 $3 $4 $5",["[26]"],"0$1",0,"$1 $2 $3 $4 $5"]],"0",0,0,0,0,0,[["(?:(?:[12][136]|3[356]|4[0246]|6[03]|8\\d)\\d|90[1-9])\\d{4,6}|(?:1(?:2[0-35]|4[0-4]|5[0-25-9]|7[13-6]|[89]\\d)|2(?:2[0-7]|4[0136-8]|5[0138]|7[018]|8[01]|9[0-57])|3(?:0[0-4]|1\\d|2[0-25]|4[056]|7[0-2]|8[0-3]|9[023])|4(?:1[013-8]|3[0135]|5[14-79]|7[0-246-9]|8[0156]|9[0-689])|5(?:0[0-6]|[15][0-5]|2[0-68]|3[0-4]|4\\d|6[03-5]|7[013]|8[0-79]|9[01])|6(?:1[1-3]|2[0-4]|4[02-57]|5[0-37]|6[0-3]|7[0-2]|8[0247]|9[0-356])|9(?:1[0-68]|2\\d|3[02-5]|4[0-3]|5[0-4]|[68][01]|7[0135-8]))\\d{5,6}",[7,8,9]],["7[02369]\\d{7}",[9]],["20\\d{4,7}",[6,7,8,9]],["649\\d{6}|99[1-59]\\d{4}(?:\\d{3})?|9(?:00|39|44)[1-8]\\d{3,6}",[7,8,9,10]],["75[1-8]\\d{6}",[9]],0,["10[1-8]\\d{6}",[9]],["74[02-9]\\d{6}",[9]],0,["77[0-7]\\d{6}",[9]]]],"SG":["65","0[0-3]\\d","(?:(?:1\\d|8)\\d\\d|7000)\\d{7}|[3689]\\d{7}",[8,10,11],[["(\\d{4})(\\d{4})","$1 $2",["[369]|8(?:0[1-5]|[1-9])"]],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["8"]],["(\\d{4})(\\d{4})(\\d{3})","$1 $2 $3",["7"]],["(\\d{4})(\\d{3})(\\d{4})","$1 $2 $3",["1"]]],0,0,0,0,0,0,[["662[0-24-9]\\d{4}|6(?:[0-578]\\d|6[013-57-9]|9[0-35-9])\\d{5}",[8]],["8(?:051|95[0-2])\\d{4}|(?:8(?:0[1-4]|[1-8]\\d|9[0-4])|9[0-8]\\d)\\d{5}",[8]],["(?:18|8)00\\d{7}",[10,11]],["1900\\d{7}",[11]],0,0,["7000\\d{7}",[11]],0,["(?:3[12]\\d|666)\\d{5}",[8]]]],"SH":["290","00","(?:[256]\\d|8)\\d{3}",[4,5],0,0,0,0,0,0,"[256]",[["2(?:[0-57-9]\\d|6[4-9])\\d\\d"],["[56]\\d{4}",[5]],0,0,0,0,0,0,["262\\d\\d",[5]]]],"SI":["386","00|10(?:22|66|88|99)","[1-7]\\d{7}|8\\d{4,7}|90\\d{4,6}",[5,6,7,8],[["(\\d{2})(\\d{3,6})","$1 $2",["8[09]|9"],"0$1"],["(\\d{3})(\\d{5})","$1 $2",["59|8"],"0$1"],["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["[37][01]|4[0139]|51|6"],"0$1"],["(\\d)(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[1-57]"],"(0$1)"]],"0",0,0,0,0,0,[["(?:[1-357][2-8]|4[24-8])\\d{6}",[8]],["65(?:1\\d|55|[67]0)\\d{4}|(?:[37][01]|4[0139]|51|6[489])\\d{6}",[8]],["80\\d{4,6}",[6,7,8]],["89[1-3]\\d{2,5}|90\\d{4,6}"],0,0,0,0,["(?:59\\d\\d|8(?:1(?:[67]\\d|8[0-589])|2(?:0\\d|2[0-37-9]|8[0-2489])|3[389]\\d))\\d{4}",[8]]],"00"],"SJ":["47","00","0\\d{4}|(?:[489]\\d|[57]9)\\d{6}",[5,8],0,0,0,0,0,0,"79",[["79\\d{6}",[8]],["(?:4[015-8]|59|9\\d)\\d{6}",[8]],["80[01]\\d{5}",[8]],["82[09]\\d{5}",[8]],["880\\d{5}",[8]],0,["(?:0[2-9]|81(?:0(?:0[7-9]|1\\d)|5\\d\\d))\\d{3}"],0,["85[0-5]\\d{5}",[8]],["810(?:0[0-6]|[2-8]\\d)\\d{3}",[8]]]],"SK":["421","00","[2-689]\\d{8}|[2-59]\\d{6}|[2-5]\\d{5}",[6,7,9],[["(\\d)(\\d{2})(\\d{3,4})","$1 $2 $3",["21"],"0$1"],["(\\d{2})(\\d{2})(\\d{2,3})","$1 $2 $3",["[3-5][1-8]1","[3-5][1-8]1[67]"],"0$1"],["(\\d)(\\d{3})(\\d{3})(\\d{2})","$1/$2 $3 $4",["2"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[689]"],"0$1"],["(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1/$2 $3 $4",["[3-5]"],"0$1"]],"0",0,0,0,0,0,[["(?:2(?:16|[2-9]\\d{3})|(?:(?:[3-5][1-8]\\d|819)\\d|601[1-5])\\d)\\d{4}|(?:2|[3-5][1-8])1[67]\\d{3}|[3-5][1-8]16\\d\\d"],["909[1-9]\\d{5}|9(?:0[1-8]|1[0-24-9]|4[03-57-9]|5\\d)\\d{6}",[9]],["800\\d{6}",[9]],["9(?:00|[78]\\d)\\d{6}",[9]],0,0,["96\\d{7}",[9]],["9090\\d{3}",[7]],["6(?:02|5[0-4]|9[0-6])\\d{6}",[9]],["8[5-9]\\d{7}",[9]]]],"SL":["232","00","(?:[237-9]\\d|66)\\d{6}",[8],[["(\\d{2})(\\d{6})","$1 $2",["[236-9]"],"(0$1)"]],"0",0,0,0,0,0,[["22[2-4][2-9]\\d{4}"],["(?:25|3[0-5]|66|7[2-9]|8[08]|9[09])\\d{6}"]]],"SM":["378","00","(?:0549|[5-7]\\d)\\d{6}",[8,10],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[5-7]"]],["(\\d{4})(\\d{6})","$1 $2",["0"]]],0,0,"([89]\\d{5})$","0549$1",0,0,[["0549(?:8[0157-9]|9\\d)\\d{4}",[10]],["6[16]\\d{6}",[8]],0,["7[178]\\d{6}",[8]],0,0,0,0,["5[158]\\d{6}",[8]]]],"SN":["221","00","(?:[378]\\d|93)\\d{7}",[9],[["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["8"]],["(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[379]"]]],0,0,0,0,0,0,[["3(?:0(?:1[0-2]|80)|282|3(?:8[1-9]|9[3-9])|611)\\d{5}"],["75(?:01|[38]3)\\d{5}|7(?:[06-8]\\d|21|5[4-7]|90)\\d{6}"],["800\\d{6}"],["88[4689]\\d{6}"],0,0,0,0,["(?:3(?:392|9[01]\\d)\\d|93(?:3[13]0|929))\\d{4}"],["81[02468]\\d{6}"]]],"SO":["252","00","[346-9]\\d{8}|[12679]\\d{7}|[1-5]\\d{6}|[1348]\\d{5}",[6,7,8,9],[["(\\d{2})(\\d{4})","$1 $2",["8[125]"]],["(\\d{6})","$1",["[134]"]],["(\\d)(\\d{6})","$1 $2",["[15]|2[0-79]|3[0-46-8]|4[0-7]"]],["(\\d)(\\d{7})","$1 $2",["24|[67]"]],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[3478]|64|90"]],["(\\d{2})(\\d{5,7})","$1 $2",["1|28|6(?:0[5-7]|[1-35-9])|9[2-9]"]]],"0",0,0,0,0,0,[["(?:1\\d|2[0-79]|3[0-46-8]|4[0-7]|5[57-9])\\d{5}|(?:[134]\\d|8[125])\\d{4}",[6,7]],["(?:(?:15|(?:3[59]|4[89]|79|8[08])\\d|6(?:0[5-7]|[1-9]\\d)|9(?:0\\d|[2-9]))\\d|2(?:4\\d|8))\\d{5}|(?:6\\d|7[1-9])\\d{6}",[7,8,9]]]],"SR":["597","00","(?:[2-5]|68|[78]\\d)\\d{5}",[6,7],[["(\\d{2})(\\d{2})(\\d{2})","$1-$2-$3",["56"]],["(\\d{3})(\\d{3})","$1-$2",["[2-5]"]],["(\\d{3})(\\d{4})","$1-$2",["[6-8]"]]],0,0,0,0,0,0,[["(?:2[1-3]|3[0-7]|(?:4|68)\\d|5[2-58])\\d{4}"],["(?:7[124-7]|8[124-9])\\d{5}",[7]],0,0,0,0,0,0,["56\\d{4}",[6]]]],"SS":["211","00","[19]\\d{8}",[9],[["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[19]"],"0$1"]],"0",0,0,0,0,0,[["1[89]\\d{7}"],["(?:12|9[1257-9])\\d{7}"]]],"ST":["239","00","(?:22|9\\d)\\d{5}",[7],[["(\\d{3})(\\d{4})","$1 $2",["[29]"]]],0,0,0,0,0,0,[["22\\d{5}"],["900[5-9]\\d{3}|9(?:0[1-9]|[89]\\d)\\d{4}"]]],"SV":["503","00","[267]\\d{7}|[89]00\\d{4}(?:\\d{4})?",[7,8,11],[["(\\d{3})(\\d{4})","$1 $2",["[89]"]],["(\\d{4})(\\d{4})","$1 $2",["[267]"]],["(\\d{3})(\\d{4})(\\d{4})","$1 $2 $3",["[89]"]]],0,0,0,0,0,0,[["2(?:[1-6]\\d{3}|[79]90[034]|890[0245])\\d{3}",[8]],["66(?:[02-9]\\d\\d|1(?:[02-9]\\d|16))\\d{3}|(?:6[0-57-9]|7\\d)\\d{6}",[8]],["800\\d{4}(?:\\d{4})?",[7,11]],["900\\d{4}(?:\\d{4})?",[7,11]]]],"SX":["1","011","7215\\d{6}|(?:[58]\\d\\d|900)\\d{7}",[10],0,"1",0,"1|(5\\d{6})$","721$1",0,"721",[["7215(?:4[2-8]|8[239]|9[056])\\d{4}"],["7215(?:1[02]|2\\d|5[034679]|8[014-8])\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"SY":["963","00","[1-39]\\d{8}|[1-5]\\d{7}",[8,9],[["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["[1-5]"],"0$1",1],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["9"],"0$1",1]],"0",0,0,0,0,0,[["21\\d{6,7}|(?:1(?:[14]\\d|[2356])|2[235]|3(?:[13]\\d|4)|4[134]|5[1-3])\\d{6}"],["9[1-689]\\d{7}",[9]]]],"SZ":["268","00","0800\\d{4}|(?:[237]\\d|900)\\d{6}",[8,9],[["(\\d{4})(\\d{4})","$1 $2",["[0237]"]],["(\\d{5})(\\d{4})","$1 $2",["9"]]],0,0,0,0,0,0,[["[23][2-5]\\d{6}",[8]],["7[6-9]\\d{6}",[8]],["0800\\d{4}",[8]],["900\\d{6}",[9]],0,0,0,0,["70\\d{6}",[8]]]],"TA":["290","00","8\\d{3}",[4],0,0,0,0,0,0,"8",[["8\\d{3}"]]],"TC":["1","011","(?:[58]\\d\\d|649|900)\\d{7}",[10],0,"1",0,"1|([2-479]\\d{6})$","649$1",0,"649",[["649(?:266|712|9(?:4\\d|50))\\d{4}"],["649(?:2(?:3[129]|4[1-79])|3\\d\\d|4[34][1-3])\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"],0,0,0,["649(?:71[01]|966)\\d{4}"]]],"TD":["235","00|16","(?:22|[69]\\d|77)\\d{6}",[8],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[2679]"]]],0,0,0,0,0,0,[["22(?:[37-9]0|5[0-5]|6[89])\\d{4}"],["(?:6[023568]|77|9\\d)\\d{6}"]],"00"],"TG":["228","00","[279]\\d{7}",[8],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[279]"]]],0,0,0,0,0,0,[["2(?:2[2-7]|3[23]|4[45]|55|6[67]|77)\\d{5}"],["(?:7[09]|9[0-36-9])\\d{6}"]]],"TH":["66","00[1-9]","(?:001800|[2-57]|[689]\\d)\\d{7}|1\\d{7,9}",[8,9,10,13],[["(\\d)(\\d{3})(\\d{4})","$1 $2 $3",["2"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["[13-9]"],"0$1"],["(\\d{4})(\\d{3})(\\d{3})","$1 $2 $3",["1"]]],"0",0,0,0,0,0,[["(?:1[0689]|2\\d|3[2-9]|4[2-5]|5[2-6]|7[3-7])\\d{6}",[8]],["671[0-8]\\d{5}|(?:14|6[1-6]|[89]\\d)\\d{7}",[9]],["(?:001800\\d|1800)\\d{6}",[10,13]],["1900\\d{6}",[10]],0,0,0,0,["6[08]\\d{7}",[9]]]],"TJ":["992","810","(?:00|[1-57-9]\\d)\\d{7}",[9],[["(\\d{6})(\\d)(\\d{2})","$1 $2 $3",["331","3317"]],["(\\d{3})(\\d{2})(\\d{4})","$1 $2 $3",["[34]7|91[78]"]],["(\\d{4})(\\d)(\\d{4})","$1 $2 $3",["3[1-5]"]],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[0-57-9]"]]],0,0,0,0,0,0,[["(?:3(?:1[3-5]|2[245]|3[12]|4[24-7]|5[25]|72)|4(?:46|74|87))\\d{6}"],["41[18]\\d{6}|(?:[034]0|[17][017]|2[02]|5[05]|8[08]|9\\d)\\d{7}"]],"8~10"],"TK":["690","00","[2-47]\\d{3,6}",[4,5,6,7],0,0,0,0,0,0,0,[["(?:2[2-4]|[34]\\d)\\d{2,5}"],["7[2-4]\\d{2,5}"]]],"TL":["670","00","7\\d{7}|(?:[2-47]\\d|[89]0)\\d{5}",[7,8],[["(\\d{3})(\\d{4})","$1 $2",["[2-489]|70"]],["(\\d{4})(\\d{4})","$1 $2",["7"]]],0,0,0,0,0,0,[["(?:2[1-5]|3[1-9]|4[1-4])\\d{5}",[7]],["7[2-8]\\d{6}",[8]],["80\\d{5}",[7]],["90\\d{5}",[7]],["70\\d{5}",[7]]]],"TM":["993","810","[1-6]\\d{7}",[8],[["(\\d{2})(\\d{2})(\\d{2})(\\d{2})","$1 $2-$3-$4",["12"],"(8 $1)"],["(\\d{3})(\\d)(\\d{2})(\\d{2})","$1 $2-$3-$4",["[1-5]"],"(8 $1)"],["(\\d{2})(\\d{6})","$1 $2",["6"],"8 $1"]],"8",0,0,0,0,0,[["(?:1(?:2\\d|3[1-9])|2(?:22|4[0-35-8])|3(?:22|4[03-9])|4(?:22|3[128]|4\\d|6[15])|5(?:22|5[7-9]|6[014-689]))\\d{5}"],["6\\d{7}"]],"8~10"],"TN":["216","00","[2-57-9]\\d{7}",[8],[["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["[2-57-9]"]]],0,0,0,0,0,0,[["81200\\d{3}|(?:3[0-2]|7\\d)\\d{6}"],["3(?:001|[12]40)\\d{4}|(?:(?:[259]\\d|4[0-7])\\d|3(?:1[1-35]|6[0-4]|91))\\d{5}"],["8010\\d{4}"],["88\\d{6}"],0,0,0,0,0,["8[12]10\\d{4}"]]],"TO":["676","00","(?:0800|(?:[5-8]\\d\\d|999)\\d)\\d{3}|[2-8]\\d{4}",[5,7],[["(\\d{2})(\\d{3})","$1-$2",["[2-4]|50|6[09]|7[0-24-69]|8[05]"]],["(\\d{4})(\\d{3})","$1 $2",["0"]],["(\\d{3})(\\d{4})","$1 $2",["[5-9]"]]],0,0,0,0,0,0,[["(?:2\\d|3[0-8]|4[0-4]|50|6[09]|7[0-24-69]|8[05])\\d{3}",[5]],["(?:55[4-6]|6(?:[09]\\d|3[02]|8[15-9])|(?:7\\d|8[46-9])\\d|999)\\d{4}",[7]],["0800\\d{3}",[7]],0,0,0,0,0,["55[0-37-9]\\d{4}",[7]]]],"TR":["90","00","4\\d{6}|8\\d{11,12}|(?:[2-58]\\d\\d|900)\\d{7}",[7,10,12,13],[["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["512|8[01589]|90"],"0$1",1],["(\\d{3})(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["5(?:[0-59]|61)","5(?:[0-59]|616)","5(?:[0-59]|6161)"],"0$1",1],["(\\d{3})(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[24][1-8]|3[1-9]"],"(0$1)",1],["(\\d{3})(\\d{3})(\\d{6,7})","$1 $2 $3",["80"],"0$1",1]],"0",0,0,0,0,0,[["(?:2(?:[13][26]|[28][2468]|[45][268]|[67][246])|3(?:[13][28]|[24-6][2468]|[78][02468]|92)|4(?:[16][246]|[23578][2468]|4[26]))\\d{7}",[10]],["56161\\d{5}|5(?:0[15-7]|1[06]|24|[34]\\d|5[1-59]|9[46])\\d{7}",[10]],["8(?:00\\d{7}(?:\\d{2,3})?|11\\d{7})",[10,12,13]],["(?:8[89]8|900)\\d{7}",[10]],["592(?:21[12]|461)\\d{4}",[10]],0,["444\\d{4}",[7]],["512\\d{7}",[10]],["850\\d{7}",[10]]]],"TT":["1","011","(?:[58]\\d\\d|900)\\d{7}",[10],0,"1",0,"1|([2-46-8]\\d{6})$","868$1",0,"868",[["868(?:2(?:0[13]|1[5-9]|[23]\\d|4[0-2])|6(?:0[7-9]|1[02-8]|2[1-9]|[3-69]\\d|7[0-79])|82[124])\\d{4}"],["868(?:(?:2[5-9]|3\\d)\\d|4(?:3[0-6]|[6-9]\\d)|6(?:20|78|8\\d)|7(?:0[1-9]|1[02-9]|[2-9]\\d))\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"TV":["688","00","(?:2|7\\d\\d|90)\\d{4}",[5,6,7],[["(\\d{2})(\\d{3})","$1 $2",["2"]],["(\\d{2})(\\d{4})","$1 $2",["90"]],["(\\d{2})(\\d{5})","$1 $2",["7"]]],0,0,0,0,0,0,[["2[02-9]\\d{3}",[5]],["(?:7[01]\\d|90)\\d{4}",[6,7]]]],"TW":["886","0(?:0[25-79]|19)","[2-689]\\d{8}|7\\d{9,10}|[2-8]\\d{7}|2\\d{6}",[7,8,9,10,11],[["(\\d{2})(\\d)(\\d{4})","$1 $2 $3",["202"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["[258]0"],"0$1"],["(\\d)(\\d{3,4})(\\d{4})","$1 $2 $3",["[23568]|4(?:0[02-48]|[1-47-9])|7[1-9]","[23568]|4(?:0[2-48]|[1-47-9])|(?:400|7)[1-9]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[49]"],"0$1"],["(\\d{2})(\\d{4})(\\d{4,5})","$1 $2 $3",["7"],"0$1"]],"0",0,0,0,0,0,[["(?:2[2-8]\\d|370|55[01]|7[1-9])\\d{6}|4(?:(?:0(?:0[1-9]|[2-48]\\d)|1[023]\\d)\\d{4,5}|(?:[239]\\d\\d|4(?:0[56]|12|49))\\d{5})|6(?:[01]\\d{7}|4(?:0[56]|12|24|4[09])\\d{4,5})|8(?:(?:2(?:3\\d|4[0-269]|[578]0|66)|36[24-9]|90\\d\\d)\\d{4}|4(?:0[56]|12|24|4[09])\\d{4,5})|(?:2(?:2(?:0\\d\\d|4(?:0[68]|[249]0|3[0-467]|5[0-25-9]|6[0235689]))|(?:3(?:[09]\\d|1[0-4])|(?:4\\d|5[0-49]|6[0-29]|7[0-5])\\d)\\d)|(?:(?:3[2-9]|5[2-8]|6[0-35-79]|8[7-9])\\d\\d|4(?:2(?:[089]\\d|7[1-9])|(?:3[0-4]|[78]\\d|9[01])\\d))\\d)\\d{3}",[8,9]],["(?:40001[0-2]|9[0-8]\\d{4})\\d{3}",[9]],["80[0-79]\\d{6}|800\\d{5}",[8,9]],["20(?:[013-9]\\d\\d|2)\\d{4}",[7,9]],["99\\d{7}",[9]],0,["50[0-46-9]\\d{6}",[9]],0,["7010(?:[0-2679]\\d|3[0-7]|8[0-5])\\d{5}|70\\d{8}",[10,11]]],0,"#"],"TZ":["255","00[056]","(?:[26-8]\\d|41|90)\\d{7}",[9],[["(\\d{3})(\\d{2})(\\d{4})","$1 $2 $3",["[89]"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[24]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[67]"],"0$1"]],"0",0,0,0,0,0,[["2[2-8]\\d{7}"],["77[2-9]\\d{6}|(?:6[1-9]|7[1-689])\\d{7}"],["80[08]\\d{6}"],["90\\d{7}"],0,0,0,0,["41\\d{7}"],["8(?:40|6[01])\\d{6}"]]],"UA":["380","00","[89]\\d{9}|[3-9]\\d{8}",[9,10],[["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["6[12][29]|(?:3[1-8]|4[136-8]|5[12457]|6[49])2|(?:56|65)[24]","6[12][29]|(?:35|4[1378]|5[12457]|6[49])2|(?:56|65)[24]|(?:3[1-46-8]|46)2[013-9]"],"0$1"],["(\\d{4})(\\d{5})","$1 $2",["3[1-8]|4(?:[1367]|[45][6-9]|8[4-6])|5(?:[1-5]|6[0135689]|7[4-6])|6(?:[12][3-7]|[459])","3[1-8]|4(?:[1367]|[45][6-9]|8[4-6])|5(?:[1-5]|6(?:[015689]|3[02389])|7[4-6])|6(?:[12][3-7]|[459])"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[3-7]|89|9[1-9]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3,4})","$1 $2 $3",["[89]"],"0$1"]],"0",0,0,0,0,0,[["(?:3[1-8]|4[13-8]|5[1-7]|6[12459])\\d{7}",[9]],["(?:39|50|6[36-8]|7[1-3]|9[1-9])\\d{7}",[9]],["800[1-8]\\d{5,6}"],["900[239]\\d{5,6}"],0,0,0,0,["89[1-579]\\d{6}",[9]]],"0~0"],"UG":["256","00[057]","800\\d{6}|(?:[29]0|[347]\\d)\\d{7}",[9],[["(\\d{4})(\\d{5})","$1 $2",["202","2024"],"0$1"],["(\\d{3})(\\d{6})","$1 $2",["[27-9]|4(?:6[45]|[7-9])"],"0$1"],["(\\d{2})(\\d{7})","$1 $2",["[34]"],"0$1"]],"0",0,0,0,0,0,[["20(?:(?:(?:24|81)0|30[67])\\d|6(?:00[0-2]|30[0-4]))\\d{3}|(?:20(?:[017]\\d|2[5-9]|32|5[0-4]|6[15-9])|[34]\\d{3})\\d{5}"],["726[01]\\d{5}|7(?:[01578]\\d|20|36|[46][0-4]|9[89])\\d{6}"],["800[1-3]\\d{5}"],["90[1-3]\\d{6}"]]],"US":["1","011","[2-9]\\d{9}|3\\d{6}",[10],[["(\\d{3})(\\d{4})","$1-$2",["310"],0,1],["(\\d{3})(\\d{3})(\\d{4})","($1) $2-$3",["[2-9]"],0,1,"$1-$2-$3"]],"1",0,0,0,0,0,[["5(?:05(?:[2-57-9]\\d\\d|6(?:[0-35-9]\\d|44))|82(?:2(?:0[0-3]|[268]2)|3(?:0[02]|22|33)|4(?:00|4[24]|65|82)|5(?:00|29|58|83)|6(?:00|66|82)|7(?:58|77)|8(?:00|42|88)|9(?:00|9[89])))\\d{4}|(?:2(?:0[1-35-9]|1[02-9]|2[03-589]|3[149]|4[08]|5[1-46]|6[0279]|7[0269]|8[13])|3(?:0[1-57-9]|1[02-9]|2[01356]|3[0-24679]|4[167]|5[12]|6[014]|8[056])|4(?:0[124-9]|1[02-579]|2[3-5]|3[0245]|4[023578]|58|6[349]|7[0589]|8[04])|5(?:0[1-47-9]|1[0235-8]|20|3[0149]|4[01]|5[19]|6[1-47]|7[0-5]|8[056])|6(?:0[1-35-9]|1[024-9]|2[03689]|[34][016]|5[01679]|6[0-279]|78|8[0-29])|7(?:0[1-46-8]|1[2-9]|2[04-7]|3[1247]|4[037]|5[47]|6[02359]|7[0-59]|8[156])|8(?:0[1-68]|1[02-8]|2[068]|3[0-289]|4[03578]|5[046-9]|6[02-5]|7[028])|9(?:0[1346-9]|1[02-9]|2[0589]|3[0146-8]|4[0157-9]|5[12469]|7[0-389]|8[04-69]))[2-9]\\d{6}"],[""],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"UY":["598","0(?:0|1[3-9]\\d)","4\\d{9}|[1249]\\d{7}|(?:[49]\\d|80)\\d{5}",[7,8,10],[["(\\d{3})(\\d{4})","$1 $2",["405|8|90"],"0$1"],["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["9"],"0$1"],["(\\d{4})(\\d{4})","$1 $2",["[124]"]],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["4"],"0$1"]],"0",0,0,0,0,0,[["(?:1(?:770|987)|(?:2\\d|4[2-7])\\d\\d)\\d{4}",[8]],["9[1-9]\\d{6}",[8]],["(?:4\\d{5}|80[05])\\d{4}|405\\d{4}",[7,10]],["90[0-8]\\d{4}",[7]]],"00"," int. "],"UZ":["998","810","(?:33|55|[679]\\d|88)\\d{7}",[9],[["(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[35-9]"],"8 $1"]],"8",0,0,0,0,0,[["(?:6(?:1(?:22|3[124]|4[1-4]|5[1-3578]|64)|2(?:22|3[0-57-9]|41)|5(?:22|3[3-7]|5[024-8])|6\\d\\d|7(?:[23]\\d|7[69])|9(?:22|4[1-8]|6[135]))|7(?:0(?:5[4-9]|6[0146]|7[124-6]|9[135-8])|(?:1[12]|8\\d)\\d|2(?:22|3[13-57-9]|4[1-3579]|5[14])|3(?:2\\d|3[1578]|4[1-35-7]|5[1-57]|61)|4(?:2\\d|3[1-579]|7[1-79])|5(?:22|5[1-9]|6[1457])|6(?:22|3[12457]|4[13-8])|9(?:22|5[1-9])))\\d{5}"],["(?:(?:33|88|9[0-57-9])\\d{3}|55(?:50[013]|90\\d)|6(?:1(?:2(?:2[01]|98)|35[0-4]|50\\d|61[23]|7(?:[01][017]|4\\d|55|9[5-9]))|2(?:(?:11|7\\d)\\d|2(?:[12]1|9[01379])|5(?:[126]\\d|3[0-4]))|5(?:19[01]|2(?:27|9[26])|(?:30|59|7\\d)\\d)|6(?:2(?:1[5-9]|2[0367]|38|41|52|60)|(?:3[79]|9[0-3])\\d|4(?:56|83)|7(?:[07]\\d|1[017]|3[07]|4[047]|5[057]|67|8[0178]|9[79]))|7(?:2(?:24|3[237]|4[5-9]|7[15-8])|5(?:7[12]|8[0589])|7(?:0\\d|[39][07])|9(?:0\\d|7[079]))|9(?:2(?:1[1267]|3[01]|5\\d|7[0-4])|(?:5[67]|7\\d)\\d|6(?:2[0-26]|8\\d)))|7(?:[07]\\d{3}|1(?:13[01]|6(?:0[47]|1[67]|66)|71[3-69]|98\\d)|2(?:2(?:2[79]|95)|3(?:2[5-9]|6[0-6])|57\\d|7(?:0\\d|1[17]|2[27]|3[37]|44|5[057]|66|88))|3(?:2(?:1[0-6]|21|3[469]|7[159])|(?:33|9[4-6])\\d|5(?:0[0-4]|5[579]|9\\d)|7(?:[0-3579]\\d|4[0467]|6[67]|8[078]))|4(?:2(?:29|5[0257]|6[0-7]|7[1-57])|5(?:1[0-4]|8\\d|9[5-9])|7(?:0\\d|1[024589]|2[0-27]|3[0137]|[46][07]|5[01]|7[5-9]|9[079])|9(?:7[015-9]|[89]\\d))|5(?:112|2(?:0\\d|2[29]|[49]4)|3[1568]\\d|52[6-9]|7(?:0[01578]|1[017]|[23]7|4[047]|[5-7]\\d|8[78]|9[079]))|6(?:2(?:2[1245]|4[2-4])|39\\d|41[179]|5(?:[349]\\d|5[0-2])|7(?:0[017]|[13]\\d|22|44|55|67|88))|9(?:22[128]|3(?:2[0-4]|7\\d)|57[02569]|7(?:2[05-9]|3[37]|4\\d|60|7[2579]|87|9[07]))))\\d{4}"]],"8~10"],"VA":["39","00","0\\d{5,10}|3[0-8]\\d{7,10}|55\\d{8}|8\\d{5}(?:\\d{2,4})?|(?:1\\d|39)\\d{7,8}",[6,7,8,9,10,11],0,0,0,0,0,0,"06698",[["06698\\d{1,6}"],["3[1-9]\\d{8}|3[2-9]\\d{7}",[9,10]],["80(?:0\\d{3}|3)\\d{3}",[6,9]],["(?:0878\\d{3}|89(?:2\\d|3[04]|4(?:[0-4]|[5-9]\\d\\d)|5[0-4]))\\d\\d|(?:1(?:44|6[346])|89(?:38|5[5-9]|9))\\d{6}",[6,8,9,10]],["1(?:78\\d|99)\\d{6}",[9,10]],0,0,0,["55\\d{8}",[10]],["84(?:[08]\\d{3}|[17])\\d{3}",[6,9]]]],"VC":["1","011","(?:[58]\\d\\d|784|900)\\d{7}",[10],0,"1",0,"1|([2-7]\\d{6})$","784$1",0,"784",[["784(?:266|3(?:6[6-9]|7\\d|8[0-6])|4(?:38|5[0-36-8]|8[0-8])|5(?:55|7[0-2]|93)|638|784)\\d{4}"],["784(?:4(?:3[0-5]|5[45]|89|9[0-8])|5(?:2[6-9]|3[0-4])|720)\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"],0,0,0,["78451[0-2]\\d{4}"]]],"VE":["58","00","[68]00\\d{7}|(?:[24]\\d|[59]0)\\d{8}",[10],[["(\\d{3})(\\d{7})","$1-$2",["[24-689]"],"0$1"]],"0",0,0,0,0,0,[["(?:2(?:12|3[457-9]|[467]\\d|[58][1-9]|9[1-6])|[4-6]00)\\d{7}"],["4(?:1[24-8]|2[46])\\d{7}"],["800\\d{7}"],["90[01]\\d{7}"],0,0,["501\\d{7}"]]],"VG":["1","011","(?:284|[58]\\d\\d|900)\\d{7}",[10],0,"1",0,"1|([2-578]\\d{6})$","284$1",0,"284",[["284496[0-5]\\d{3}|284(?:229|4(?:22|9[45])|774|8(?:52|6[459]))\\d{4}"],["284496[6-9]\\d{3}|284(?:245|3(?:0[0-3]|4[0-7]|68|9[34])|4(?:4[0-6]|68|99)|5(?:4[0-7]|68|9[69]))\\d{4}"],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"VI":["1","011","[58]\\d{9}|(?:34|90)0\\d{7}",[10],0,"1",0,"1|([2-9]\\d{6})$","340$1",0,"340",[["340(?:2(?:0[0-38]|2[06-8]|4[49]|77)|3(?:32|44)|4(?:2[23]|44|7[34]|89)|5(?:1[34]|55)|6(?:2[56]|4[23]|77|9[023])|7(?:1[2-57-9]|2[57]|7\\d)|884|998)\\d{4}"],[""],["8(?:00|33|44|55|66|77|88)[2-9]\\d{6}"],["900[2-9]\\d{6}"],["52(?:3(?:[2-46-9][02-9]\\d|5(?:[02-46-9]\\d|5[0-46-9]))|4(?:[2-478][02-9]\\d|5(?:[034]\\d|2[024-9]|5[0-46-9])|6(?:0[1-9]|[2-9]\\d)|9(?:[05-9]\\d|2[0-5]|49)))\\d{4}|52[34][2-9]1[02-9]\\d{4}|5(?:00|2[125-7]|33|44|66|77|88)[2-9]\\d{6}"]]],"VN":["84","00","[12]\\d{9}|[135-9]\\d{8}|[16]\\d{7}|[16-8]\\d{6}",[7,8,9,10],[["(\\d{2})(\\d{5})","$1 $2",["80"],"0$1",1],["(\\d{4})(\\d{4,6})","$1 $2",["1"],0,1],["(\\d{2})(\\d{3})(\\d{2})(\\d{2})","$1 $2 $3 $4",["[69]"],"0$1",1],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[3578]"],"0$1",1],["(\\d{2})(\\d{4})(\\d{4})","$1 $2 $3",["2[48]"],"0$1",1],["(\\d{3})(\\d{4})(\\d{3})","$1 $2 $3",["2"],"0$1",1]],"0",0,0,0,0,0,[["2(?:0[3-9]|1[0-689]|2[0-25-9]|3[2-9]|4[2-8]|5[124-9]|6[0-39]|7[0-7]|8[2-79]|9[0-4679])\\d{7}",[10]],["(?:5(?:2[238]|59)|89[689]|99[013-9])\\d{6}|(?:3\\d|5[689]|7[06-9]|8[1-8]|9[0-8])\\d{7}",[9]],["1800\\d{4,6}|12(?:0[13]|28)\\d{4}",[8,9,10]],["1900\\d{4,6}",[8,9,10]],0,0,["(?:[17]99|80\\d)\\d{4}|69\\d{5,6}",[7,8]],0,["672\\d{6}",[9]]]],"VU":["678","00","[57-9]\\d{6}|(?:[238]\\d|48)\\d{3}",[5,7],[["(\\d{3})(\\d{4})","$1 $2",["[57-9]"]]],0,0,0,0,0,0,[["(?:38[0-8]|48[4-9])\\d\\d|(?:2[02-9]|3[4-7]|88)\\d{3}",[5]],["(?:[58]\\d|7[013-7])\\d{5}",[7]],["81[18]\\d\\d",[5]],0,0,0,["(?:3[03]|900\\d)\\d{3}"],0,["9(?:0[1-9]|1[01])\\d{4}",[7]]]],"WF":["681","00","(?:40|72)\\d{4}|8\\d{5}(?:\\d{3})?",[6,9],[["(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3",["[478]"]],["(\\d{3})(\\d{2})(\\d{2})(\\d{2})","$1 $2 $3 $4",["8"]]],0,0,0,0,0,0,[["72\\d{4}",[6]],["(?:72|8[23])\\d{4}",[6]],["80[0-5]\\d{6}",[9]]]],"WS":["685","0","(?:[2-6]|8\\d{5})\\d{4}|[78]\\d{6}|[68]\\d{5}",[5,6,7,10],[["(\\d{5})","$1",["[2-5]|6[1-9]"]],["(\\d{3})(\\d{3,7})","$1 $2",["[68]"]],["(\\d{2})(\\d{5})","$1 $2",["7"]]],0,0,0,0,0,0,[["6[1-9]\\d{3}|(?:[2-5]|60)\\d{4}",[5,6]],["(?:7[1-35-7]|8(?:[3-7]|9\\d{3}))\\d{5}",[7,10]],["800\\d{3}",[6]]]],"XK":["383","00","[23]\\d{7,8}|(?:4\\d\\d|[89]00)\\d{5}",[8,9],[["(\\d{3})(\\d{5})","$1 $2",["[89]"],"0$1"],["(\\d{2})(\\d{3})(\\d{3})","$1 $2 $3",["[2-4]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[23]"],"0$1"]],"0",0,0,0,0,0,[["(?:2[89]|39)0\\d{6}|[23][89]\\d{6}"],["4[3-9]\\d{6}",[8]],["800\\d{5}",[8]],["900\\d{5}",[8]]]],"YE":["967","00","(?:1|7\\d)\\d{7}|[1-7]\\d{6}",[7,8,9],[["(\\d)(\\d{3})(\\d{3,4})","$1 $2 $3",["[1-6]|7[24-68]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["7"],"0$1"]],"0",0,0,0,0,0,[["78[0-7]\\d{4}|17\\d{6}|(?:[12][2-68]|3[2358]|4[2-58]|5[2-6]|6[3-58]|7[24-6])\\d{5}",[7,8]],["7[0137]\\d{7}",[9]]]],"YT":["262","00","80\\d{7}|(?:26|63)9\\d{6}",[9],0,"0",0,0,0,0,"269|63",[["269(?:0[0-367]|5[0-3]|6\\d|[78]0)\\d{4}"],["639(?:0[0-79]|1[019]|[267]\\d|3[09]|40|5[05-9]|9[04-79])\\d{4}"],["80\\d{7}"]]],"ZA":["27","00","[1-79]\\d{8}|8\\d{4,9}",[5,6,7,8,9,10],[["(\\d{2})(\\d{3,4})","$1 $2",["8[1-4]"],"0$1"],["(\\d{2})(\\d{3})(\\d{2,3})","$1 $2 $3",["8[1-4]"],"0$1"],["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["860"],"0$1"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["[1-9]"],"0$1"],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["8"],"0$1"]],"0",0,0,0,0,0,[["(?:2(?:0330|4302)|52087)0\\d{3}|(?:1[0-8]|2[1-378]|3[1-69]|4\\d|5[1346-8])\\d{7}",[9]],["(?:1(?:3492[0-25]|4495[0235]|549(?:20|5[01]))|4[34]492[01])\\d{3}|8[1-4]\\d{3,7}|(?:2[27]|47|54)4950\\d{3}|(?:1(?:049[2-4]|9[12]\\d\\d)|(?:6\\d|7[0-46-9])\\d{3}|8(?:5\\d{3}|7(?:08[67]|158|28[5-9]|310)))\\d{4}|(?:1[6-8]|28|3[2-69]|4[025689]|5[36-8])4920\\d{3}|(?:12|[2-5]1)492\\d{4}",[5,6,7,8,9]],["80\\d{7}",[9]],["(?:86[2-9]|9[0-2]\\d)\\d{6}",[9]],0,0,["861\\d{6,7}",[9,10]],0,["87(?:08[0-589]|15[0-79]|28[0-4]|31[1-9])\\d{4}|87(?:[02][0-79]|1[0-46-9]|3[02-9]|[4-9]\\d)\\d{5}",[9]],["860\\d{6}",[9]]]],"ZM":["260","00","800\\d{6}|(?:21|63|[79]\\d)\\d{7}",[9],[["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[28]"],"0$1"],["(\\d{2})(\\d{7})","$1 $2",["[79]"],"0$1"]],"0",0,0,0,0,0,[["21[1-8]\\d{6}"],["(?:7[679]|9[5-8])\\d{7}"],["800\\d{6}"],0,0,0,0,0,["63\\d{7}"]]],"ZW":["263","00","2(?:[0-57-9]\\d{6,8}|6[0-24-9]\\d{6,7})|[38]\\d{9}|[35-8]\\d{8}|[3-6]\\d{7}|[1-689]\\d{6}|[1-3569]\\d{5}|[1356]\\d{4}",[5,6,7,8,9,10],[["(\\d{3})(\\d{3,5})","$1 $2",["2(?:0[45]|2[278]|[49]8)|3(?:[09]8|17)|6(?:[29]8|37|75)|[23][78]|(?:33|5[15]|6[68])[78]"],"0$1"],["(\\d)(\\d{3})(\\d{2,4})","$1 $2 $3",["[49]"],"0$1"],["(\\d{3})(\\d{4})","$1 $2",["80"],"0$1"],["(\\d{2})(\\d{7})","$1 $2",["24|8[13-59]|(?:2[05-79]|39|5[45]|6[15-8])2","2(?:02[014]|4|[56]20|[79]2)|392|5(?:42|525)|6(?:[16-8]21|52[013])|8[13-59]"],"(0$1)"],["(\\d{2})(\\d{3})(\\d{4})","$1 $2 $3",["7"],"0$1"],["(\\d{3})(\\d{3})(\\d{3,4})","$1 $2 $3",["2(?:1[39]|2[0157]|[378]|[56][14])|3(?:12|29)","2(?:1[39]|2[0157]|[378]|[56][14])|3(?:123|29)"],"0$1"],["(\\d{4})(\\d{6})","$1 $2",["8"],"0$1"],["(\\d{2})(\\d{3,5})","$1 $2",["1|2(?:0[0-36-9]|12|29|[56])|3(?:1[0-689]|[24-6])|5(?:[0236-9]|1[2-4])|6(?:[013-59]|7[0-46-9])|(?:33|55|6[68])[0-69]|(?:29|3[09]|62)[0-79]"],"0$1"],["(\\d{2})(\\d{3})(\\d{3,4})","$1 $2 $3",["29[013-9]|39|54"],"0$1"],["(\\d{4})(\\d{3,5})","$1 $2",["(?:25|54)8","258|5483"],"0$1"]],"0",0,0,0,0,0,[["(?:1(?:(?:3\\d|9)\\d|[4-8])|2(?:(?:(?:0(?:2[014]|5)|(?:2[0157]|31|84|9)\\d\\d|[56](?:[14]\\d\\d|20)|7(?:[089]|2[03]|[35]\\d\\d))\\d|4(?:2\\d\\d|8))\\d|1(?:2|[39]\\d{4}))|3(?:(?:123|(?:29\\d|92)\\d)\\d\\d|7(?:[19]|[56]\\d))|5(?:0|1[2-478]|26|[37]2|4(?:2\\d{3}|83)|5(?:25\\d\\d|[78])|[689]\\d)|6(?:(?:[16-8]21|28|52[013])\\d\\d|[39])|8(?:[1349]28|523)\\d\\d)\\d{3}|(?:4\\d\\d|9[2-9])\\d{4,5}|(?:(?:2(?:(?:(?:0|8[146])\\d|7[1-7])\\d|2(?:[278]\\d|92)|58(?:2\\d|3))|3(?:[26]|9\\d{3})|5(?:4\\d|5)\\d\\d)\\d|6(?:(?:(?:[0-246]|[78]\\d)\\d|37)\\d|5[2-8]))\\d\\d|(?:2(?:[569]\\d|8[2-57-9])|3(?:[013-59]\\d|8[37])|6[89]8)\\d{3}"],["7(?:[178]\\d|3[1-9])\\d{6}",[9]],["80(?:[01]\\d|20|8[0-8])\\d{3}",[7]],0,0,0,0,0,["86(?:1[12]|22|30|44|55|77|8[368])\\d{6}",[10]]]]},"nonGeographic":{"800":["800",0,"(?:005|[1-9]\\d\\d)\\d{5}",[8],[["(\\d{4})(\\d{4})","$1 $2",["\\d"]]],0,0,0,0,0,0,[0,0,["(?:005|[1-9]\\d\\d)\\d{5}"]]],"808":["808",0,"[1-9]\\d{7}",[8],[["(\\d{4})(\\d{4})","$1 $2",["[1-9]"]]],0,0,0,0,0,0,[0,0,0,0,0,0,0,0,0,["[1-9]\\d{7}"]]],"870":["870",0,"7\\d{11}|[35-7]\\d{8}",[9,12],[["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["[35-7]"]]],0,0,0,0,0,0,[0,["(?:[356]|774[45])\\d{8}|7[6-8]\\d{7}"]]],"878":["878",0,"10\\d{10}",[12],[["(\\d{2})(\\d{5})(\\d{5})","$1 $2 $3",["1"]]],0,0,0,0,0,0,[0,0,0,0,0,0,0,0,["10\\d{10}"]]],"881":["881",0,"[0-36-9]\\d{8}",[9],[["(\\d)(\\d{3})(\\d{5})","$1 $2 $3",["[0-36-9]"]]],0,0,0,0,0,0,[0,["[0-36-9]\\d{8}"]]],"882":["882",0,"[13]\\d{6}(?:\\d{2,5})?|285\\d{9}|(?:[19]\\d|49)\\d{6}",[7,8,9,10,11,12],[["(\\d{2})(\\d{5})","$1 $2",["16|342"]],["(\\d{2})(\\d{6})","$1 $2",["4"]],["(\\d{2})(\\d{2})(\\d{4})","$1 $2 $3",["[19]"]],["(\\d{2})(\\d{4})(\\d{3})","$1 $2 $3",["3[23]"]],["(\\d{2})(\\d{3,4})(\\d{4})","$1 $2 $3",["1"]],["(\\d{2})(\\d{4})(\\d{4})","$1 $2 $3",["34[57]"]],["(\\d{3})(\\d{4})(\\d{4})","$1 $2 $3",["34"]],["(\\d{2})(\\d{4,5})(\\d{5})","$1 $2 $3",["[1-3]"]]],0,0,0,0,0,0,[0,["342\\d{4}|(?:337|49)\\d{6}|3(?:2|47|7\\d{3})\\d{7}",[7,8,9,10,12]],0,0,0,0,0,0,["1(?:3(?:0[0347]|[13][0139]|2[035]|4[013568]|6[0459]|7[06]|8[15-8]|9[0689])\\d{4}|6\\d{5,10})|(?:(?:285\\d\\d|3(?:45|[69]\\d{3}))\\d|9[89])\\d{6}"]]],"883":["883",0,"(?:210|370\\d\\d)\\d{7}|51\\d{7}(?:\\d{3})?",[9,10,12],[["(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3",["510"]],["(\\d{3})(\\d{3})(\\d{4})","$1 $2 $3",["2"]],["(\\d{4})(\\d{4})(\\d{4})","$1 $2 $3",["51[13]"]],["(\\d{3})(\\d{3})(\\d{3})(\\d{3})","$1 $2 $3 $4",["[35]"]]],0,0,0,0,0,0,[0,0,0,0,0,0,0,0,["(?:210|(?:370[1-9]|51[013]0)\\d)\\d{7}|5100\\d{5}"]]],"888":["888",0,"\\d{11}",[11],[["(\\d{3})(\\d{3})(\\d{5})","$1 $2 $3"]],0,0,0,0,0,0,[0,0,0,0,0,0,["\\d{11}"]]],"979":["979",0,"[1359]\\d{8}",[9],[["(\\d)(\\d{4})(\\d{4})","$1 $2 $3",["[1359]"]]],0,0,0,0,0,0,[0,0,0,["[1359]\\d{8}"]]]}});
+
+/***/ }),
+
 /***/ "./node_modules/pinia/node_modules/vue-demi/lib/index.mjs":
 /*!****************************************************************!*\
   !*** ./node_modules/pinia/node_modules/vue-demi/lib/index.mjs ***!
@@ -29214,6 +44670,15 @@ function del(target, key) {
 /******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 /******/ 			}
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/node module decorator */
+/******/ 	(() => {
+/******/ 		__webpack_require__.nmd = (module) => {
+/******/ 			module.paths = [];
+/******/ 			if (!module.children) module.children = [];
+/******/ 			return module;
 /******/ 		};
 /******/ 	})();
 /******/ 	

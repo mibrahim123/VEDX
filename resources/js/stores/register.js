@@ -16,14 +16,16 @@ export const useRegisterStore = defineStore("register", {
             confirmPassword: '',
             validPhone: true,
             skills: [],
-            newSkills: []
+            newSkills: [],
+            category: '',
+            subCategory: ''
         };
     },
-    // actions: {
-    //     increment(value = 1) {
-    //         this.count += value;
-    //     },
-    // },
+    actions: {
+        increment(value = 1) {
+            alert("yes");
+        },
+    },
     // getters: {
     //     doubleCount: (state) => {
     //         return state.count * 2;
