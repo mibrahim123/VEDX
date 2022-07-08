@@ -24,7 +24,6 @@ Route::get('categories', [CategoryController::class,'list']);
 Route::get('sub-categories', [SubCategoryController::class,'list']);
 Route::get('skills', [SkillController::class,'list']);
 
-
 Route::middleware('auth:sanctum')->group(function(){
     Route::get('/user', function (Request $request) {
         return $request->user();

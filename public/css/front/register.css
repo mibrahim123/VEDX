@@ -1,0 +1,1391 @@
+/* signup Start CSS*/
+
+.vx__login.vx__forget--items .login-container .row .col--50:last-child {
+    height: 100% !important;
+    margin: 0;
+    padding: 15px;
+}
+
+.vx__login .vx__login--form {
+    padding: 15px !important;
+}
+
+.vx__progress-bar .complete-bar {
+    padding: 0 15px !important;
+}
+
+.vx__progress-bar .progress--bar .progress-line {
+    position: relative;
+    width: 100%;
+    height: 10px;
+    background-color: #707070;
+}
+
+.vx__progress-bar .progress--bar .progress-line::before {
+    content: " ";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 10px;
+    background-color: #0450B4;
+    transition: all 0.5s ease-in-out;
+}
+
+.vx__progress-bar .progress--bar.active p {
+    color: #0450B4;
+}
+
+.vx__progress-bar .progress--bar.active .progress-line::before {
+    width: 100%;
+    transition: all 0.5s ease-in-out;
+}
+
+.vx__user--type .vx_user--items {
+    -moz-column-gap: 25px;
+    column-gap: 25px;
+    width: 100%;
+    max-width: 85%;
+    margin: 0 auto;
+}
+
+.vx__user--type .vx_user--items .h3 {
+    padding: 20px 30px;
+    border-radius: 15px;
+    transition: all 0.3s ease-in-out;
+    min-width: auto !important;
+    width: 100%;
+}
+
+.vx__user--type .vx_user--items .btn.btn-blue {
+    background-color: #707070;
+}
+
+.vx__user--type .vx_user--items .btn.btn-blue:before {
+    border-bottom: 110px solid #0450B4;
+}
+
+.vx__user--type .vx_user--items .btn.btn-blue:hover {
+    color: #FF9A08;
+}
+
+.form--data h1 {
+    color: #0450B4;
+    font-size: 100px;
+    text-align: center;
+    padding: 130px 0;
+}
+
+@media (max-width: 1600px) {
+    .vx__user--type .vx_user--items {
+        max-width: 100%;
+    }
+    .vx__user--type .vx_user--items a {
+        font-size: 30px !important;
+    }
+    .form--data h1 {
+        font-size: 80px;
+    }
+}
+
+@media (max-width: 1199px) {
+    .vx__user--type .vx_user--items a {
+        font-size: 25px !important;
+    }
+    .form--data h1 {
+        font-size: 70px;
+    }
+}
+
+@media (max-width: 991px) {
+    .vx__progress-bar .col--50 {
+        max-width: 50% !important;
+        flex: 0 0 50% !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .vx__user--type .vx_user--items a {
+        font-size: 20px !important;
+    }
+}
+
+@media (max-width: 545px) {
+    .form--data h2 {
+        margin-bottom: 8px !important;
+    }
+    .progress--bar p {
+        font-size: 12px;
+    }
+    .vx__user--type .vx_user--items {
+        -moz-column-gap: 10px;
+        column-gap: 10px;
+    }
+    .vx__user--type .vx_user--items a {
+        font-size: 20px !important;
+    }
+    .vx__user--type .vx_user--items .btn.btn-blue {
+        padding: 12px 30px !important;
+    }
+    .form--data h1 {
+        font-size: 50px;
+    }
+}
+
+@media (max-width: 400px) {
+    .vx__user--type .vx_user--items a {
+        font-size: 14px !important;
+    }
+}
+
+
+/* signup End CSS*/
+
+
+/* signupcomplete Start CSS*/
+
+.vx__login.vx__signup-complete {
+    height: -webkit-fit-content !important;
+    height: -moz-fit-content !important;
+    height: fit-content !important;
+}
+
+.vx__login.vx__signup-complete .vx__login--form {
+    padding: 30px !important;
+}
+
+.vx__progress-bar.active .progress-line::before {
+    width: 100%;
+    transition: all 0.5s ease-in-out;
+}
+
+.select--gender {
+    color: #3C3C3C;
+    font-size: 18px;
+    margin-right: 20px;
+}
+
+.vx__form--gender-section p {
+    margin-right: 30px;
+}
+
+[type=radio] {
+    position: absolute;
+}
+
+[type=radio]:checked+label,
+[type=radio]:not(:checked)+label {
+    position: relative;
+    padding-left: 28px;
+    cursor: pointer;
+    line-height: 20px;
+    display: inline-block;
+    color: #666;
+}
+
+[type=radio]:checked+label:before,
+[type=radio]:not(:checked)+label:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #FF9A08;
+    border-radius: 100%;
+    background: #fff;
+}
+
+[type=radio]:checked+label:after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background: #FF9A08;
+    position: absolute;
+    top: 45%;
+    left: 9px;
+    border-radius: 100%;
+    transition: all 0.2s ease;
+}
+
+[type=radio]:not(:checked)+label:after {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background: #FF9A08;
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    border-radius: 100%;
+    transition: all 0.2s ease;
+    opacity: 0;
+    transform: scale(0);
+}
+
+[type=radio]:checked+label:after {
+    opacity: 1;
+    transform: translate(-5px, -45%);
+}
+
+.form-group input {
+    padding: 12px 16px !important;
+    border: 1px solid #FF9A08 !important;
+    background-color: transparent !important;
+    border-radius: 5px !important;
+}
+
+.vx__input input:first-child {
+    margin-right: 35px !important;
+}
+
+.vx__login .login-container .form--data {
+    align-self: flex-start !important;
+}
+
+.vx__register--button {
+    position: inherit !important;
+    width: 100%;
+    left: unset !important;
+    max-width: 1000% !important;
+    margin: 0 auto;
+    bottom: unset !important;
+    transform: unset !important;
+}
+
+.vx__login {
+    height: -webkit-fit-content !important;
+    height: -moz-fit-content !important;
+    height: fit-content !important;
+}
+
+.vx__form--check-box a {
+    text-decoration: none !important;
+}
+
+@media (max-width: 991px) {
+    .vx__progress-bar .col--50 {
+        max-width: 50% !important;
+        flex: 0 0 50% !important;
+    }
+    .vx__register--button {
+        margin: 0;
+    }
+    .vx__account--link {
+        left: 0% !important;
+        transform: translate(0, 0) !important;
+        margin-bottom: 25px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .vx__input {
+        flex-wrap: wrap;
+    }
+    .form-group .form-control {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .form-group .form-control:first-child {
+        margin-right: 0 !important;
+        margin-bottom: 20px !important;
+    }
+}
+
+@media (max-width: 500px) {
+    .vx__form--gender-section {
+        flex-wrap: wrap;
+    }
+    .vx__form--gender-section .select--gender {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+
+/* signupcomplete End CSS*/
+
+
+/* Login Start CSS */
+
+.vx__login--items .login-container .row {
+    height: 100%;
+}
+
+.vx__login--items .login-container .row .col--50:last-child {
+    height: 100% !important;
+    margin: 0;
+    padding: 15px;
+}
+
+.vx__login--items .login-container .row .vx__forgat--form .form--data h2 {
+    margin-bottom: 10px !important;
+}
+
+.vx__login--items.vx__login .vx__login--form {
+    height: 100% !important;
+    padding: 75px 25px !important;
+}
+
+.vx__login .vx__login--form {
+    margin: 0px 0 !important;
+}
+
+.vx__login .vx__login--form .h2 {
+    font-size: 50px;
+    color: #0450B4;
+}
+
+.vx__login .vx__login--form h2 {
+    color: #3C3C3C;
+}
+
+.vx__login .vx__login--form span {
+    color: #FF9A08;
+    font-family: "breeze";
+}
+
+.vx__login .vx__login--form .vx__social-icon .icon {
+    margin: 0 10px;
+}
+
+.vx__login .vx__login--form .vx__social-icon .icon svg {
+    background-color: #0450B4;
+    border-radius: 50px;
+    width: 50px;
+    height: 50px;
+    transition: all 0.5s ease-in-out;
+}
+
+.vx__login .vx__login--form .vx__social-icon .icon svg path {
+    fill: #ffffff;
+}
+
+.vx__login .vx__login--form .vx__social-icon .icon:hover svg {
+    border: 2px dotted #fff;
+}
+
+.vx__login .vx__login--form .vx__social-icon .icon:hover.facebook svg {
+    background-color: #3b5998;
+    transition: all 0.5s ease-in-out;
+}
+
+.vx__login .vx__login--form .vx__social-icon .icon:hover.linkedin svg {
+    background-color: #0077b5;
+    transition: all 0.5s ease-in-out;
+}
+
+.vx__login .vx__login--form .vx__social-icon .icon:hover.google svg {
+    background-color: #DB4437;
+    transition: all 0.5s ease-in-out;
+}
+
+.vx__login .vx__login--form .line {
+    position: relative;
+    z-index: 999;
+}
+
+.vx__login .vx__login--form .line::before {
+    content: "or";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    z-index: 9999;
+    background: #ffffff;
+    padding: 4px 10px;
+    color: #C7C7C7;
+}
+
+.vx__login .vx__login--form .line hr {
+    background-color: transparent;
+    border-color: #C7C7C7;
+    opacity: 0.4;
+}
+
+.vx__login form .vx__username a {
+    font-size: 14px;
+    color: #0450B4;
+}
+
+.vx__login form .vx__username a:hover {
+    color: #FF9A08;
+}
+
+.vx__login form .vx__form--check-box p {
+    font-size: 16px;
+}
+
+.vx__login form .vx__form--check-box #remember {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+}
+
+.vx__login form .btn.btn-blue {
+    width: 100%;
+}
+
+@media (max-width: 1600px) {
+    .login-container .align-items-end {
+        align-items: center;
+    }
+    .vx__login .vx__login--form {
+        padding: 65px 15px !important;
+    }
+}
+
+@media (max-width: 1280px) {
+    .vx__login .vx__login--form {
+        padding: 55px 15px;
+    }
+}
+
+@media (max-width: 1199px) {
+    .login-container {
+        padding-left: 0%;
+    }
+    .vx__login--image {
+        position: relative;
+        padding-top: 65%;
+        overflow: hidden;
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .login-container>.row {
+        justify-content: center;
+    }
+    .login-container .col--50 {
+        max-width: 70%;
+        flex: 0 0 70%;
+    }
+    .vx__login--image {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .login-container>.row {
+        justify-content: center;
+    }
+    .login-container .col--50 {
+        max-width: 85%;
+        flex: 0 0 85%;
+    }
+    .vx__login .vx__login--form .h2 {
+        font-size: 35px;
+    }
+    .vx__login .vx__login--form h2 {
+        font-size: 25px;
+    }
+    .vx__login .vx__login--form .vx__social-icon .icon svg {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 600px) {
+    .login-container .col--50 {
+        max-width: 95%;
+        flex: 0 0 95%;
+    }
+}
+
+
+/* Login End CSS */
+
+
+/*Forget Password Start CSS*/
+
+.vx__login--image {
+    position: relative;
+    padding-top: 80%;
+    overflow: hidden;
+}
+
+.vx__login--image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    -o-object-fit: contain;
+    object-fit: contain;
+}
+
+.vx__login .login-container .vx__data--set {
+    height: 100%;
+}
+
+.vx__login .login-container .vx__data--set .vx__login--form .forgot--data {
+    width: 100%;
+    align-self: center;
+}
+
+@media (max-width: 1280px) {
+    .login-container {
+        padding-left: 0 !important;
+    }
+}
+
+@media (max-width: 991px) {
+    .vx__login.vx__forget--items .vx__login--image {
+        z-index: 9999;
+    }
+    .vx__login.vx__forget--items .vx__login--image img {
+        position: static;
+    }
+    .login-container .col--50 {
+        max-width: 70%;
+        flex: 0 0 70%;
+        margin: 0 auto;
+    }
+    .login-container .vx__data--set .vx__login--form {
+        display: flex !important;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 767px) {
+    .vx__login--form {
+        padding: 0 30px !important;
+    }
+    .login-container .col--50 {
+        max-width: 90%;
+        flex: 0 0 90%;
+        margin: 0 auto;
+    }
+}
+
+
+/* Forget Password End CSS*/
+
+
+/* Enterprice Section Start CSS */
+
+.vx__enterprice--items .vx__login--form {
+    padding: 0 30px !important;
+}
+
+.vx__enterprice--items .vx__login--form .form-group>.row {
+    margin: 0 0px;
+}
+
+.vx__enterprice--items .vx__login--form .form-group>.row>.col--50 {
+    padding: 0 15px;
+}
+
+.vx__enterprice--items .vx__login--form .form-group>.row>.col--50:first-child {
+    padding-left: 0 !important;
+}
+
+.vx__enterprice--items .vx__login--form .form-group>.row>.col--50:last-child {
+    padding-right: 0 !important;
+}
+
+.vx__enterprice--items .vx__login--form .form-group>.row>.col--50 .vx__fist-name {
+    padding-right: 15px;
+}
+
+.vx__enterprice--items.vx__login .login-container .form--data {
+    width: 100%;
+    align-self: flex-start !important;
+    padding-top: 70px;
+}
+
+.vx__enterprice--items.vx__login .login-container .vx__data--set .vx__login--form {
+    flex-wrap: wrap;
+}
+
+@media (max-width: 991px) {
+    .vx__enterprice--items .vx__login--image {
+        display: none;
+    }
+    .form-group>.row>.col--50 {
+        max-width: 50%;
+        flex: 0 0 50%;
+    }
+    .vx__login {
+        height: auto !important;
+    }
+    .vx__register--button {
+        position: static !important;
+        max-width: 100% !important;
+        transform: translate(0%, 0px) !important;
+        margin-bottom: 25px !important;
+    }
+    .vx__login--form {
+        display: block !important;
+        padding-bottom: 1px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .vx__login--form {
+        padding-bottom: 1px !important;
+    }
+}
+
+@media (max-width: 568px) {
+    .vx__login.vx__enterprice--items {
+        height: -webkit-fit-content !important;
+        height: -moz-fit-content !important;
+        height: fit-content !important;
+    }
+    .form-group>.row>.col--50 {
+        max-width: 100%;
+        flex: 0 0 100%;
+        padding: 0 !important;
+    }
+    .form-group>.row>.col--50:first-child {
+        margin-bottom: 25px;
+    }
+}
+
+
+/* Enterprice Section End CSS */
+
+
+/* Student Login Start CSS*/
+
+.vx__student--items .login-container .vx__data--set .vx__login--form {
+    padding: 0 30px !important;
+    flex-wrap: wrap;
+}
+
+.vx__student--items.vx__login .login-container .form--data {
+    padding-top: 30px;
+    width: 100%;
+    align-self: flex-start !important;
+}
+
+.vx__student--items .tab button {
+    background-color: #707070 !important;
+    padding: 33px 15px;
+    transition: 0.3s;
+    font-size: 40px;
+    min-width: auto !important;
+    width: 100%;
+    max-width: 300px;
+    border-radius: 15px;
+}
+
+.vx__student--items .tab .btn.btn-blue.active {
+    color: #FF9A08 !important;
+    background-color: #0450B4 !important;
+}
+
+.vx__student--items .tab .btn.btn-blue:hover::before {
+    display: none;
+}
+
+.vx__student--items #student {
+    display: block;
+}
+
+.vx__student--items .tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border-top: none;
+}
+
+.vx__student--items .form-group>.row>.col--50:first-child {
+    padding: 0 !important;
+    padding-right: 25px !important;
+}
+
+.vx__student--items .form-group>.row>.col--50:last-child {
+    padding: 0 !important;
+}
+
+@media (max-width: 1600px) {
+    .vx__student--items .form--data .tab {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+        -moz-column-gap: 10px !important;
+        column-gap: 10px !important;
+    }
+    .vx__student--items .form--data .tab .tablinks {
+        font-size: 30px;
+    }
+}
+
+@media (max-width: 1199px) {
+    .vx__student--items .tablinks {
+        font-size: 25px !important;
+    }
+}
+
+@media (max-width: 991px) {
+    .vx__student--items.vx__login {
+        height: -webkit-fit-content !important;
+        height: -moz-fit-content !important;
+        height: fit-content !important;
+    }
+    .vx__student--items .vx__account--link {
+        position: static;
+        left: 0;
+        transform: unset;
+        padding: 15px 0;
+    }
+    .vx__student--items form .form-group>.row>.col--50 {
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+    .vx__student--items form .form-group>.row>.col--50:first-child {
+        padding-right: 0 !important;
+        margin-bottom: 25px !important;
+    }
+}
+
+@media (max-width: 560px) {
+    .vx__student--items .tablinks {
+        font-size: 18px !important;
+    }
+}
+
+@media (max-width: 445px) {
+    .vx__student--items .tablinks {
+        font-size: 14px !important;
+    }
+    .vx__student--items .login-container .col--50 {
+        max-width: 98% !important;
+        flex: 0 0 98% !important;
+        margin: 0 auto !important;
+    }
+}
+
+
+/* Student Login End CSS*/
+
+
+/*Register Start CSS */
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border: 0;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #FF9A08;
+    color: #fff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background: #0450B4;
+}
+
+.btn-default {
+    background: #707070;
+    color: #fff;
+}
+
+input[type=text],
+input[type=email],
+input[type=tel],
+input[type=password],
+textarea,
+select {
+    width: 100%;
+    display: block;
+    padding: 12px 15px;
+    border: 1px solid #FF9A08;
+    background: transparent;
+}
+
+.section__spacing {
+    padding: 60px 0 !important;
+}
+
+.mar-b-0 {
+    margin-bottom: 0 !important;
+}
+
+a {
+    color: #0450B4;
+}
+
+a:hover {
+    color: #FF9A08;
+}
+
+.form-wizard {
+    position: relative;
+    width: 100%;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.steps {
+    padding: 30px 0;
+    padding-bottom: 0;
+    overflow: hidden;
+}
+
+.steps .d-flex {
+    margin: 0 -15px;
+}
+
+.steps ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.steps ul li {
+    float: left;
+    color: rgba(255, 255, 255, 0.4);
+    padding: 0 15px;
+    position: relative;
+    cursor: pointer;
+}
+
+.steps ul li.active {
+    color: #FF9A08;
+}
+
+.steps ul li.active span {
+    background: #FF9A08;
+    color: #fff;
+}
+
+.steps ul li.active::after {
+    background: #FF9A08;
+    width: 100%;
+}
+
+.steps ul li span {
+    display: block;
+    margin: 0;
+    width: 100%;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.4);
+    text-align: center;
+    font-size: 18px;
+    line-height: 35px;
+    font-weight: 300;
+    color: #000;
+    position: relative;
+    z-index: 1;
+}
+
+.steps ul li:first-child::before,
+.steps ul li:first-child::after {
+    display: none;
+}
+
+.form-container {
+    clear: both;
+    display: none;
+    left: 100%;
+    background: #fff;
+    padding: 40px 30px;
+}
+
+.form-container.active {
+    display: block;
+}
+
+.form-container.animated {
+    height: -webkit-fit-content;
+    height: -moz-fit-content;
+    height: fit-content;
+    max-height: 510px;
+    overflow: auto;
+}
+
+.form-title {
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    position: relative;
+}
+
+.form-title::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 80px;
+    height: 2px;
+    background: #FF9A08;
+}
+
+.col--55 {
+    padding: 0 !important;
+}
+
+.vx__step-content {
+    padding: 30px;
+    background-color: #0450B4;
+    color: #ffffff;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+}
+
+.vx__form--data {
+    border-radius: 15px;
+    width: 100%;
+    max-width: 44.3%;
+    margin: 0 auto;
+}
+
+article {
+    height: 100%;
+    display: none;
+}
+
+article.on {
+    display: block;
+}
+
+article form input {
+    border-radius: 5px;
+    background-color: transparent !important;
+    padding: 13px 15px;
+    font-size: 16px;
+}
+
+article .vx__hours input {
+    border: 1px solid #FF9A08;
+}
+
+.vx__step--button.form-group.d-flex .btn.btn-blue.next,
+.vx__step--button.form-group.d-flex .btn.btn-blue.back {
+    margin-left: 20px;
+}
+
+.form-group .btn.btn-blue.next,
+.form-group .btn.btn-blue.back {
+    min-width: 175px !important;
+    width: -webkit-fit-content !important;
+    width: -moz-fit-content !important;
+    width: fit-content !important;
+    margin-left: auto;
+    margin-top: 15px;
+    padding: 15px 30px;
+    font-weight: 600;
+}
+
+.form-group .btn.btn-blue.next {
+    background-color: #0450B4 !important;
+    border: 2px solid #0450B4 !important;
+}
+
+.form-group .btn.btn-blue.back {
+    background-color: transparent;
+    border: 2px solid #0450B4 !important;
+    color: #0450B4;
+    padding: 13px 30px !important;
+}
+
+.form-group .btn.btn-blue:hover {
+    background-color: #FF9A08 !important;
+    border: 2px solid #FF9A08 !important;
+    color: #ffffff;
+}
+
+.vx__submit--checkbox input {
+    margin-right: 8px;
+}
+
+.vx__tab--items.d-flex {
+    margin: 0 -15px;
+}
+
+.vx__tab--items-data .vx__items--tab {
+    position: relative;
+}
+
+.vx__tab--items-data .vx__items--tab input {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    left: unset;
+}
+
+.vx__tab--items-data .vx__items--tab .vx__tab--data--text {
+    padding: 15px;
+    border: 1px solid #0450B4;
+    background-color: rgba(4, 80, 180, 0.1);
+    border-radius: 5px;
+    transition: all 0.5s ease-in-out;
+}
+
+.vx__tab--items-data .p {
+    font-size: 11px;
+}
+
+.vx__tab--items-data #tab1:checked~.vx__tab--data--text {
+    background: #0450B4;
+    transition: all 0.5s ease-in-out;
+}
+
+.vx__tab--items-data #tab1:checked~.vx__tab--data--text p {
+    color: #ffffff !important;
+}
+
+.vx__tab--items-data #tab1:checked~.vx__tab--data--text .tab__data--image {
+    background-color: #ffffff;
+}
+
+.vx__tab--items-data #tab1:checked~.vx__tab--data--text svg path {
+    fill: #0450B4;
+}
+
+.vx__tab--items-data .tab__data--image {
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+    background: #0450B4;
+    border-radius: 50px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+}
+
+.vx__tab--items-data .tab__data--image svg {
+    width: 20px;
+    height: 20px;
+    -o-object-fit: cover;
+    object-fit: cover;
+    align-self: center;
+}
+
+.vx__tab--menu form input#start {
+    width: 100%;
+    font-size: 14px !important;
+    border: 1px solid #FF9A08;
+    margin-bottom: 20px;
+}
+
+.vx__select-time.d-flex {
+    margin-bottom: 20px !important;
+}
+
+.vx__select-time .vx__hours {
+    margin: 0 0px;
+    padding: 0;
+}
+
+.vx__select-time .vx__hours .selected {
+    border: 1px solid #FF9A08;
+    background-image: url(../images/time-arrow.svg);
+    background-repeat: no-repeat;
+    background-size: 15px;
+    background-position: 96% center;
+    color: #707070;
+}
+
+.vx__select-time .vx__hours .drop-down {
+    padding: 0;
+}
+
+.vx__recorded-radio {
+    margin-bottom: 20px;
+}
+
+.vx__recorded-radio .day-button {
+    margin-right: 40px;
+}
+
+.vx__recorded-radio .day-button input {
+    width: 20px;
+    height: 20px;
+    margin-right: 15px;
+    z-index: 9;
+    opacity: 0;
+}
+
+.vx__recorded-radio .day-button label {
+    cursor: unset;
+}
+
+input:checked~.checkmark {
+    background-color: red !important;
+    color: red !important;
+}
+
+.vx__date-time-items {
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+    padding: 13px 18px;
+    background: #e5edf7;
+    border-radius: 5px;
+    margin-right: 30px;
+}
+
+.vx__date-time-items h5 {
+    margin: 0;
+    margin-right: 8px;
+    color: #0450B4;
+}
+
+.vx__date-time-items .vx__delete--button {
+    background: #A7333F;
+    border-radius: 5px;
+    width: 32px;
+    height: 32px;
+}
+
+
+/* personal-data Start CSS */
+
+.vx__input-text {
+    width: 100% !important;
+}
+
+.vx__input-text label {
+    color: #3C3C3C;
+    font-size: 18px;
+}
+
+.personal-data .vx__data--example {
+    padding-left: 20px;
+}
+
+.personal-data .vx__data--example li {
+    width: 100%;
+    max-width: 66%;
+    list-style-type: disc;
+}
+
+
+/* personal-data End CSS */
+
+
+/* Search Skill Start CSS*/
+
+.vx__search--skill .form-group.vx__input-text input {
+    background-image: url(../images/gray-search.svg);
+    background-repeat: no-repeat;
+    background-position: 10px 7px;
+    padding: 16px;
+    padding-left: 50px;
+}
+
+.vx__skill--items {
+    padding: 7px 0 !important;
+    border-radius: 50px !important;
+    text-align: center;
+    margin-right: 10px;
+}
+
+.vx__skill--items p a {
+    margin-left: 4px;
+}
+
+.vx__data--popular-skill p {
+    font-size: 18px;
+}
+
+.vx__data--popular-skill .vx__skill--items {
+    background-color: rgba(4, 80, 180, 0.4) !important;
+    color: #0450B4;
+}
+
+.vx__data--popular-skill .vx__skill--items p {
+    font-size: 14px;
+}
+
+.vx__data--popular-skill .vx__skill--items a {
+    margin: 0;
+    margin-right: 2px;
+}
+
+.vx__skill-data {
+    -moz-column-gap: 10px;
+    column-gap: 10px;
+    row-gap: 15px;
+}
+
+
+/* Search Skill End CSS*/
+
+
+/* Scope Section Start CSS */
+
+.vx__scope-data label {
+    font-size: 18px;
+    font-weight: 600;
+    color: #3C3C3C;
+}
+
+.vx__scope-data p {
+    font-size: 14px;
+}
+
+.vx__scope-data .selectt {
+    display: none;
+    padding-left: 35px;
+}
+
+.vx__scope-data input {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+}
+
+.vx__scope-data [type=radio] {
+    position: static;
+    left: unset;
+}
+
+.vx__scope-data .vx__long--work {
+    margin-top: 10px;
+}
+
+.vx__scope-data p label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #707070;
+}
+
+
+/* Scope Section End CSS */
+
+
+/* Budget Section Start CSS */
+
+.vx__budget--details .vx__input-text {
+    margin-bottom: 0;
+}
+
+.vx__budget--details .vx__input-text:first-child {
+    padding-right: 30px;
+}
+
+.vx__budget--details .inputwrapper {
+    position: relative;
+}
+
+.vx__budget--details .inputwrapper::after {
+    content: "hours";
+    position: absolute;
+    top: 50%;
+    right: 30px;
+    transform: translate(0, -50%);
+}
+
+.vx__budget--details .vx__chart--data {
+    position: relative;
+    padding-top: 40%;
+    overflow: hidden;
+    width: 42%;
+}
+
+.vx__budget--details .vx__chart--data img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    -o-object-fit: contain;
+    object-fit: contain;
+}
+
+
+/* Budget Section Start CSS */
+
+@media (max-width: 1600px) {
+    .vx__form--data {
+        max-width: 60%;
+    }
+    .vx__tab--items-data .vx__items--tab {
+        position: relative;
+        height: 100%;
+    }
+    .vx__tab--items-data .vx__tab--data--text {
+        height: 100%;
+    }
+}
+
+@media (max-width: 1199px) {
+    .vx__form--data {
+        max-width: 80%;
+    }
+}
+
+@media (max-width: 991px) {
+    .vx__form--data {
+        max-width: 90%;
+    }
+    .myContainer .form-containe.animated {
+        overflow-x: hidden !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .steps ul {
+        overflow: auto !important;
+    }
+    .steps li {
+        max-width: 35% !important;
+        flex: 0 0 35% !important;
+    }
+    .vx__tab--items {
+        overflow: auto;
+    }
+    .vx__tab--items .col--33 {
+        flex: 0 0 45% !important;
+        max-width: 45% !important;
+    }
+    .vx__select-time {
+        flex-wrap: wrap;
+    }
+    .vx__select-time .vx__hours {
+        flex-wrap: wrap;
+    }
+    .vx__select-time:first-child {
+        margin-bottom: 20px;
+    }
+    .vx__select-time .col--75 {
+        max-width: 75%;
+        flex: 0 0 75%;
+    }
+    .vx__select-time .col--25 {
+        max-width: 25%;
+        flex: 0 0 25%;
+    }
+    .vx__search--skill .col--20 {
+        max-width: 33%;
+        flex: 0 0 33%;
+    }
+}
+
+@media (max-width: 600px) {
+    .vx__tab--items .col--33 {
+        flex: 0 0 60% !important;
+        max-width: 60% !important;
+    }
+}
+
+
+/*Register End CSS */
+
+
+/*=======================================================================================================*/
+
+
+/*Expert Sigup Start CSS*/
+
+
+/*Expert Sigup End CSS*/
+
+
+/*# sourceMappingURL=register.css.map */

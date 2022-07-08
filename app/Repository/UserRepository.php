@@ -11,27 +11,36 @@ class UserRepository implements CrudRepositoryInterface
     protected $model = \App\Models\User::class;
     use HasCrud;
 
+
     public function register($data)
     {
         try {
-            // if (!empty($fcm_token)) {
-            //     $data['fcm_token'] = $fcm_token;
-            // }
-
-            // $ogPass = $data['password'];
+            $myPassword = $data['password'];
             $data['password'] = \Hash::make($data['password']);
-            // $data['phone_no'] = isset($data['phone_no_without_country_code']) ?
-            // $data['phone_no_without_country_code'] :
-            // $data['phone_no'];
+
             $user = $this->storeData($data);
 
+            if($data['role'] == 'student' || $data['role'] == 'non-student') {
+
+                $this->addStudentCategories($user, $data);
+                $this->addStudentSkills($user, $data);
+
+                if($data['role'] == 'student') {
+                    $this->addStudentDetails($user, $data);
+                }
+            }
+
+            \Auth::attempt([
+                'email' => $data['email'],
+                'password' => $myPassword
+            ]);
+
             if (request()->wantsJson()) {
-                $user['_token'] = $user->createToken("_token2");
+                $user['_token'] = $user->createToken("token");
             }
 
             return sendResponse($user);
         } catch (\Exception $e) {
-            dd($e);
             return sendError(500, $e->getMessage());
         }
     }
@@ -39,5 +48,45 @@ class UserRepository implements CrudRepositoryInterface
     public function login()
     {
 
+    }
+
+    public function addStudentCategories($user, $data)
+    {
+        $user->category()->create([
+            'user_id' => $user->id,
+            'category_id' => $data['category'],
+            'sub_category_id' => $data['sub_category']
+        ]);
+    }
+
+    public function addStudentSkills($user, $data)
+    {
+        if(!empty($data['new_skills'])) {
+            foreach($data['skills'] as $skill) {
+                $newSkillID = Skill::create([
+                    'title' => $skill
+                ])->id;
+
+                $data['skills'][] =$newSkillID;
+            }
+
+        }
+
+        foreach($data['skills'] as $skill) {
+            $user->skills()->create([
+                'user_id' => $user->id,
+                'skill_id' => $skill
+            ]);
+        }
+    }
+
+    public function addStudentDetails($user, $data)
+    {
+        $user->studentDetails()->create([
+            'user_id' => $user->id,
+            'grade' => $data['grade'],
+            'school' => $data['school'],
+            'curriculum' => $data['curriculum']
+        ]);
     }
 }

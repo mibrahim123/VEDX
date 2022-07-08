@@ -49,14 +49,25 @@
             <div class="line mb-30">
                 <hr>
             </div>
+            <div class="vx__form--gender-section d-flex align-items-center mb-20">
+                <label class="text-500 select--gender">Select Gender</label>
+                <p>
+                    <input type="radio" id="test1" name="radio-group" value="0" v-model="store.gender" checked>
+                    <label for="test1">Male</label>
+                </p>
+                <p>
+                    <input type="radio" id="test2" name="radio-group"  value="1" v-model="store.gender">
+                    <label for="test2">Female</label>
+                </p>
+            </div>
             <div class="row">
                 <div class="col--50">
                     <div class="form-group mb-25">
                         <Field class="p" type="text"
-                        v-model = "store.firstName"
-                        name = "firstName"
+                        v-model = "store.first_name"
+                        name = "first_name"
                         placeholder="First Name" />
-                        <ErrorMessage name="firstName" v-slot="{ message }" >
+                        <ErrorMessage name="first_name" v-slot="{ message }" >
                             <span class="error">{{ message }}</span>
                         </ErrorMessage>
                     </div>
@@ -64,12 +75,13 @@
                 <div class="col--50">
                     <div class="form-group mb-25">
                         <Field class="p" type="text"
-                        v-model = "store.lastName"
-                        name = "lastName"
+                        v-model = "store.last_name"
+                        name = "last_name"
                         placeholder="Last Name"/>
-                        <ErrorMessage name="lastName" v-slot="{ message }" >
+                        <ErrorMessage name="last_name" v-slot="{ message }" >
                             <span class="error">{{ message }}</span>
                         </ErrorMessage>
+
                     </div>
                 </div>
             </div>
@@ -78,19 +90,28 @@
                     <div class="form-group mb-25">
                         <Field class="p" type="email"
                         v-model = "store.email"
+                        @change="() => { store.error.email = '' }"
                         name = "email"
                         placeholder="Email Address"/>
                         <ErrorMessage name="email" v-slot="{ message }" >
                             <span class="error">{{ message }}</span>
                         </ErrorMessage>
+                        <span class="error" v-show="store.error?.email">{{ store.error?.email ?  store.error?.email[0] : '' }}</span>
                     </div>
                 </div>
                 <div class="col--50">
                     <div class="form-group mb-25">
-                        <Field v-model="store.phone" name="phone" as="vue-tel-input" @input="onInput" ></Field>
+                        <Field
+                            v-model="store.phone"
+                            name="phone"
+                            as="vue-tel-input"
+                            @input="onInput"
+                            @change="() => { store.error.phone = '' }"
+                        ></Field>
                         <ErrorMessage name="phone" v-slot="{ message }" >
                             <span class="error">{{ message }}</span>
                         </ErrorMessage>
+                        <span class="error" v-show="store.error?.phone">{{ store.error?.phone ?  store.error?.phone[0] : ''  }}</span>
                     </div>
                 </div>
             </div>
@@ -133,10 +154,10 @@
                 <div class="col--50">
                     <div class="form-group mb-25">
                         <Field class="p" type="password"
-                        v-model = "store.confirmPassword"
-                        name = "confirmPassword"
+                        v-model = "store.confirm_password"
+                        name = "confirm_password"
                         placeholder="Confirm Password"/>
-                        <ErrorMessage name="confirmPassword" v-slot="{ message }" >
+                        <ErrorMessage name="confirm_password" v-slot="{ message }" >
                             <span class="error">{{ message }}</span>
                         </ErrorMessage>
                     </div>
@@ -161,14 +182,18 @@
         setup() {
 
             const schema = Yup.object({
-                firstName : Yup.string().min(5).required().label('First Name'),
-                lastName : Yup.string().min(5).required().label('Last Name'),
+                first_name : Yup.string().min(5).required().label('First Name'),
+                last_name : Yup.string().min(5).required().label('Last Name'),
                 phone : Yup.string().required().label('Phone Number').test("valid-phone", "Invalid Phone Number", (value) =>  store.validPhone),
                 email : Yup.string().email().required().label('Email'),
                 age : Yup.string().required().test("valid-age", "Age Must Be Greate Than 10", (value) => value > 10 && value < 60),
                 location : Yup.string().required(),
-                password :  Yup.string().min(8).required(),
-                confirmPassword :Yup.string().min(8).required().test("confirm-password", "confirm password must match with password fields", (value) => value === store.password),
+                password : Yup.string().required('Please Enter your password')
+                            .matches(
+                            /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
+                            "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
+                            ),
+                confirm_password :Yup.string().min(8).required().test("confirm-password", "confirm password must match with password fields", (value) => value === store.password),
             });
 
             const store = useRegisterStore();
@@ -184,7 +209,7 @@
                 if(phoneObject && phoneObject.nationalNumber) {
                     let valid = parsePhoneNumberFromString("'" + phoneObject?.nationalNumber+"'" ,phoneObject?.country?.iso2 );
 
-                    store.countryCode = phoneObject.country.dialCode
+                    store.country_code = phoneObject.country.dialCode
                     store.phone = phone
 
                     store.validPhone = valid.isValid();

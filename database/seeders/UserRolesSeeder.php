@@ -15,8 +15,19 @@ class UserRolesSeeder extends Seeder
      */
     public function run()
     {
-        Role::create(
+        Role::UpdateOrCreate(
+            ['name' => 'admin'],
             ['name' => 'admin']
+        );
+
+        Role::UpdateOrCreate(
+            ['name' => 'student'],
+            ['name' => 'student']
+        );
+
+        Role::UpdateOrCreate(
+            ['name' => 'non-student'],
+            ['name' => 'non-student']
         );
     }
 }

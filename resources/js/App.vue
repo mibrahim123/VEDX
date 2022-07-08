@@ -12,7 +12,7 @@
 
 </template>
 <script>
-    import { reactive, ref } from 'vue';
+    import { reactive, ref, inject } from 'vue';
     import { useRegisterStore } from "./stores/register";
     import FirstStep from './FirstStep.vue';
     import SecondStep from './SecondStep.vue';
@@ -22,6 +22,9 @@
             SecondStep
         },
         setup(_, context) {
+
+            const axios = inject('axios')
+            axios.defaults.withCredentials = true;
             const store = useRegisterStore();
             const step = ref(1)
             const role = ref('student');
@@ -30,15 +33,36 @@
 
             const nextStep = () => {
                 if (step.value == 1) {
-                    step.value = step.value + 1
-                    // firstStep.value.onSubmit()
-                    // if(firstStep.value.meta.valid){
-                    //     step.value = step.value + 1
-                    // }
+                    // step.value = step.value + 1
+                    firstStep.value.onSubmit()
+                    if(firstStep.value.meta.valid){
+                        step.value = step.value + 1
+                    }
                 } else {
                     secondStep.value.onSubmit()
-                    if(secondStep.value.valid){
-                        alert("yes");
+
+                    store.skills = store.skills.filter((value) => {
+                        return !store.new_skills.includes(value)
+                    })
+
+                    if(secondStep.value.meta.valid){
+                        axios.post('api/register',
+                            store
+                        ).then((res) => {
+                            axios.get('api/user', {})
+                            .then((res) => {
+                                console.log(res);
+
+                            })
+
+                        }).catch((error) => {
+                            if(store.error = error.response.data.errors) {
+                               if ( store.error.hasOwnProperty('email') || store.error.hasOwnProperty('phone')) {
+                                    step.value = 1;
+                               }
+                            }
+                        })
+
                     }
                 }
             }

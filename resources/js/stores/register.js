@@ -3,22 +3,23 @@ import { defineStore } from "pinia";
 export const useRegisterStore = defineStore("register", {
     state: () => {
         return {
-            role: '',
-            gender: '',
+            role: 'student',
+            gender: '0',
             email: '',
-            firstName: '',
-            lastName: '',
+            first_name: '',
+            last_name: '',
             phone: '',
-            countryCode: '',
+            country_code: '',
             age: '',
             location: '',
             password: '',
-            confirmPassword: '',
+            confirm_password: '',
             validPhone: true,
             skills: [],
-            newSkills: [],
+            new_skills: [],
             category: '',
-            subCategory: ''
+            sub_category: '',
+            error: []
         };
     },
     actions: {

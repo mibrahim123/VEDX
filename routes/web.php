@@ -33,6 +33,14 @@ Route::get('admin/login', function () {
 });
 
 Route::middleware([
+    'auth:sanctum'
+])->group(function () {
+    Route::get('/ibrahim', function (){
+    dd("yes");
+    });
+});
+
+Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',

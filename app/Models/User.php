@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\StudentDetail;
+use Laravel\Jetstream\HasTeams;
+use Laravel\Sanctum\HasApiTokens;
+use Laravel\Jetstream\HasProfilePhoto;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
-use Laravel\Jetstream\HasTeams;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
@@ -22,13 +23,24 @@ class User extends Authenticatable
     use HasRoles;
     use TwoFactorAuthenticatable;
 
+    protected $with = [
+        'skills'
+    ];
     /**
      * The attributes that are mass assignable.
      *
      * @var string[]
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'first_name',
+        'last_name',
+        'age',
+        'country_code',
+        'location',
+        'gender',
+        'email',
+        'phone',
+        'password',
     ];
 
     /**
@@ -60,4 +72,25 @@ class User extends Authenticatable
     protected $appends = [
         'profile_photo_url',
     ];
+
+
+    /**
+    * Get all of the comments for the User
+    *
+    * @return \Illuminate\Database\Eloquent\Relations\HasMany
+    */
+    public function skills()
+    {
+        return $this->hasMany(UserSkill::class);
+    }
+
+    public function category()
+    {
+        return $this->hasOne(UserCategory::class);
+    }
+
+    public function studentDetails()
+    {
+        return $this->hasOne(StudentDetail::class);
+    }
 }

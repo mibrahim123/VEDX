@@ -44,32 +44,44 @@
             <div class="form-group mb-25">
                 <div class="row">
                     <div class="col--50 vx__fist-name">
-                        <Multiselect
-                            v-model="store.category"
-                            :searchable = 'true'
-                            :label = '"title"'
-                            @select="fetchSubcategory"
-                            :value-prop = '"id"'
-                            :options="categories"
-                            :placeholder="'Category'"
-                        />
+                        <Field name="category" v-model="store.category">
+                            <Multiselect
+                                v-model="store.category"
+                                :searchable = 'true'
+                                :label = '"title"'
+                                @select="fetchSubcategory"
+                                :value-prop = '"id"'
+                                :options="categories"
+                                :placeholder="'Category'"
+                            />
+                        </Field>
+                        <ErrorMessage name="category" v-slot="{ message }" >
+                            <span class="error">{{ message }}</span>
+                        </ErrorMessage>
                     </div>
                     <div class="col--50 vx__fist-name">
-                        <Multiselect
-                            v-model="store.subCategory"
-                            :searchable = 'true'
-                            :label = '"title"'
-                            :value-prop = '"id"'
-                            :options="subCategories"
-                            :placeholder="'Sub categories'"
-                        />
+                        <Field name="subcategory" v-model="store.sub_category">
+                            <Multiselect
+                                v-model="store.sub_category"
+                                :searchable = 'true'
+                                :label = '"title"'
+                                :value-prop = '"id"'
+                                :options="subCategories"
+                                :placeholder="'Sub categories'"
+                            />
+                        </Field>
+                        <ErrorMessage name="subcategory" v-slot="{ message }" >
+                            <span class="error">{{ message }}</span>
+                        </ErrorMessage>
                     </div>
                 </div>
             </div>
             <div class="form-group mb-25">
+
                 <label class="p mb-5" >Add skills to learn</label>
+                <Field name="skills" v-model="store.skills">
                     <Multiselect
-                        v-model="skillsToValidate"
+                        v-model="store.skills"
                         :mode = "'tags'"
                         :searchable = 'true'
                         :create-option = 'true'
@@ -84,17 +96,20 @@
                         :options="skills"
                         :placeholder="'Skills'"
                     />
-                    <span class="error">{{ skillErrorMessage }}</span>
+                    </Field>
+                    <ErrorMessage name="skills" v-slot="{ message }" >
+                        <span class="error">{{ message }}</span>
+                    </ErrorMessage>
             </div>
         </div>
     </div>
 </template>
 <script>
-import { reactive, onMounted, inject, ref, computed  } from 'vue';
+import { reactive, onMounted, inject, ref } from 'vue';
 import Multiselect from '@vueform/multiselect'
 import { useRegisterStore } from "./stores/register";
 import * as Yup from "yup";
-import { useField, useForm, Field, ErrorMessage} from 'vee-validate';
+import { useForm, Field, ErrorMessage} from 'vee-validate';
 
 export default {
     components: {
@@ -112,15 +127,18 @@ export default {
         const state = reactive({
             isStudent : true
         })
+        // const {value : skillsToValidate, errorMessage : skillErrorMessage , validate } = useField('skills');
 
         const schema = Yup.object({
             school : Yup.string().required().label('School'),
             grade : Yup.string().required().label('Grade'),
             curriculum : Yup.string().required().label('Curriculum'),
-            skills :  Yup.string().required()
+            skills : Yup.array().min(1, 'Please select at lease one skill'),
+            category : Yup.string().required('Please select at least one category').label('Category'),
+            subcategory : Yup.string().required('Please select at least one sub category').label('Sub Category'),
+            skills : Yup.array().min(1, 'Please select at least one skill')
         });
 
-        const {value : skillsToValidate, errorMessage : skillErrorMessage , validate } = useField('skills', Yup.string().required());
 
         const { handleSubmit, meta} = useForm({
             validationSchema: schema
@@ -160,11 +178,11 @@ export default {
         }
 
         const addNewOption = (query, $select) => {
-            store.newSkills.push(query);
+            store.new_skills.push(query);
         }
 
         const removeOption = (query, $select = '') => {
-             store.newSkills = store.newSkills.filter((value) => {
+             store.new_skills = store.new_skills.filter((value) => {
                 return value != query
             });
         }
@@ -192,11 +210,11 @@ export default {
             kewDown,
             fetchSubcategory,
             handleSubmit,
-            skillsToValidate,
-            skillErrorMessage,
+            // skillsToValidate,
+            // skillErrorMessage,
             onSubmit,
             meta,
-            validate
+            // validate
 
         }
     }
